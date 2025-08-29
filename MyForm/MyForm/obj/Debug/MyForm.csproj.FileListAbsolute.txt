@@ -1,0 +1,12 @@
+C:\Users\PC602\Downloads\MyForm\MyForm\bin\Debug\MyForm.exe.config
+C:\Users\PC602\Downloads\MyForm\MyForm\bin\Debug\MyForm.exe
+C:\Users\PC602\Downloads\MyForm\MyForm\bin\Debug\MyForm.pdb
+C:\Users\PC602\Downloads\MyForm\MyForm\obj\Debug\MyForm.csproj.AssemblyReference.cache
+C:\Users\PC602\Downloads\MyForm\MyForm\obj\Debug\MyForm.Properties.Resources.resources
+C:\Users\PC602\Downloads\MyForm\MyForm\obj\Debug\MyForm.csproj.GenerateResource.cache
+C:\Users\PC602\Downloads\MyForm\MyForm\obj\Debug\MyForm.csproj.CoreCompileInputs.cache
+C:\Users\PC602\Downloads\MyForm\MyForm\obj\Debug\MyForm.exe
+C:\Users\PC602\Downloads\MyForm\MyForm\obj\Debug\MyForm.pdb
+C:\Users\PC602\Downloads\MyForm\MyForm\obj\Debug\MyForm.frmGiangVien.resources
+C:\Users\PC602\Downloads\MyForm\MyForm\obj\Debug\MyForm.frmTBGiangVien.resources
+C:\Users\PC602\Downloads\MyForm\MyForm\obj\Debug\MyForm.frmTrungTam.resources
