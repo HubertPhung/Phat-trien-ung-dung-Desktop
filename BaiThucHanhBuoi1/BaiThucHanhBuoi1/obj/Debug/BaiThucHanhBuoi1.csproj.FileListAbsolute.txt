@@ -1,0 +1,11 @@
+D:\University\Phát triển ứng dụng Desktop\BaiThucHanhBuoi1\BaiThucHanhBuoi1\bin\Debug\BaiThucHanhBuoi1.exe.config
+D:\University\Phát triển ứng dụng Desktop\BaiThucHanhBuoi1\BaiThucHanhBuoi1\bin\Debug\BaiThucHanhBuoi1.exe
+D:\University\Phát triển ứng dụng Desktop\BaiThucHanhBuoi1\BaiThucHanhBuoi1\bin\Debug\BaiThucHanhBuoi1.pdb
+D:\University\Phát triển ứng dụng Desktop\BaiThucHanhBuoi1\BaiThucHanhBuoi1\obj\Debug\BaiThucHanhBuoi1.csproj.AssemblyReference.cache
+D:\University\Phát triển ứng dụng Desktop\BaiThucHanhBuoi1\BaiThucHanhBuoi1\obj\Debug\BaiThucHanhBuoi1.MainForm.resources
+D:\University\Phát triển ứng dụng Desktop\BaiThucHanhBuoi1\BaiThucHanhBuoi1\obj\Debug\BaiThucHanhBuoi1.Properties.Resources.resources
+D:\University\Phát triển ứng dụng Desktop\BaiThucHanhBuoi1\BaiThucHanhBuoi1\obj\Debug\BaiThucHanhBuoi1.csproj.GenerateResource.cache
+D:\University\Phát triển ứng dụng Desktop\BaiThucHanhBuoi1\BaiThucHanhBuoi1\obj\Debug\BaiThucHanhBuoi1.csproj.CoreCompileInputs.cache
+D:\University\Phát triển ứng dụng Desktop\BaiThucHanhBuoi1\BaiThucHanhBuoi1\obj\Debug\BaiThucHanhBuoi1.exe
+D:\University\Phát triển ứng dụng Desktop\BaiThucHanhBuoi1\BaiThucHanhBuoi1\obj\Debug\BaiThucHanhBuoi1.pdb
+D:\University\Phát triển ứng dụng Desktop\BaiThucHanhBuoi1\BaiThucHanhBuoi1\obj\Debug\BaiThucHanhBuoi1.exe.config
