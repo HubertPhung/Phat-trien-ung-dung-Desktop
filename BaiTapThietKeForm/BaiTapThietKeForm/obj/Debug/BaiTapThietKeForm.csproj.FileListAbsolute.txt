@@ -1,0 +1,15 @@
+D:\University\Phát triển ứng dụng Desktop\BaiTapThietKeForm\BaiTapThietKeForm\bin\Debug\BaiTapThietKeForm.exe.config
+D:\University\Phát triển ứng dụng Desktop\BaiTapThietKeForm\BaiTapThietKeForm\bin\Debug\BaiTapThietKeForm.exe
+D:\University\Phát triển ứng dụng Desktop\BaiTapThietKeForm\BaiTapThietKeForm\bin\Debug\BaiTapThietKeForm.pdb
+D:\University\Phát triển ứng dụng Desktop\BaiTapThietKeForm\BaiTapThietKeForm\obj\Debug\BaiTapThietKeForm.csproj.AssemblyReference.cache
+D:\University\Phát triển ứng dụng Desktop\BaiTapThietKeForm\BaiTapThietKeForm\obj\Debug\BaiTapThietKeForm.frmBai1.resources
+D:\University\Phát triển ứng dụng Desktop\BaiTapThietKeForm\BaiTapThietKeForm\obj\Debug\BaiTapThietKeForm.frmChinh.resources
+D:\University\Phát triển ứng dụng Desktop\BaiTapThietKeForm\BaiTapThietKeForm\obj\Debug\BaiTapThietKeForm.Properties.Resources.resources
+D:\University\Phát triển ứng dụng Desktop\BaiTapThietKeForm\BaiTapThietKeForm\obj\Debug\BaiTapThietKeForm.csproj.GenerateResource.cache
+D:\University\Phát triển ứng dụng Desktop\BaiTapThietKeForm\BaiTapThietKeForm\obj\Debug\BaiTapThietKeForm.csproj.CoreCompileInputs.cache
+D:\University\Phát triển ứng dụng Desktop\BaiTapThietKeForm\BaiTapThietKeForm\obj\Debug\BaiTapThietKeForm.exe
+D:\University\Phát triển ứng dụng Desktop\BaiTapThietKeForm\BaiTapThietKeForm\obj\Debug\BaiTapThietKeForm.pdb
+D:\University\Phát triển ứng dụng Desktop\BaiTapThietKeForm\BaiTapThietKeForm\obj\Debug\BaiTapThietKeForm.exe.config
+D:\University\Phát triển ứng dụng Desktop\BaiTapThietKeForm\BaiTapThietKeForm\obj\Debug\BaiTapThietKeForm.frmBai2.resources
+D:\University\Phát triển ứng dụng Desktop\BaiTapThietKeForm\BaiTapThietKeForm\obj\Debug\BaiTapThietKeForm.frmBai3.resources
+D:\University\Phát triển ứng dụng Desktop\BaiTapThietKeForm\BaiTapThietKeForm\obj\Debug\BaiTapThietKeForm.frmBai4.resources
