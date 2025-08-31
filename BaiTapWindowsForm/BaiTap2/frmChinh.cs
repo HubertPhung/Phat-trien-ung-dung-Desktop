@@ -22,5 +22,17 @@ namespace BaiTap2
             var frm = new frmBai1();
             frm.ShowDialog();
         }
+
+        private void tsmiBai2_Click(object sender, EventArgs e)
+        {
+            var frm = new frmBai2();
+            frm.ShowDialog();
+        }
+
+        private void tsmiBai3_Click(object sender, EventArgs e)
+        {
+            var frm = new frmBai3();
+            frm.ShowDialog();
+        }
     }
 }

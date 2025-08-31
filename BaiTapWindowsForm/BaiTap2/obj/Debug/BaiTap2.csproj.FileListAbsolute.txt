@@ -10,3 +10,5 @@ D:\University\Phát triển ứng dụng Desktop\BaiTapWindowsForm\BaiTap2\obj\D
 D:\University\Phát triển ứng dụng Desktop\BaiTapWindowsForm\BaiTap2\obj\Debug\BaiTap2.exe
 D:\University\Phát triển ứng dụng Desktop\BaiTapWindowsForm\BaiTap2\obj\Debug\BaiTap2.pdb
 D:\University\Phát triển ứng dụng Desktop\BaiTapWindowsForm\BaiTap2\obj\Debug\BaiTap2.exe.config
+D:\University\Phát triển ứng dụng Desktop\BaiTapWindowsForm\BaiTap2\obj\Debug\BaiTap2.frmBai2.resources
+D:\University\Phát triển ứng dụng Desktop\BaiTapWindowsForm\BaiTap2\obj\Debug\BaiTap2.frmBai3.resources

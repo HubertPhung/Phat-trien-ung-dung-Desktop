@@ -102,7 +102,7 @@
             this.cbbMaThietBi.Location = new System.Drawing.Point(154, 61);
             this.cbbMaThietBi.Name = "cbbMaThietBi";
             this.cbbMaThietBi.Size = new System.Drawing.Size(175, 24);
-            this.cbbMaThietBi.TabIndex = 1;
+            this.cbbMaThietBi.TabIndex = 0;
             this.cbbMaThietBi.SelectedIndexChanged += new System.EventHandler(this.cbbMaThietBi_SelectedIndexChanged);
             // 
             // txtNuocSX
@@ -117,14 +117,14 @@
             this.txtDonGia.Location = new System.Drawing.Point(154, 176);
             this.txtDonGia.Name = "txtDonGia";
             this.txtDonGia.Size = new System.Drawing.Size(155, 22);
-            this.txtDonGia.TabIndex = 2;
+            this.txtDonGia.TabIndex = 3;
             // 
             // txtSoLuong
             // 
             this.txtSoLuong.Location = new System.Drawing.Point(154, 210);
             this.txtSoLuong.Name = "txtSoLuong";
             this.txtSoLuong.Size = new System.Drawing.Size(89, 22);
-            this.txtSoLuong.TabIndex = 2;
+            this.txtSoLuong.TabIndex = 4;
             // 
             // cbbTenThietBi
             // 
@@ -147,7 +147,7 @@
             this.btnTinhTien.Location = new System.Drawing.Point(125, 259);
             this.btnTinhTien.Name = "btnTinhTien";
             this.btnTinhTien.Size = new System.Drawing.Size(106, 35);
-            this.btnTinhTien.TabIndex = 3;
+            this.btnTinhTien.TabIndex = 5;
             this.btnTinhTien.Text = "Tính Tiền";
             this.btnTinhTien.UseVisualStyleBackColor = true;
             this.btnTinhTien.Click += new System.EventHandler(this.btnTinhTien_Click);

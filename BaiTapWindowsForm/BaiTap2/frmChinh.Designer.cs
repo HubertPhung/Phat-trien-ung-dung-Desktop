@@ -74,6 +74,7 @@
             this.tsmiBai2.Name = "tsmiBai2";
             this.tsmiBai2.Size = new System.Drawing.Size(224, 26);
             this.tsmiBai2.Text = "Bài số 2";
+            this.tsmiBai2.Click += new System.EventHandler(this.tsmiBai2_Click);
             // 
             // tsmiBai3
             // 
@@ -81,6 +82,7 @@
             this.tsmiBai3.Name = "tsmiBai3";
             this.tsmiBai3.Size = new System.Drawing.Size(224, 26);
             this.tsmiBai3.Text = "Bài số 3";
+            this.tsmiBai3.Click += new System.EventHandler(this.tsmiBai3_Click);
             // 
             // contextMenuStrip1
             // 

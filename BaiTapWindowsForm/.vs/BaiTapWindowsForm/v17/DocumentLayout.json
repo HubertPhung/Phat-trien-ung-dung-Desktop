@@ -3,28 +3,28 @@
   "WorkspaceRootPath": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{960F41CA-FA10-49C8-8F45-A87011E0B9CC}|BaiTap2\\BaiTap2.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\baitapwindowsform\\baitap2\\frmbai1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{960F41CA-FA10-49C8-8F45-A87011E0B9CC}|BaiTap2\\BaiTap2.csproj|solutionrelative:baitap2\\frmbai1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{3CBCE3D4-011B-49D2-93A6-01B6E965C145}|BaiTap3\\BaiTap3.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\baitapwindowsform\\baitap3\\frmbai3.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{3CBCE3D4-011B-49D2-93A6-01B6E965C145}|BaiTap3\\BaiTap3.csproj|solutionrelative:baitap3\\frmbai3.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{960F41CA-FA10-49C8-8F45-A87011E0B9CC}|BaiTap2\\BaiTap2.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\baitapwindowsform\\baitap2\\thietbi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{960F41CA-FA10-49C8-8F45-A87011E0B9CC}|BaiTap2\\BaiTap2.csproj|solutionrelative:baitap2\\thietbi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{3CBCE3D4-011B-49D2-93A6-01B6E965C145}|BaiTap3\\BaiTap3.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\baitapwindowsform\\baitap3\\pheptinh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3CBCE3D4-011B-49D2-93A6-01B6E965C145}|BaiTap3\\BaiTap3.csproj|solutionrelative:baitap3\\pheptinh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{960F41CA-FA10-49C8-8F45-A87011E0B9CC}|BaiTap2\\BaiTap2.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\baitapwindowsform\\baitap2\\frmbai1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{960F41CA-FA10-49C8-8F45-A87011E0B9CC}|BaiTap2\\BaiTap2.csproj|solutionrelative:baitap2\\frmbai1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{3CBCE3D4-011B-49D2-93A6-01B6E965C145}|BaiTap3\\BaiTap3.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\baitapwindowsform\\baitap3\\frmbai2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3CBCE3D4-011B-49D2-93A6-01B6E965C145}|BaiTap3\\BaiTap3.csproj|solutionrelative:baitap3\\frmbai2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{960F41CA-FA10-49C8-8F45-A87011E0B9CC}|BaiTap2\\BaiTap2.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\baitapwindowsform\\baitap2\\frmbai1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{960F41CA-FA10-49C8-8F45-A87011E0B9CC}|BaiTap2\\BaiTap2.csproj|solutionrelative:baitap2\\frmbai1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+      "AbsoluteMoniker": "D:0:0:{3CBCE3D4-011B-49D2-93A6-01B6E965C145}|BaiTap3\\BaiTap3.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\baitapwindowsform\\baitap3\\frmbai2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{3CBCE3D4-011B-49D2-93A6-01B6E965C145}|BaiTap3\\BaiTap3.csproj|solutionrelative:baitap3\\frmbai2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{960F41CA-FA10-49C8-8F45-A87011E0B9CC}|BaiTap2\\BaiTap2.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\baitapwindowsform\\baitap2\\frmchinh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{960F41CA-FA10-49C8-8F45-A87011E0B9CC}|BaiTap2\\BaiTap2.csproj|solutionrelative:baitap2\\frmchinh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+      "AbsoluteMoniker": "D:0:0:{3CBCE3D4-011B-49D2-93A6-01B6E965C145}|BaiTap3\\BaiTap3.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\baitapwindowsform\\baitap3\\frmchinh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{3CBCE3D4-011B-49D2-93A6-01B6E965C145}|BaiTap3\\BaiTap3.csproj|solutionrelative:baitap3\\frmchinh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{960F41CA-FA10-49C8-8F45-A87011E0B9CC}|BaiTap2\\BaiTap2.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\baitapwindowsform\\baitap2\\frmchinh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{960F41CA-FA10-49C8-8F45-A87011E0B9CC}|BaiTap2\\BaiTap2.csproj|solutionrelative:baitap2\\frmchinh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{3CBCE3D4-011B-49D2-93A6-01B6E965C145}|BaiTap3\\BaiTap3.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\baitapwindowsform\\baitap3\\frmchinh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3CBCE3D4-011B-49D2-93A6-01B6E965C145}|BaiTap3\\BaiTap3.csproj|solutionrelative:baitap3\\frmchinh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -34,7 +34,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -42,78 +42,77 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "ThietBi.cs",
-              "DocumentMoniker": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap2\\ThietBi.cs",
-              "RelativeDocumentMoniker": "BaiTap2\\ThietBi.cs",
-              "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap2\\ThietBi.cs",
-              "RelativeToolTip": "BaiTap2\\ThietBi.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAACMAAAAOAAAAAAAAAA==",
+              "DocumentIndex": 0,
+              "Title": "frmBai3.cs [Design]",
+              "DocumentMoniker": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap3\\frmBai3.cs",
+              "RelativeDocumentMoniker": "BaiTap3\\frmBai3.cs",
+              "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap3\\frmBai3.cs [Design]",
+              "RelativeToolTip": "BaiTap3\\frmBai3.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-30T17:14:32.315Z",
+              "WhenOpened": "2025-08-31T13:15:58.85Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "PhepTinh.cs",
+              "DocumentMoniker": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap3\\PhepTinh.cs",
+              "RelativeDocumentMoniker": "BaiTap3\\PhepTinh.cs",
+              "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap3\\PhepTinh.cs",
+              "RelativeToolTip": "BaiTap3\\PhepTinh.cs",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAqwBgAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-31T13:06:21.17Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "frmBai2.cs",
+              "DocumentMoniker": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap3\\frmBai2.cs",
+              "RelativeDocumentMoniker": "BaiTap3\\frmBai2.cs",
+              "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap3\\frmBai2.cs",
+              "RelativeToolTip": "BaiTap3\\frmBai2.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAmwCEAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-31T12:32:02.976Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "frmBai2.cs [Design]",
+              "DocumentMoniker": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap3\\frmBai2.cs",
+              "RelativeDocumentMoniker": "BaiTap3\\frmBai2.cs",
+              "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap3\\frmBai2.cs [Design]",
+              "RelativeToolTip": "BaiTap3\\frmBai2.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-31T12:31:56.145Z",
+              "EditorCaption": " [Design]"
             },
             {
               "$type": "Document",
               "DocumentIndex": 5,
               "Title": "frmChinh.cs",
-              "DocumentMoniker": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap2\\frmChinh.cs",
-              "RelativeDocumentMoniker": "BaiTap2\\frmChinh.cs",
-              "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap2\\frmChinh.cs",
-              "RelativeToolTip": "BaiTap2\\frmChinh.cs",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAvwBUAAAAkAAAAAAAAAA==",
+              "DocumentMoniker": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap3\\frmChinh.cs",
+              "RelativeDocumentMoniker": "BaiTap3\\frmChinh.cs",
+              "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap3\\frmChinh.cs",
+              "RelativeToolTip": "BaiTap3\\frmChinh.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAuwBwAAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-30T16:57:45.551Z",
+              "WhenOpened": "2025-08-31T12:31:18.025Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
               "Title": "frmChinh.cs [Design]",
-              "DocumentMoniker": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap2\\frmChinh.cs",
-              "RelativeDocumentMoniker": "BaiTap2\\frmChinh.cs",
-              "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap2\\frmChinh.cs [Design]",
-              "RelativeToolTip": "BaiTap2\\frmChinh.cs [Design]",
+              "DocumentMoniker": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap3\\frmChinh.cs",
+              "RelativeDocumentMoniker": "BaiTap3\\frmChinh.cs",
+              "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap3\\frmChinh.cs [Design]",
+              "RelativeToolTip": "BaiTap3\\frmChinh.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-30T16:57:41.686Z",
-              "EditorCaption": " [Design]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "frmBai1.Designer.cs",
-              "DocumentMoniker": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap2\\frmBai1.Designer.cs",
-              "RelativeDocumentMoniker": "BaiTap2\\frmBai1.Designer.cs",
-              "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap2\\frmBai1.Designer.cs",
-              "RelativeToolTip": "BaiTap2\\frmBai1.Designer.cs",
-              "ViewState": "AgIAAFwAAAAAAAAAAAAEwGoAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-30T16:49:35.328Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "frmBai1.cs",
-              "DocumentMoniker": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap2\\frmBai1.cs",
-              "RelativeDocumentMoniker": "BaiTap2\\frmBai1.cs",
-              "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap2\\frmBai1.cs",
-              "RelativeToolTip": "BaiTap2\\frmBai1.cs",
-              "ViewState": "AgIAAEEAAAAAAAAAAAAwwFEAAABFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-30T16:49:08.446Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "frmBai1.cs [Design]",
-              "DocumentMoniker": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap2\\frmBai1.cs",
-              "RelativeDocumentMoniker": "BaiTap2\\frmBai1.cs",
-              "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapWindowsForm\\BaiTap2\\frmBai1.cs [Design]",
-              "RelativeToolTip": "BaiTap2\\frmBai1.cs [Design]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-30T16:43:45.029Z",
+              "WhenOpened": "2025-08-31T12:31:16.384Z",
               "EditorCaption": " [Design]"
             }
           ]
