@@ -9,7 +9,7 @@ namespace BaiTap3
     public class PhepTinh
     {
         // s1 lưu họ , s2 lưu tên
-        public static void TachChuoi(string hoten, string s1, string s2)
+        public static void TachChuoi(string hoten,out string s1,out string s2)
         {
             var arr = hoten.Split(' ');
             s2 = arr[arr.Length - 1];

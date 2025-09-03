@@ -1,0 +1,14 @@
+D:\University\Phát triển ứng dụng Desktop\BaiTapWindowsForm\BaiTap4\obj\Debug\BaiTap4.csproj.AssemblyReference.cache
+D:\University\Phát triển ứng dụng Desktop\BaiTapWindowsForm\BaiTap4\obj\Debug\BaiTap4.frmChinh.resources
+D:\University\Phát triển ứng dụng Desktop\BaiTapWindowsForm\BaiTap4\obj\Debug\BaiTap4.Properties.Resources.resources
+D:\University\Phát triển ứng dụng Desktop\BaiTapWindowsForm\BaiTap4\obj\Debug\BaiTap4.csproj.GenerateResource.cache
+D:\University\Phát triển ứng dụng Desktop\BaiTapWindowsForm\BaiTap4\obj\Debug\BaiTap4.csproj.CoreCompileInputs.cache
+D:\University\Phát triển ứng dụng Desktop\BaiTapWindowsForm\BaiTap4\bin\Debug\BaiTap4.exe.config
+D:\University\Phát triển ứng dụng Desktop\BaiTapWindowsForm\BaiTap4\bin\Debug\BaiTap4.exe
+D:\University\Phát triển ứng dụng Desktop\BaiTapWindowsForm\BaiTap4\bin\Debug\BaiTap4.pdb
+D:\University\Phát triển ứng dụng Desktop\BaiTapWindowsForm\BaiTap4\obj\Debug\BaiTap4.exe
+D:\University\Phát triển ứng dụng Desktop\BaiTapWindowsForm\BaiTap4\obj\Debug\BaiTap4.pdb
+D:\University\Phát triển ứng dụng Desktop\BaiTapWindowsForm\BaiTap4\obj\Debug\BaiTap4.exe.config
+D:\University\Phát triển ứng dụng Desktop\BaiTapWindowsForm\BaiTap4\obj\Debug\BaiTap4.frmBai1.resources
+D:\University\Phát triển ứng dụng Desktop\BaiTapWindowsForm\BaiTap4\obj\Debug\BaiTap4.frmBai2.resources
+D:\University\Phát triển ứng dụng Desktop\BaiTapWindowsForm\BaiTap4\obj\Debug\BaiTap4.frmBai3.resources

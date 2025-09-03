@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace BaiTap3
+namespace BaiTap4
 {
     public partial class frmChinh : Form
     {
@@ -17,19 +17,19 @@ namespace BaiTap3
             InitializeComponent();
         }
 
-        private void btnBai1_Click(object sender, EventArgs e)
+        private void tsmiBai1_Click(object sender, EventArgs e)
         {
             var frm = new frmBai1();
             frm.ShowDialog();
         }
 
-        private void btnBai2_Click(object sender, EventArgs e)
+        private void tsmiBai2_Click(object sender, EventArgs e)
         {
             var frm = new frmBai2();
             frm.ShowDialog();
         }
 
-        private void btnBai3_Click(object sender, EventArgs e)
+        private void tsmiBai3_Click(object sender, EventArgs e)
         {
             var frm = new frmBai3();
             frm.ShowDialog();
