@@ -1,0 +1,11 @@
+D:\University\Phát triển ứng dụng Desktop\BaiTapXoSoCacMien\BaiTapXoSoCacMien\obj\Debug\BaiTapXoSoCacMien.csproj.AssemblyReference.cache
+D:\University\Phát triển ứng dụng Desktop\BaiTapXoSoCacMien\BaiTapXoSoCacMien\obj\Debug\BaiTapSoXoCacMien.frmChinh.resources
+D:\University\Phát triển ứng dụng Desktop\BaiTapXoSoCacMien\BaiTapXoSoCacMien\obj\Debug\BaiTapXoSoCacMien.Properties.Resources.resources
+D:\University\Phát triển ứng dụng Desktop\BaiTapXoSoCacMien\BaiTapXoSoCacMien\obj\Debug\BaiTapXoSoCacMien.csproj.GenerateResource.cache
+D:\University\Phát triển ứng dụng Desktop\BaiTapXoSoCacMien\BaiTapXoSoCacMien\obj\Debug\BaiTapXoSoCacMien.csproj.CoreCompileInputs.cache
+D:\University\Phát triển ứng dụng Desktop\BaiTapXoSoCacMien\BaiTapXoSoCacMien\bin\Debug\BaiTapXoSoCacMien.exe.config
+D:\University\Phát triển ứng dụng Desktop\BaiTapXoSoCacMien\BaiTapXoSoCacMien\bin\Debug\BaiTapXoSoCacMien.exe
+D:\University\Phát triển ứng dụng Desktop\BaiTapXoSoCacMien\BaiTapXoSoCacMien\bin\Debug\BaiTapXoSoCacMien.pdb
+D:\University\Phát triển ứng dụng Desktop\BaiTapXoSoCacMien\BaiTapXoSoCacMien\obj\Debug\BaiTapXoSoCacMien.exe
+D:\University\Phát triển ứng dụng Desktop\BaiTapXoSoCacMien\BaiTapXoSoCacMien\obj\Debug\BaiTapXoSoCacMien.pdb
+D:\University\Phát triển ứng dụng Desktop\BaiTapXoSoCacMien\BaiTapXoSoCacMien\obj\Debug\BaiTapXoSoCacMien.exe.config

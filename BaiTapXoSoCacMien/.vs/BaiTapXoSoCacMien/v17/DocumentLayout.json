@@ -1,0 +1,141 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapXoSoCacMien\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{B3AB5EBD-8E2D-49D7-923D-B6478D8DCDF7}|BaiTapXoSoCacMien\\BaiTapXoSoCacMien.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\baitapxosocacmien\\baitapxosocacmien\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B3AB5EBD-8E2D-49D7-923D-B6478D8DCDF7}|BaiTapXoSoCacMien\\BaiTapXoSoCacMien.csproj|solutionrelative:baitapxosocacmien\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B3AB5EBD-8E2D-49D7-923D-B6478D8DCDF7}|BaiTapXoSoCacMien\\BaiTapXoSoCacMien.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\baitapxosocacmien\\baitapxosocacmien\\frmchinh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{B3AB5EBD-8E2D-49D7-923D-B6478D8DCDF7}|BaiTapXoSoCacMien\\BaiTapXoSoCacMien.csproj|solutionrelative:baitapxosocacmien\\frmchinh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B3AB5EBD-8E2D-49D7-923D-B6478D8DCDF7}|BaiTapXoSoCacMien\\BaiTapXoSoCacMien.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\baitapxosocacmien\\baitapxosocacmien\\frmchinh.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B3AB5EBD-8E2D-49D7-923D-B6478D8DCDF7}|BaiTapXoSoCacMien\\BaiTapXoSoCacMien.csproj|solutionrelative:baitapxosocacmien\\frmchinh.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B3AB5EBD-8E2D-49D7-923D-B6478D8DCDF7}|BaiTapXoSoCacMien\\BaiTapXoSoCacMien.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\baitapxosocacmien\\baitapxosocacmien\\rssservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B3AB5EBD-8E2D-49D7-923D-B6478D8DCDF7}|BaiTapXoSoCacMien\\BaiTapXoSoCacMien.csproj|solutionrelative:baitapxosocacmien\\rssservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B3AB5EBD-8E2D-49D7-923D-B6478D8DCDF7}|BaiTapXoSoCacMien\\BaiTapXoSoCacMien.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\baitapxosocacmien\\baitapxosocacmien\\frmchinh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B3AB5EBD-8E2D-49D7-923D-B6478D8DCDF7}|BaiTapXoSoCacMien\\BaiTapXoSoCacMien.csproj|solutionrelative:baitapxosocacmien\\frmchinh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B3AB5EBD-8E2D-49D7-923D-B6478D8DCDF7}|BaiTapXoSoCacMien\\BaiTapXoSoCacMien.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\baitapxosocacmien\\baitapxosocacmien\\ketquasoxo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B3AB5EBD-8E2D-49D7-923D-B6478D8DCDF7}|BaiTapXoSoCacMien\\BaiTapXoSoCacMien.csproj|solutionrelative:baitapxosocacmien\\ketquasoxo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B3AB5EBD-8E2D-49D7-923D-B6478D8DCDF7}|BaiTapXoSoCacMien\\BaiTapXoSoCacMien.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\baitapxosocacmien\\baitapxosocacmien\\frmchinh.resx||{81828910-B8B3-4D2B-99A3-067027C180C1}",
+      "RelativeMoniker": "D:0:0:{B3AB5EBD-8E2D-49D7-923D-B6478D8DCDF7}|BaiTapXoSoCacMien\\BaiTapXoSoCacMien.csproj|solutionrelative:baitapxosocacmien\\frmchinh.resx||{81828910-B8B3-4D2B-99A3-067027C180C1}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 7,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "KetQuaSoXo.cs",
+              "DocumentMoniker": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapXoSoCacMien\\BaiTapXoSoCacMien\\KetQuaSoXo.cs",
+              "RelativeDocumentMoniker": "BaiTapXoSoCacMien\\KetQuaSoXo.cs",
+              "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapXoSoCacMien\\BaiTapXoSoCacMien\\KetQuaSoXo.cs",
+              "RelativeToolTip": "BaiTapXoSoCacMien\\KetQuaSoXo.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-13T03:43:45.612Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "frmChinh.resx",
+              "DocumentMoniker": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapXoSoCacMien\\BaiTapXoSoCacMien\\frmChinh.resx",
+              "RelativeDocumentMoniker": "BaiTapXoSoCacMien\\frmChinh.resx",
+              "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapXoSoCacMien\\BaiTapXoSoCacMien\\frmChinh.resx",
+              "RelativeToolTip": "BaiTapXoSoCacMien\\frmChinh.resx",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001005|",
+              "WhenOpened": "2025-09-13T03:12:00.6Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "frmChinh.cs",
+              "DocumentMoniker": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapXoSoCacMien\\BaiTapXoSoCacMien\\frmChinh.cs",
+              "RelativeDocumentMoniker": "BaiTapXoSoCacMien\\frmChinh.cs",
+              "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapXoSoCacMien\\BaiTapXoSoCacMien\\frmChinh.cs",
+              "RelativeToolTip": "BaiTapXoSoCacMien\\frmChinh.cs",
+              "ViewState": "AgIAADIAAAAAAAAAAAAAAEYAAABfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-13T03:11:19.757Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "frmChinh.Designer.cs",
+              "DocumentMoniker": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapXoSoCacMien\\BaiTapXoSoCacMien\\frmChinh.Designer.cs",
+              "RelativeDocumentMoniker": "BaiTapXoSoCacMien\\frmChinh.Designer.cs",
+              "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapXoSoCacMien\\BaiTapXoSoCacMien\\frmChinh.Designer.cs",
+              "RelativeToolTip": "BaiTapXoSoCacMien\\frmChinh.Designer.cs",
+              "ViewState": "AgIAAHEAAAAAAAAAAAAIwIQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-13T03:10:07.985Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "RssService.cs",
+              "DocumentMoniker": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapXoSoCacMien\\BaiTapXoSoCacMien\\RssService.cs",
+              "RelativeDocumentMoniker": "BaiTapXoSoCacMien\\RssService.cs",
+              "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapXoSoCacMien\\BaiTapXoSoCacMien\\RssService.cs",
+              "RelativeToolTip": "BaiTapXoSoCacMien\\RssService.cs",
+              "ViewState": "AgIAAFMAAAAAAAAAAAAuwHQAAAAPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-13T02:59:54.95Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "frmChinh.cs [Design]",
+              "DocumentMoniker": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapXoSoCacMien\\BaiTapXoSoCacMien\\frmChinh.cs",
+              "RelativeDocumentMoniker": "BaiTapXoSoCacMien\\frmChinh.cs",
+              "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapXoSoCacMien\\BaiTapXoSoCacMien\\frmChinh.cs [Design]",
+              "RelativeToolTip": "BaiTapXoSoCacMien\\frmChinh.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-13T02:56:23.594Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapXoSoCacMien\\BaiTapXoSoCacMien\\Program.cs",
+              "RelativeDocumentMoniker": "BaiTapXoSoCacMien\\Program.cs",
+              "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\BaiTapXoSoCacMien\\BaiTapXoSoCacMien\\Program.cs",
+              "RelativeToolTip": "BaiTapXoSoCacMien\\Program.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAEwBEAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-13T03:13:17.028Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
