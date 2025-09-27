@@ -1,0 +1,52 @@
+﻿using System;
+using System.Windows.Forms;
+
+namespace BaiTapC
+{
+    public class SearchDialog : Form
+    {
+        private TextBox txtMssv = new TextBox();
+        private TextBox txtTen = new TextBox();
+        private TextBox txtLop = new TextBox();
+        private Button btnOk = new Button();
+        private Button btnCancel = new Button();
+
+        public string MSSV => txtMssv.Text.Trim();
+        public string Ten => txtTen.Text.Trim();
+        public string Lop => txtLop.Text.Trim();
+
+        public SearchDialog()
+        {
+            Text = "Tìm kiếm sinh viên";
+            StartPosition = FormStartPosition.CenterParent;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Width = 420; Height = 200;
+
+            var lbl1 = new Label { Text = "MSSV:", Left = 20, Top = 20, AutoSize = true };
+            var lbl2 = new Label { Text = "Tên:", Left = 20, Top = 50, AutoSize = true };
+            var lbl3 = new Label { Text = "Lớp:", Left = 20, Top = 80, AutoSize = true };
+
+            txtMssv.Left = 90; txtMssv.Top = 18; txtMssv.Width = 280;
+            txtTen.Left = 90; txtTen.Top = 48; txtTen.Width = 280;
+            txtLop.Left = 90; txtLop.Top = 78; txtLop.Width = 280;
+
+            btnOk.Text = "Tìm"; btnOk.Left = 210; btnOk.Top = 120; btnOk.Width = 70; btnOk.DialogResult = DialogResult.OK;
+            btnCancel.Text = "Hủy"; btnCancel.Left = 300; btnCancel.Top = 120; btnCancel.Width = 70; btnCancel.DialogResult = DialogResult.Cancel;
+
+            Controls.AddRange(new Control[] { lbl1, lbl2, lbl3, txtMssv, txtTen, txtLop, btnOk, btnCancel });
+            AcceptButton = btnOk; CancelButton = btnCancel;
+        }
+
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            this.ClientSize = new System.Drawing.Size(520, 313);
+            this.Name = "SearchDialog";
+            this.ResumeLayout(false);
+
+        }
+
+    }
+}

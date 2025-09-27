@@ -1,0 +1,88 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Runtime.Serialization;
+
+namespace BaiTapC
+{
+    [DataContract]
+    public class Student
+    {
+        [DataMember] public string MSSV { get; set; }
+        [DataMember] public string HoLot { get; set; }
+        [DataMember] public string Ten { get; set; }
+        [DataMember] public DateTime NgaySinh { get; set; }
+        [DataMember] public bool GioiTinhNam { get; set; } // true = Nam, false = Nu
+        [DataMember] public string Lop { get; set; }
+        [DataMember] public string SoCMND { get; set; }
+        [DataMember] public string SoDT { get; set; }
+        [DataMember] public string DiaChi { get; set; }
+        [DataMember] public List<string> MonHocDangKy { get; set; } = new List<string>();
+
+        public string HoTenDayDu => string.Concat(HoLot ?? string.Empty, (string.IsNullOrWhiteSpace(HoLot) ? string.Empty : " "), Ten ?? string.Empty).Trim();
+
+        public static bool IsValidMssv(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return false;
+            return value.All(char.IsDigit) && value.Length == 7; // MSSV 7 ký tự số
+        }
+
+        public static bool IsValidCmnd(string value)
+        {
+            return !string.IsNullOrWhiteSpace(value) && value.All(char.IsDigit) && (value.Length == 9);
+        }
+
+        public static bool IsValidSoDt(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return false;
+            var digits = new string(value.Where(char.IsDigit).ToArray());
+            return digits.Length == 10;
+        }
+
+        public string ToTextLine()
+        {
+            var monhoc = string.Join(";", MonHocDangKy ?? new List<string>());
+            return string.Join("|", new[]
+            {
+                MSSV ?? string.Empty,
+                HoLot ?? string.Empty,
+                Ten ?? string.Empty,
+                NgaySinh.ToString("yyyy-MM-dd"),
+                GioiTinhNam ? "1" : "0",
+                Lop ?? string.Empty,
+                SoCMND ?? string.Empty,
+                SoDT ?? string.Empty,
+                DiaChi ?? string.Empty,
+                monhoc
+            });
+        }
+
+        public static bool TryParse(string line, out Student student)
+        {
+            student = null;
+            if (string.IsNullOrWhiteSpace(line)) return false;
+            var parts = line.Split('|');
+            if (parts.Length < 10) return false;
+            DateTime d;
+            if (!DateTime.TryParseExact(parts[3], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out d))
+            {
+                if (!DateTime.TryParse(parts[3], out d)) return false;
+            }
+            student = new Student
+            {
+                MSSV = parts[0],
+                HoLot = parts[1],
+                Ten = parts[2],
+                NgaySinh = d,
+                GioiTinhNam = parts[4] == "1" || parts[4].Equals("Nam", StringComparison.OrdinalIgnoreCase),
+                Lop = parts[5],
+                SoCMND = parts[6],
+                SoDT = parts[7],
+                DiaChi = parts[8],
+                MonHocDangKy = (parts[9] ?? string.Empty).Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList()
+            };
+            return true;
+        }
+    }
+}

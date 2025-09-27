@@ -1,0 +1,8 @@
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\GhiFileXML_2\bin\Debug\GhiFileXML_2.exe.config
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\GhiFileXML_2\bin\Debug\GhiFileXML_2.exe
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\GhiFileXML_2\bin\Debug\GhiFileXML_2.pdb
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\GhiFileXML_2\obj\Debug\GhiFileXML_2.csproj.AssemblyReference.cache
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\GhiFileXML_2\obj\Debug\GhiFileXML_2.csproj.CoreCompileInputs.cache
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\GhiFileXML_2\obj\Debug\GhiFileXML_2.exe
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\GhiFileXML_2\obj\Debug\GhiFileXML_2.pdb
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\GhiFileXML_2\obj\Debug\GhiFileXML_2.exe.config

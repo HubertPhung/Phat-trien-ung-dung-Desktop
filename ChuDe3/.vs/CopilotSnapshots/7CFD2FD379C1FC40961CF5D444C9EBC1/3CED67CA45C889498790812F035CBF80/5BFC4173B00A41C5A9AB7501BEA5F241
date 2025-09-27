@@ -1,0 +1,286 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Xml.Serialization;
+using Newtonsoft.Json;
+
+namespace BaiTapC
+{
+    public partial class Form1 : Form
+    {
+        private readonly BindingList<Student> _students = new BindingList<Student>();
+        private readonly ContextMenuStrip _gridMenu = new ContextMenuStrip();
+        private const string TextFilePath = "students.txt";
+        private const string JsonFilePath = "students.json";
+        private const string XmlFilePath = "students.xml";
+
+        public Form1()
+        {
+            InitializeComponent();
+            InitDataBinding();
+            InitContextMenu();
+            LoadFromFilesIfExist();
+        }
+
+        private void InitDataBinding()
+        {
+            dgvSinhVien.Rows.Clear();
+            dgvSinhVien.DataSource = null; // using manual rows to control format
+        }
+
+        private void InitContextMenu()
+        {
+            var miDelete = new ToolStripMenuItem("Xóa") { ShortcutKeys = Keys.Delete };
+            miDelete.Click += (s, e) => DeleteSelectedRows();
+            _gridMenu.Items.Add(miDelete);
+            dgvSinhVien.ContextMenuStrip = _gridMenu;
+            dgvSinhVien.MouseDown += (s, e) =>
+            {
+                if (e.Button == MouseButtons.Right)
+                {
+                    var hit = dgvSinhVien.HitTest(e.X, e.Y);
+                    if (hit.RowIndex >= 0)
+                    {
+                        dgvSinhVien.ClearSelection();
+                        dgvSinhVien.Rows[hit.RowIndex].Selected = true;
+                    }
+                }
+            };
+        }
+
+        private void LoadFromFilesIfExist()
+        {
+            try
+            {
+                if (File.Exists(TextFilePath))
+                {
+                    var lines = File.ReadAllLines(TextFilePath, Encoding.UTF8);
+                    foreach (var line in lines)
+                    {
+                        Student st;
+                        if (Student.TryParse(line, out st))
+                        {
+                            AddStudentToGrid(st);
+                        }
+                    }
+                }
+                else if (File.Exists(JsonFilePath))
+                {
+                    var json = File.ReadAllText(JsonFilePath, Encoding.UTF8);
+                    var list = JsonConvert.DeserializeObject<List<Student>>(json) ?? new List<Student>();
+                    foreach (var st in list) AddStudentToGrid(st);
+                }
+                else if (File.Exists(XmlFilePath))
+                {
+                    using (var fs = File.OpenRead(XmlFilePath))
+                    {
+                        var xs = new XmlSerializer(typeof(List<Student>));
+                        var list = (List<Student>)xs.Deserialize(fs);
+                        foreach (var st in list) AddStudentToGrid(st);
+                    }
+                }
+            }
+            catch { /* ignore load errors for now */ }
+        }
+
+        private Student CollectFromInputs()
+        {
+            var monHoc = grpMonHoc.Controls.OfType<CheckBox>().Where(c => c.Checked).Select(c => c.Text).ToList();
+            return new Student
+            {
+                MSSV = txtMSSV.Text.Trim(),
+                HoLot = txtHoLot.Text.Trim(),
+                Ten = txtTen.Text.Trim(),
+                NgaySinh = dtpNgaySinh.Value.Date,
+                GioiTinhNam = rdoNam.Checked,
+                Lop = txtLop.Text.Trim(),
+                SoCMND = txtCMND.Text.Trim(),
+                SoDT = mtxtSoDT.Text.Trim(),
+                DiaChi = txtDiaChi.Text.Trim(),
+                MonHocDangKy = monHoc
+            };
+        }
+
+        private bool ValidateInputs(out string message)
+        {
+            message = null;
+            if (!Student.IsValidMssv(txtMSSV.Text.Trim()))
+            {
+                message = "MSSV phải là 7 ký tự số"; return false;
+            }
+            if (!Student.IsValidCmnd(txtCMND.Text.Trim()))
+            {
+                message = "CMND phải có 9 chữ số"; return false;
+            }
+            if (!Student.IsValidSoDt(mtxtSoDT.Text.Trim()))
+            {
+                message = "Số ĐT phải có 10 chữ số"; return false;
+            }
+            if (string.IsNullOrWhiteSpace(txtTen.Text)) { message = "Vui lòng nhập Tên"; return false; }
+            return true;
+        }
+
+        private void AddStudentToGrid(Student st)
+        {
+            dgvSinhVien.Rows.Add(
+                st.MSSV,
+                st.HoLot,
+                st.Ten,
+                st.NgaySinh.ToShortDateString(),
+                st.Lop,
+                st.SoCMND,
+                st.SoDT,
+                st.DiaChi
+            );
+        }
+
+        private void DeleteSelectedRows()
+        {
+            foreach (DataGridViewRow row in dgvSinhVien.SelectedRows)
+            {
+                if (!row.IsNewRow) dgvSinhVien.Rows.Remove(row);
+            }
+        }
+
+        private void SaveToText()
+        {
+            var list = GetStudentsFromGrid();
+            var lines = list.Select(s => s.ToTextLine()).ToArray();
+            File.WriteAllLines(TextFilePath, lines, Encoding.UTF8);
+        }
+
+        private void SaveToJson()
+        {
+            var list = GetStudentsFromGrid();
+            var json = JsonConvert.SerializeObject(list, Formatting.Indented);
+            File.WriteAllText(JsonFilePath, json, Encoding.UTF8);
+        }
+
+        private void SaveToXml()
+        {
+            var list = GetStudentsFromGrid();
+            using (var fs = File.Create(XmlFilePath))
+            {
+                var xs = new XmlSerializer(typeof(List<Student>));
+                xs.Serialize(fs, list);
+            }
+        }
+
+        private List<Student> GetStudentsFromGrid()
+        {
+            var list = new List<Student>();
+            foreach (DataGridViewRow row in dgvSinhVien.Rows)
+            {
+                if (row.IsNewRow) continue;
+                var st = new Student
+                {
+                    MSSV = Convert.ToString(row.Cells[0].Value),
+                    HoLot = Convert.ToString(row.Cells[1].Value),
+                    Ten = Convert.ToString(row.Cells[2].Value),
+                    NgaySinh = DateTime.TryParse(Convert.ToString(row.Cells[3].Value), out DateTime d) ? d : DateTime.Today,
+                    Lop = Convert.ToString(row.Cells[4].Value),
+                    SoCMND = Convert.ToString(row.Cells[5].Value),
+                    SoDT = Convert.ToString(row.Cells[6].Value),
+                    DiaChi = Convert.ToString(row.Cells[7].Value)
+                };
+                list.Add(st);
+            }
+            return list;
+        }
+
+        private void btnThoat_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void btnThemMoi_Click(object sender, EventArgs e)
+        {
+            txtMSSV.Clear();
+            txtHoLot.Clear();
+            txtTen.Clear();
+            dtpNgaySinh.Value = DateTime.Today;
+            txtLop.Clear();
+            txtCMND.Clear();
+            mtxtSoDT.Clear();
+            txtDiaChi.Clear();
+            rdoNam.Checked = true;
+            foreach (var chk in grpMonHoc.Controls.OfType<CheckBox>()) chk.Checked = false;
+            txtMSSV.Focus();
+        }
+
+        private void btnCapNhat_Click(object sender, EventArgs e)
+        {
+            string msg;
+            if (!ValidateInputs(out msg))
+            {
+                MessageBox.Show(msg, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Nếu MSSV đã tồn tại thì cập nhật dòng; nếu chưa thì thêm mới
+            var st = CollectFromInputs();
+            DataGridViewRow found = null;
+            foreach (DataGridViewRow row in dgvSinhVien.Rows)
+            {
+                if (row.IsNewRow) continue;
+                if (string.Equals(Convert.ToString(row.Cells[0].Value), st.MSSV, StringComparison.OrdinalIgnoreCase))
+                { found = row; break; }
+            }
+
+            if (found == null)
+            {
+                AddStudentToGrid(st);
+            }
+            else
+            {
+                found.Cells[1].Value = st.HoLot;
+                found.Cells[2].Value = st.Ten;
+                found.Cells[3].Value = st.NgaySinh.ToShortDateString();
+                found.Cells[4].Value = st.Lop;
+                found.Cells[5].Value = st.SoCMND;
+                found.Cells[6].Value = st.SoDT;
+                found.Cells[7].Value = st.DiaChi;
+            }
+        }
+
+        private void btnTimKiem_Click(object sender, EventArgs e)
+        {
+            string key = (txtMSSV.Text + " " + txtHoLot.Text + " " + txtTen.Text + " " + txtLop.Text).Trim();
+            if (string.IsNullOrWhiteSpace(key)) return;
+            key = key.ToLowerInvariant();
+            foreach (DataGridViewRow row in dgvSinhVien.Rows)
+            {
+                if (row.IsNewRow) continue;
+                string text = string.Join(" ", new[]
+                {
+                    Convert.ToString(row.Cells[0].Value),
+                    Convert.ToString(row.Cells[1].Value),
+                    Convert.ToString(row.Cells[2].Value),
+                    Convert.ToString(row.Cells[4].Value)
+                }).ToLowerInvariant();
+                row.Visible = text.Contains(key);
+            }
+        }
+
+        // Helper menu items or keyboard shortcuts could call these saves; you can wire to buttons if needed
+        private void SaveAllFormats()
+        {
+            try { SaveToText(); } catch { }
+            try { SaveToJson(); } catch { }
+            try { SaveToXml(); } catch { }
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+            SaveAllFormats();
+        }
+    }
+}

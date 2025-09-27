@@ -1,0 +1,15 @@
+﻿<?xml-stylesheet type='text/xsl' href='book.xsl'?>
+<!DOCTYPE catalog [<!ENTITY h 'hardcover'>]>
+<!--This is a book sample XML-->
+<catalog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <book ISBN="9831123212" yearpublished="2002">
+    <author>Mahesh Chand</author>
+    <title>Visual C# Programming</title>
+    <price>44.95</price>
+  </book>
+  <book ISBN="9780131103627" yearpublished="1988">
+    <author>Brian W. Kernighan; Dennis M. Ritchie</author>
+    <title>The C Programming Language</title>
+    <price>39.99</price>
+  </book>
+</catalog>

@@ -1,0 +1,174 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Xml.Serialization;
+
+namespace BaiTapC
+{
+    public class StudentManager
+    {
+        public List<Student> Students { get; } = new List<Student>();
+
+        public string TextFilePath { get; }
+        public string XmlFilePath { get; }
+        public string JsonFilePath { get; }
+
+        public StudentManager(string textPath, string xmlPath, string jsonPath)
+        {
+            TextFilePath = textPath;
+            XmlFilePath = xmlPath;
+            JsonFilePath = jsonPath;
+        }
+
+        public void Load()
+        {
+            Students.Clear();
+            if (File.Exists(TextFilePath))
+            {
+                foreach (var line in File.ReadAllLines(TextFilePath, Encoding.UTF8))
+                {
+                    if (Student.TryParse(line, out var st)) Students.Add(st);
+                }
+                return;
+            }
+            if (File.Exists(XmlFilePath))
+            {
+                using (var fs = File.OpenRead(XmlFilePath))
+                {
+                    var xs = new XmlSerializer(typeof(List<Student>));
+                    var list = (List<Student>)xs.Deserialize(fs);
+                    Students.AddRange(list ?? new List<Student>());
+                }
+                return;
+            }
+            if (File.Exists(JsonFilePath))
+            {
+                // hỗ trợ json theo định dạng text-line đã lưu trong SaveJson
+                foreach (var line in File.ReadAllLines(JsonFilePath, Encoding.UTF8))
+                {
+                    if (Student.TryParse(line, out var st)) Students.Add(st);
+                }
+            }
+        }
+
+        public void SaveAll()
+        {
+            SaveText();
+            SaveXml();
+            SaveJson();
+        }
+
+        public void SaveText()
+        {
+            var lines = Students.Select(s => s.ToTextLine()).ToArray();
+            File.WriteAllLines(TextFilePath, lines, Encoding.UTF8);
+        }
+
+        public void SaveXml()
+        {
+            using (var fs = File.Create(XmlFilePath))
+            {
+                var xs = new XmlSerializer(typeof(List<Student>));
+                xs.Serialize(fs, Students);
+            }
+        }
+
+        public void SaveJson()
+        {
+            // Không dùng thư viện ngoài: lưu theo định dạng text-line giống txt (đủ yêu cầu đọc/ghi theo đề bài trong môi trường này)
+            var lines = Students.Select(s => s.ToTextLine()).ToArray();
+            File.WriteAllLines(JsonFilePath, lines, Encoding.UTF8);
+        }
+
+        public bool AddOrUpdate(Student st, out string error)
+        {
+            error = null;
+            // Validate đầy đủ nhập liệu
+            if (st == null) { error = "Dữ liệu không hợp lệ"; return false; }
+            if (!Student.IsValidMssv(st.MSSV)) { error = "MSSV phải là 7 chữ số"; return false; }
+            if (!ValidateMssvAABBCCC(st.MSSV, st.Lop, out error)) return false;
+            if (!Student.IsValidCmnd(st.SoCMND)) { error = "CMND phải có 9 chữ số"; return false; }
+            if (!Student.IsValidSoDt(st.SoDT)) { error = "Số ĐT phải có 10 chữ số"; return false; }
+            if (string.IsNullOrWhiteSpace(st.Ten)) { error = "Vui lòng nhập Tên"; return false; }
+
+            var existed = Students.FirstOrDefault(x => string.Equals(x.MSSV, st.MSSV, StringComparison.OrdinalIgnoreCase));
+            if (existed == null)
+            {
+                // kiểm tra trùng MSSV
+                if (Students.Any(x => string.Equals(x.MSSV, st.MSSV, StringComparison.OrdinalIgnoreCase)))
+                {
+                    error = "MSSV đã tồn tại"; return false;
+                }
+                Students.Add(st);
+            }
+            else
+            {
+                existed.HoLot = st.HoLot;
+                existed.Ten = st.Ten;
+                existed.NgaySinh = st.NgaySinh;
+                existed.GioiTinhNam = st.GioiTinhNam;
+                existed.Lop = st.Lop;
+                existed.SoCMND = st.SoCMND;
+                existed.SoDT = st.SoDT;
+                existed.DiaChi = st.DiaChi;
+                existed.MonHocDangKy = st.MonHocDangKy ?? new List<string>();
+            }
+            SaveAll();
+            return true;
+        }
+
+        public int RemoveByMssv(IEnumerable<string> mssvList)
+        {
+            var set = new HashSet<string>(mssvList.Where(s => !string.IsNullOrWhiteSpace(s)), StringComparer.OrdinalIgnoreCase);
+            var removed = Students.RemoveAll(s => set.Contains(s.MSSV));
+            if (removed > 0) SaveAll();
+            return removed;
+        }
+
+        public IEnumerable<Student> Search(string mssv = null, string ten = null, string lop = null)
+        {
+            IEnumerable<Student> q = Students;
+            if (!string.IsNullOrWhiteSpace(mssv))
+                q = q.Where(s => s.MSSV.IndexOf(mssv, StringComparison.OrdinalIgnoreCase) >= 0);
+            if (!string.IsNullOrWhiteSpace(ten))
+                q = q.Where(s => s.Ten.IndexOf(ten, StringComparison.OrdinalIgnoreCase) >= 0 || s.HoLot.IndexOf(ten, StringComparison.OrdinalIgnoreCase) >= 0 || s.HoTenDayDu.IndexOf(ten, StringComparison.OrdinalIgnoreCase) >= 0);
+            if (!string.IsNullOrWhiteSpace(lop))
+                q = q.Where(s => s.Lop.IndexOf(lop, StringComparison.OrdinalIgnoreCase) >= 0);
+            return q.ToList();
+        }
+
+        public static bool ValidateMssvAABBCCC(string mssv, string lop, out string error)
+        {
+            error = null;
+            // AABBCCC: BB = 10, AA = 2 số cuối năm nhập học (dựa vào lớp)
+            if (string.IsNullOrWhiteSpace(mssv) || mssv.Length != 7 || !mssv.All(char.IsDigit))
+            { error = "MSSV phải gồm 7 chữ số"; return false; }
+
+            if (mssv.Substring(2, 2) != "10")
+            { error = "MSSV không đúng định dạng AABBCCC (BB phải = 10)"; return false; }
+
+            var aaExpected = ExtractYearSuffixFromClass(lop);
+            if (aaExpected == null)
+            { error = "Không xác định được năm nhập học từ Lớp"; return false; }
+
+            if (mssv.Substring(0, 2) != aaExpected)
+            { error = $"Hai chữ số đầu MSSV phải là {aaExpected}"; return false; }
+
+            return true;
+        }
+
+        public static string ExtractYearSuffixFromClass(string lop)
+        {
+            if (string.IsNullOrWhiteSpace(lop)) return null;
+            // Tìm 4 chữ số (20xx) -> lấy 2 số cuối. Nếu không có, tìm cụm 2 chữ số liền nhau gần cuối chuỗi.
+            var m4 = Regex.Match(lop, @"(19|20)(\d{2})");
+            if (m4.Success) return m4.Groups[2].Value; // 2 số cuối của 19xx/20xx
+            var m2First = Regex.Match(lop, @"\d{2}");
+            if (m2First.Success) return m2First.Value; // lấy cặp 2 số đầu tiên (ví dụ D20... -> 20)
+            return null;
+        }
+    }
+}

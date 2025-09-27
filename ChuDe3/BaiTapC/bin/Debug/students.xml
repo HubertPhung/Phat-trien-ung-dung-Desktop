@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<ArrayOfStudent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Student>
+    <MSSV>2310585</MSSV>
+    <HoLot>Phùng Nguyễn Hoài</HoLot>
+    <Ten>Bo</Ten>
+    <NgaySinh>2025-09-27T00:00:00</NgaySinh>
+    <GioiTinhNam>true</GioiTinhNam>
+    <Lop>CTK47A</Lop>
+    <SoCMND>352786314</SoCMND>
+    <SoDT>0988-752-291</SoDT>
+    <DiaChi>Đà Lạt</DiaChi>
+    <MonHocDangKy>
+      <string>An toàn và bảo mật hệ thống</string>
+      <string>Lập trình trên thiết bị di động</string>
+      <string>Phương pháp NCKH</string>
+      <string>Đồ án cơ sở</string>
+      <string>Lập trình mạng</string>
+      <string>Lập trình CSDL</string>
+      <string>Hệ điều hành</string>
+      <string>Mạng máy tính</string>
+    </MonHocDangKy>
+    <NamNhapHoc>2023</NamNhapHoc>
+  </Student>
+</ArrayOfStudent>
