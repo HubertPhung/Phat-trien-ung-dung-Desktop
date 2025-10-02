@@ -1,0 +1,14 @@
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\BaiTap_C\bin\Debug\BaiTap_C.exe.config
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\BaiTap_C\bin\Debug\BaiTap_C.exe
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\BaiTap_C\bin\Debug\BaiTap_C.pdb
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\BaiTap_C\bin\Debug\Newtonsoft.Json.dll
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\BaiTap_C\bin\Debug\Newtonsoft.Json.xml
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\BaiTap_C\obj\Debug\BaiTap_C.csproj.AssemblyReference.cache
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\BaiTap_C\obj\Debug\BaiTap_C.frmThongTinSV.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\BaiTap_C\obj\Debug\BaiTap_C.Properties.Resources.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\BaiTap_C\obj\Debug\BaiTap_C.csproj.GenerateResource.cache
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\BaiTap_C\obj\Debug\BaiTap_C.csproj.CoreCompileInputs.cache
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\BaiTap_C\obj\Debug\BaiTap_C.csproj.Up2Date
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\BaiTap_C\obj\Debug\BaiTap_C.exe
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\BaiTap_C\obj\Debug\BaiTap_C.pdb
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\BaiTap_C\obj\Debug\BaiTap_C.exe.config
