@@ -1,0 +1,6 @@
+HP001,Lập trình Mạng,3
+HP002,Cơ sở dữ liệu,4
+HP003,Mạng máy tính,3
+HP004,Hệ điều hành,3
+HP005,Toán rời rạc,2
+HP006,Nhập môn AI,2

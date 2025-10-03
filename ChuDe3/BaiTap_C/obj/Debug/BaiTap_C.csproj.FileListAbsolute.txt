@@ -12,3 +12,4 @@ D:\University\Phát triển ứng dụng Desktop\ChuDe3\BaiTap_C\obj\Debug\BaiTa
 D:\University\Phát triển ứng dụng Desktop\ChuDe3\BaiTap_C\obj\Debug\BaiTap_C.exe
 D:\University\Phát triển ứng dụng Desktop\ChuDe3\BaiTap_C\obj\Debug\BaiTap_C.pdb
 D:\University\Phát triển ứng dụng Desktop\ChuDe3\BaiTap_C\obj\Debug\BaiTap_C.exe.config
+D:\University\Phát triển ứng dụng Desktop\ChuDe3\BaiTap_C\bin\Debug\HocPhan.txt
