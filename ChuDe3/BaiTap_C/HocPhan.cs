@@ -25,7 +25,7 @@ namespace BaiTap_C
 
         public override string ToString()
         {
-            return TenHP + "  " + SoTinChi;
+            return TenHP;
         }
     }
 }

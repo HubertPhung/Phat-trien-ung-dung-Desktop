@@ -84,6 +84,36 @@ namespace BaiTap_C
             ChonFileDuLieu();
         }
 
+        private void btnXuatFile_Click(object sender, EventArgs e)
+        {
+            using (SaveFileDialog sfd = new SaveFileDialog())
+            {
+                sfd.Title = "Xuất danh sách sinh viên";
+                sfd.Filter = "Text file (*.txt)|*.txt|JSON file (*.json)|*.json|XML file (*.xml)|*.xml";
+                sfd.FileName = "DanhSachSV";
+
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        currentFilePath = sfd.FileName;
+                        qlsv.SaveToFile(currentFilePath);
+                        MessageBox.Show("Xuất file thành công!",
+                                        "Thông báo",
+                                        MessageBoxButtons.OK,
+                                        MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Lỗi khi xuất file: " + ex.Message,
+                                        "Lỗi",
+                                        MessageBoxButtons.OK,
+                                        MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
         private void ThemSV(SinhVien sv)
         {
             int rowIndex = dgvDSSV.Rows.Add();
@@ -99,15 +129,53 @@ namespace BaiTap_C
             row.Cells["colDiaChi"].Value = sv.DiaChi;
         }
 
-        private void btnThemMoi_Click(object sender, EventArgs e)
+        private bool ValidateMSSVTheoLop(out int mssv)
         {
-            if (!int.TryParse(mtxtMSSV.Text.Trim(), out int mssv) || mtxtMSSV.Text.Length != 7)
+            mssv = 0;
+            string mssvStr = mtxtMSSV.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(mssvStr) || mssvStr.Length != 7 || !int.TryParse(mssvStr, out mssv))
             {
                 MessageBox.Show("MSSV phải là 7 chữ số.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 mtxtMSSV.Focus();
-                return;
+                return false;
             }
 
+            if (string.IsNullOrWhiteSpace(cbLop.Text))
+            {
+                MessageBox.Show("Vui lòng chọn/nhập Lớp.", "Thiếu thông tin", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                cbLop.Focus();
+                return false;
+            }
+
+            var tmpSv = new SinhVien();
+            int aaNumber = tmpSv.NamNhapHoc(cbLop.Text.Trim());
+            if (aaNumber <= 0 || aaNumber > 99)
+            {
+                MessageBox.Show("Không xác định được năm nhập học từ Lớp.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            string aaExpected = aaNumber.ToString("D2");
+
+            if (mssvStr.Substring(2, 2) != "10")
+            {
+                MessageBox.Show("2 số giữa của MSSV (BB) phải là 10.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                mtxtMSSV.Focus();
+                return false;
+            }
+
+            if (mssvStr.Substring(0, 2) != aaExpected)
+            {
+                MessageBox.Show($"2 số đầu của MSSV (AA) phải là {aaExpected} theo năm nhập học của lớp.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                mtxtMSSV.Focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        private void btnThemMoi_Click(object sender, EventArgs e)
+        {
             if (string.IsNullOrWhiteSpace(txtTen.Text))
             {
                 MessageBox.Show("Vui lòng nhập Tên.", "Thiếu thông tin", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -136,6 +204,16 @@ namespace BaiTap_C
                 return;
             }
 
+            if (!ValidateMSSVTheoLop(out int mssv))
+                return;
+
+            if (qlsv.DSSV.Any(s => s.MSSV == mssv))
+            {
+                MessageBox.Show("MSSV đã tồn tại, vui lòng nhập số khác.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                mtxtMSSV.Focus();
+                return;
+            }
+
             var sv = new SinhVien(mssv,
                                   txtHoTenLot.Text.Trim(),
                                   txtTen.Text.Trim(),
@@ -158,25 +236,6 @@ namespace BaiTap_C
             foreach (var s in qlsv.DSSV) ThemSV(s);
 
             XoaDuLieuNhap();
-        }
-
-
-
-
-        private void mnuXoa_Click(object sender, EventArgs e)
-        {
-            if (dgvDSSV.SelectedRows.Count == 0) return;
-
-            foreach (DataGridViewRow row in dgvDSSV.SelectedRows)
-            {
-                if (row.Cells["colMSSV"].Value != null)
-                {
-                    int mssv = int.Parse(row.Cells["colMSSV"].Value.ToString());
-                    qlsv.DSSV.RemoveAll(s => s.MSSV == mssv);
-                    dgvDSSV.Rows.Remove(row);
-                }
-            }
-            qlsv.SaveToFile(currentFilePath); 
         }
 
         private void dgvDSSV_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -214,55 +273,6 @@ namespace BaiTap_C
                 else if (gt == "Nữ") rdNu.Checked = true;
 
                 CapNhatHocPhan();
-            }
-        }
-
-        private void btnCapNhat_Click(object sender, EventArgs e)
-        {
-            if (!int.TryParse(mtxtMSSV.Text, out int mssv)) return;
-
-            var sv = new SinhVien(mssv,
-                                   txtHoTenLot.Text.Trim(),
-                                   txtTen.Text.Trim(),
-                                   dtpNgaySinh.Value,
-                                   rdNam.Checked,
-                                   cbLop.Text.Trim(),
-                                   mtxtCMND.Text.Trim(),
-                                   mtxtSoDT.Text.Trim(),
-                                   txtDiaChi.Text.Trim());
-
-            sv.MonHocDangKy.Clear();
-            foreach (var item in clbMonHoc.CheckedItems)
-            {
-                if (item is HocPhan hp)
-                    sv.MonHocDangKy.Add(hp.MaHP);
-            }
-
-            qlsv.Them_CapNhat(sv, currentFilePath);
-
-            dgvDSSV.Rows.Clear();
-            foreach (var s in qlsv.DSSV) ThemSV(s);
-
-            XoaDuLieuNhap();
-        }
-
-        private void CapNhatHocPhan()
-        {
-            if (dgvDSSV.SelectedRows.Count == 0) return;
-
-            var row = dgvDSSV.SelectedRows[0];
-            string mssv = row.Cells["colMSSV"].Value?.ToString();
-            if (string.IsNullOrWhiteSpace(mssv)) return;
-
-            var sv = qlsv.DSSV.FirstOrDefault(s => s.MSSV.ToString() == mssv);
-            if (sv == null) return;
-
-            for (int i = 0; i < clbMonHoc.Items.Count; i++)
-            {
-                clbMonHoc.SetItemChecked(
-                    i,
-                    clbMonHoc.Items[i] is HocPhan hp && sv.MonHocDangKy?.Contains(hp.MaHP) == true
-                );
             }
         }
 
@@ -320,8 +330,7 @@ namespace BaiTap_C
             }
             else
             {
-                MessageBox.Show("Vui lòng nhập MSSV hoặc Tên hoặc chọn Lớp để tìm kiếm.", "Thiếu thông tin", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+                ketQua = qlsv.DSSV.ToList();
             }
 
             dgvDSSV.Rows.Clear();
@@ -331,36 +340,70 @@ namespace BaiTap_C
             }
         }
 
-        private void btnXuatFile_Click(object sender, EventArgs e)
+        #region Cập nhật
+        private void btnCapNhat_Click(object sender, EventArgs e)
         {
-            using (SaveFileDialog sfd = new SaveFileDialog())
-            {
-                sfd.Title = "Xuất danh sách sinh viên";
-                sfd.Filter = "Text file (*.txt)|*.txt|JSON file (*.json)|*.json|XML file (*.xml)|*.xml";
-                sfd.FileName = "DanhSachSV";
+            if (!ValidateMSSVTheoLop(out int mssv)) return;
 
-                if (sfd.ShowDialog() == DialogResult.OK)
-                {
-                    try
-                    {
-                        currentFilePath = sfd.FileName;
-                        qlsv.SaveToFile(currentFilePath);
-                        MessageBox.Show("Xuất file thành công!",
-                                        "Thông báo",
-                                        MessageBoxButtons.OK,
-                                        MessageBoxIcon.Information);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Lỗi khi xuất file: " + ex.Message,
-                                        "Lỗi",
-                                        MessageBoxButtons.OK,
-                                        MessageBoxIcon.Error);
-                    }
-                }
+            int originalMssv = -1;
+            if (dgvDSSV.SelectedRows.Count > 0)
+            {
+                int.TryParse(dgvDSSV.SelectedRows[0].Cells["colMSSV"].Value?.ToString(), out originalMssv);
             }
+
+            if (originalMssv != mssv && qlsv.DSSV.Any(s => s.MSSV == mssv))
+            {
+                MessageBox.Show("MSSV đã tồn tại, không thể cập nhật.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            var sv = new SinhVien(mssv,
+                                   txtHoTenLot.Text.Trim(),
+                                   txtTen.Text.Trim(),
+                                   dtpNgaySinh.Value,
+                                   rdNam.Checked,
+                                   cbLop.Text.Trim(),
+                                   mtxtCMND.Text.Trim(),
+                                   mtxtSoDT.Text.Trim(),
+                                   txtDiaChi.Text.Trim());
+
+            sv.MonHocDangKy.Clear();
+            foreach (var item in clbMonHoc.CheckedItems)
+            {
+                if (item is HocPhan hp)
+                    sv.MonHocDangKy.Add(hp.MaHP);
+            }
+
+            qlsv.Them_CapNhat(sv, currentFilePath);
+
+            dgvDSSV.Rows.Clear();
+            foreach (var s in qlsv.DSSV) ThemSV(s);
+
+            XoaDuLieuNhap();
         }
 
+        private void CapNhatHocPhan()
+        {
+            if (dgvDSSV.SelectedRows.Count == 0) return;
+
+            var row = dgvDSSV.SelectedRows[0];
+            string mssv = row.Cells["colMSSV"].Value?.ToString();
+            if (string.IsNullOrWhiteSpace(mssv)) return;
+
+            var sv = qlsv.DSSV.FirstOrDefault(s => s.MSSV.ToString() == mssv);
+            if (sv == null) return;
+
+            for (int i = 0; i < clbMonHoc.Items.Count; i++)
+            {
+                clbMonHoc.SetItemChecked(
+                    i,
+                    clbMonHoc.Items[i] is HocPhan hp && sv.MonHocDangKy?.Contains(hp.MaHP) == true
+                );
+            }
+        }
+        #endregion
+
+        #region Xóa môn, xóa sinh viên
         private void clbMonHoc_ItemCheck(object sender, ItemCheckEventArgs e)
         {
             if (dgvDSSV.SelectedRows.Count == 0) return;
@@ -447,20 +490,41 @@ namespace BaiTap_C
 
         private void tmsiXoaNhieuSV_Click(object sender, EventArgs e)
         {
-            var mssvList = dgvDSSV.Rows.Cast<DataGridViewRow>()
-               .Where(r => r.Cells["colChon"].Value is bool b && b)
-               .Select(r => int.Parse(r.Cells["colMSSV"].Value.ToString()))
-               .ToList();
+            dgvDSSV.EndEdit();
 
-            if (mssvList.Count == 0) return;
+            var mssvList = dgvDSSV.Rows.Cast<DataGridViewRow>()
+                .Where(r => !r.IsNewRow)
+                .Where(r => r.Cells["colChon"].Value is bool b && b)
+                .Select(r =>
+                {
+                    int id;
+                    return int.TryParse(Convert.ToString(r.Cells["colMSSV"].Value), out id) ? (int?)id : null;
+                })
+                .Where(id => id.HasValue)
+                .Select(id => id.Value)
+                .ToList();
+
+            if (mssvList.Count == 0)
+            {
+                MessageBox.Show("Bạn chưa chọn sinh viên nào để xóa!", "Thông báo");
+                return;
+            }
+
+            var confirm = MessageBox.Show(
+                $"Bạn có chắc muốn xóa {mssvList.Count} sinh viên đã chọn?",
+                "Xác nhận",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+            if (confirm != DialogResult.Yes) return;
 
             qlsv.XoaNhieuSV(mssvList, currentFilePath);
 
-            foreach (DataGridViewRow row in dgvDSSV.SelectedRows.Cast<DataGridViewRow>().ToList())
-                if (mssvList.Contains(int.Parse(row.Cells["colMSSV"].Value.ToString())))
-                    dgvDSSV.Rows.Remove(row);
+            dgvDSSV.Rows.Clear();
+            foreach (var sv in qlsv.DSSV)
+                ThemSV(sv);
 
             MessageBox.Show("Đã xóa các sinh viên được chọn!", "Thông báo");
         }
+        #endregion 
     }
 }

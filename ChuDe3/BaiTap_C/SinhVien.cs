@@ -36,11 +36,6 @@ namespace BaiTap_C
             this.DiaChi = diaChi;
         }
 
-        public string HoTenDayDu(string hoTenLot, string ten)
-        {
-            return $"{hoTenLot} {ten}".Trim();
-        }
-
         public int NamNhapHoc(string lop)
         {
             var soLop = new string(lop.Where(char.IsDigit).ToArray());
@@ -51,16 +46,6 @@ namespace BaiTap_C
                 return namNhapHoc;
             }
             return 0;
-        }
-
-        public string TaoMSSV(string lop, int stt)
-        {
-            int nam = NamNhapHoc(lop);       
-            string aa = nam.ToString("D2");  
-            string bb = "10";                
-            string ccc = stt.ToString("D3"); 
-
-            return aa + bb + ccc; 
         }
     }
 }

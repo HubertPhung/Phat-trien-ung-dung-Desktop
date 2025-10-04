@@ -1,18 +1,30 @@
 [
   {
-    "MSSV": 2312585,
-    "HoTenLot": "Phung Nguyen Hoai",
-    "Ten": "Bo",
-    "NgaySinh": "2005-10-03T00:00:00",
+    "MSSV": 2310590,
+    "HoTenLot": "Nguyễn Ngọc Trường",
+    "Ten": "Dân",
+    "NgaySinh": "2005-07-03T00:00:00",
     "GioiTinh": true,
     "Lop": "CTK47",
-    "SoCMND": "646484564",
-    "SoDT": "0988.752.291",
-    "DiaChi": "Da lat",
+    "SoCMND": "365456465",
+    "SoDT": "0898.479.456",
+    "DiaChi": "Đồng Nai",
     "MonHocDangKy": []
   },
   {
-    "MSSV": 2312802,
+    "MSSV": 2110802,
+    "HoTenLot": "Phan Khanh",
+    "Ten": "Huỳnh",
+    "NgaySinh": "2025-10-03T00:00:00",
+    "GioiTinh": true,
+    "Lop": "CTK45",
+    "SoCMND": "648649849",
+    "SoDT": "6546.546.465",
+    "DiaChi": "Don Duong",
+    "MonHocDangKy": []
+  },
+  {
+    "MSSV": 2110555,
     "HoTenLot": "Phan Khanh",
     "Ten": "Vuong",
     "NgaySinh": "2025-10-03T00:00:00",
@@ -24,15 +36,15 @@
     "MonHocDangKy": []
   },
   {
-    "MSSV": 2310590,
-    "HoTenLot": "Nguyễn Ngọc Trường",
-    "Ten": "Dân",
-    "NgaySinh": "2005-07-03T13:55:00",
+    "MSSV": 2310585,
+    "HoTenLot": "Phung Nguyen Hoai",
+    "Ten": "Bo",
+    "NgaySinh": "2005-10-03T00:00:00",
     "GioiTinh": true,
     "Lop": "CTK47",
-    "SoCMND": "365456465",
-    "SoDT": "0898.479.456",
-    "DiaChi": "Đồng Nai",
+    "SoCMND": "646484564",
+    "SoDT": "0988.752.291",
+    "DiaChi": "Da lat",
     "MonHocDangKy": []
   }
 ]

@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -140,14 +140,14 @@
             this.dtpNgaySinh.Location = new System.Drawing.Point(154, 89);
             this.dtpNgaySinh.Name = "dtpNgaySinh";
             this.dtpNgaySinh.Size = new System.Drawing.Size(210, 22);
-            this.dtpNgaySinh.TabIndex = 2;
+            this.dtpNgaySinh.TabIndex = 3;
             // 
             // txtDiaChi
             // 
             this.txtDiaChi.Location = new System.Drawing.Point(154, 154);
             this.txtDiaChi.Name = "txtDiaChi";
             this.txtDiaChi.Size = new System.Drawing.Size(539, 22);
-            this.txtDiaChi.TabIndex = 1;
+            this.txtDiaChi.TabIndex = 7;
             // 
             // label6
             // 
@@ -212,7 +212,7 @@
             this.txtTen.Location = new System.Drawing.Point(482, 51);
             this.txtTen.Name = "txtTen";
             this.txtTen.Size = new System.Drawing.Size(211, 22);
-            this.txtTen.TabIndex = 1;
+            this.txtTen.TabIndex = 2;
             // 
             // cbLop
             // 
@@ -255,19 +255,19 @@
             this.tsmiXoa1Mon,
             this.tmstXoaNhieuMon});
             this.cmsXoaMonHoc.Name = "cmsXoaMonHoc";
-            this.cmsXoaMonHoc.Size = new System.Drawing.Size(207, 52);
+            this.cmsXoaMonHoc.Size = new System.Drawing.Size(211, 80);
             // 
             // tsmiXoa1Mon
             // 
             this.tsmiXoa1Mon.Name = "tsmiXoa1Mon";
-            this.tsmiXoa1Mon.Size = new System.Drawing.Size(210, 24);
+            this.tsmiXoa1Mon.Size = new System.Drawing.Size(206, 24);
             this.tsmiXoa1Mon.Text = "Xóa 1 môn học";
             this.tsmiXoa1Mon.Click += new System.EventHandler(this.tsmiXoa1Mon_Click);
             // 
             // tmstXoaNhieuMon
             // 
             this.tmstXoaNhieuMon.Name = "tmstXoaNhieuMon";
-            this.tmstXoaNhieuMon.Size = new System.Drawing.Size(210, 24);
+            this.tmstXoaNhieuMon.Size = new System.Drawing.Size(206, 24);
             this.tmstXoaNhieuMon.Text = "Xóa nhiều môn học";
             this.tmstXoaNhieuMon.Click += new System.EventHandler(this.tmstXoaNhieuMon_Click);
             // 
@@ -349,6 +349,7 @@
             this.dgvDSSV.ContextMenuStrip = this.cmsXoaSV;
             this.dgvDSSV.Location = new System.Drawing.Point(6, 27);
             this.dgvDSSV.Name = "dgvDSSV";
+            this.dgvDSSV.RowHeadersVisible = false;
             this.dgvDSSV.RowHeadersWidth = 51;
             this.dgvDSSV.RowTemplate.Height = 24;
             this.dgvDSSV.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
@@ -365,8 +366,8 @@
             // 
             // colMSSV
             // 
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.colMSSV.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.colMSSV.DefaultCellStyle = dataGridViewCellStyle3;
             this.colMSSV.HeaderText = "MSSV";
             this.colMSSV.MinimumWidth = 6;
             this.colMSSV.Name = "colMSSV";
@@ -435,19 +436,19 @@
             this.tmsiXoa1SV,
             this.tmsiXoaNhieuSV});
             this.cmsXoaSV.Name = "contextMenuStrip1";
-            this.cmsXoaSV.Size = new System.Drawing.Size(211, 80);
+            this.cmsXoaSV.Size = new System.Drawing.Size(206, 52);
             // 
             // tmsiXoa1SV
             // 
             this.tmsiXoa1SV.Name = "tmsiXoa1SV";
-            this.tmsiXoa1SV.Size = new System.Drawing.Size(210, 24);
+            this.tmsiXoa1SV.Size = new System.Drawing.Size(205, 24);
             this.tmsiXoa1SV.Text = "Xóa 1 sinh viên";
             this.tmsiXoa1SV.Click += new System.EventHandler(this.tmsiXoa1SV_Click);
             // 
             // tmsiXoaNhieuSV
             // 
             this.tmsiXoaNhieuSV.Name = "tmsiXoaNhieuSV";
-            this.tmsiXoaNhieuSV.Size = new System.Drawing.Size(210, 24);
+            this.tmsiXoaNhieuSV.Size = new System.Drawing.Size(205, 24);
             this.tmsiXoaNhieuSV.Text = "Xóa nhiều sinh viên";
             this.tmsiXoaNhieuSV.Click += new System.EventHandler(this.tmsiXoaNhieuSV_Click);
             // 
@@ -487,7 +488,7 @@
             this.mtxtSoDT.Mask = "0000.000.000";
             this.mtxtSoDT.Name = "mtxtSoDT";
             this.mtxtSoDT.Size = new System.Drawing.Size(209, 22);
-            this.mtxtSoDT.TabIndex = 8;
+            this.mtxtSoDT.TabIndex = 6;
             // 
             // mtxtMSSV
             // 
@@ -495,7 +496,7 @@
             this.mtxtMSSV.Mask = "0000000";
             this.mtxtMSSV.Name = "mtxtMSSV";
             this.mtxtMSSV.Size = new System.Drawing.Size(209, 22);
-            this.mtxtMSSV.TabIndex = 8;
+            this.mtxtMSSV.TabIndex = 0;
             // 
             // mtxtCMND
             // 
@@ -503,7 +504,7 @@
             this.mtxtCMND.Mask = "000000000";
             this.mtxtCMND.Name = "mtxtCMND";
             this.mtxtCMND.Size = new System.Drawing.Size(209, 22);
-            this.mtxtCMND.TabIndex = 8;
+            this.mtxtCMND.TabIndex = 5;
             // 
             // frmThongTinSV
             // 

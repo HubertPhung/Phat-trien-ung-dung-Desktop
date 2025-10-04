@@ -1,2 +1,11 @@
+HP001,Cơ sở dữ liệu,3
+HP002,Lập trình C#,3
+HP003,Toán rời rạc,2
+HP004,Hệ điều hành,3
+HP005,Mạng máy tính,3
+HP006,Lập trình Java,3
+HP007,Kỹ thuật lập trình,2
+HP008,Trí tuệ nhân tạo,3
 HP009,Phân tích thiết kế hệ thống,3
 HP010,Lập trình Web,3
+

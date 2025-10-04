@@ -1,36 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <DanhSachSinhVien>
   <SinhVien>
-    <MSSV>2312585</MSSV>
-    <HoTenLot>Phung Nguyen Hoai</HoTenLot>
+    <MSSV>2010585</MSSV>
+    <HoTenLot>Phùng Nguyễn Hoài</HoTenLot>
     <Ten>Bo</Ten>
-    <NgaySinh>2005-10-03</NgaySinh>
+    <NgaySinh>2025-10-04</NgaySinh>
     <GioiTinh>true</GioiTinh>
-    <Lop>CTK47</Lop>
-    <SoCMND>646484564</SoCMND>
-    <SoDT>0988.752.291</SoDT>
-    <DiaChi>Da lat</DiaChi>
+    <Lop>CTK44</Lop>
+    <SoCMND>355346546</SoCMND>
+    <SoDT>0987.651.316</SoDT>
+    <DiaChi>Lâm Đồng</DiaChi>
+    <MonHocDangKy></MonHocDangKy>
   </SinhVien>
   <SinhVien>
-    <MSSV>2312802</MSSV>
-    <HoTenLot>Phan Khanh</HoTenLot>
-    <Ten>Vuong</Ten>
-    <NgaySinh>2025-10-03</NgaySinh>
+    <MSSV>2410585</MSSV>
+    <HoTenLot>Phan Khánh</HoTenLot>
+    <Ten>Vương</Ten>
+    <NgaySinh>2025-01-04</NgaySinh>
     <GioiTinh>true</GioiTinh>
-    <Lop>CTK45</Lop>
-    <SoCMND>648649849</SoCMND>
-    <SoDT>6546.546.465</SoDT>
-    <DiaChi>Don Duong</DiaChi>
-  </SinhVien>
-  <SinhVien>
-    <MSSV>2310590</MSSV>
-    <HoTenLot>Nguyễn Ngọc Trường</HoTenLot>
-    <Ten>Dân</Ten>
-    <NgaySinh>2005-07-03</NgaySinh>
-    <GioiTinh>true</GioiTinh>
-    <Lop>CTK47</Lop>
-    <SoCMND>365456465</SoCMND>
-    <SoDT>0898.479.456</SoDT>
-    <DiaChi>Đồng Nai</DiaChi>
+    <Lop>CTK48</Lop>
+    <SoCMND>355346546</SoCMND>
+    <SoDT>0987.651.316</SoDT>
+    <DiaChi>Lâm Đồng</DiaChi>
+    <MonHocDangKy></MonHocDangKy>
   </SinhVien>
 </DanhSachSinhVien>
