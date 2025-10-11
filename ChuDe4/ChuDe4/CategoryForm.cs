@@ -1,0 +1,212 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Data.SqlClient;
+using System.Drawing;
+using System.Drawing.Text;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+
+namespace ChuDe4
+{
+    public partial class CategoryForm : Form
+    {
+        public CategoryForm()
+        {
+            InitializeComponent();
+        }
+
+        private void btnLoad_Click(object sender, EventArgs e)
+        {
+            // Tạo chuỗi kết nối tới cơ sở dữ liệu 
+            string connectionString = "server=.; database = RestaurantManagement; Integrated Security = true";
+
+            // Tạo đối tượng kết nôi
+            SqlConnection sqlConnection = new SqlConnection(connectionString);
+
+            // Tạo đối tượng command
+            SqlCommand sqlCommand = sqlConnection.CreateCommand();
+
+            // Thiết lập lệnh truy vấn cho đối tượng command
+            string query = "SELECT ID, Name, Type FROM Category";
+            sqlCommand.CommandText = query;
+
+            // Mở kết nối
+            sqlConnection.Open();
+
+            // Thực thi lệnh bằng phương thưc ExecuteReader
+            SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
+
+            // Gọi hàm hiển thị dữ liệu lên ListView
+            this.DisplayCategory(sqlDataReader);
+
+            // Đóng kết nối
+            sqlConnection.Close();
+        }
+
+        private void DisplayCategory(SqlDataReader reader)
+        {
+            lvCategory.Items.Clear();
+            while (reader.Read())
+            {
+                // Tạo 1 dòng trong ListView
+                ListViewItem item = new ListViewItem(reader["ID"].ToString());
+
+                // Thêm dòng mới vào ListView
+                lvCategory.Items.Add(item);
+
+                // Thêm các cột còn lại
+                item.SubItems.Add(reader["Name"].ToString());
+                item.SubItems.Add(reader["Type"].ToString());
+            }
+        }
+
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+            // Tạo đối tượng kết nối
+            string connectionString = "server=.; database = RestaurantManagement; Integrated Security = true;";
+            SqlConnection sqlConnection = new SqlConnection(connectionString);
+
+            // Tạo đối tượng command
+            SqlCommand sqlCommand = sqlConnection.CreateCommand();
+
+            // Thiết lập lệnh truy vấn cho đối tượng command
+            string query = "INSERT INTO Category (Name, [Type])" + "VALUES (N'" + txtName.Text + "'," + txtType.Text + ")";
+
+            // Mở kết nối tới csdl
+            sqlConnection.Open();
+
+            // Thực thi lệnh bằng phương pháp ExcuteReader
+            int numOfRowsEffected = sqlCommand.ExecuteNonQuery();
+
+            // Đóng kết nối
+            sqlConnection.Close();
+
+            if (numOfRowsEffected == 1)
+            {
+                MessageBox.Show("Thêm nhóm món ăn thành công");
+
+                // Tải lại dữ liệu
+                btnLoad.PerformClick();
+
+                // Xóa các ô nhập
+                txtName.Text = "";
+                txtType.Text = "";
+            }
+            else
+                MessageBox.Show("Đã có lỗi xảy ra. Vui lòng thử lại");
+        }
+
+        private void lvCategory_Click(object sender, EventArgs e)
+        {
+            // Lấy dòng được chọn trong Lv
+            ListViewItem item = lvCategory.SelectedItems[0];
+
+            // Hiển thị dữ liệu lên TextBox
+            txtID.Text = item.Text;
+            txtName.Text = item.SubItems[1].Text;
+            txtType.Text = item.SubItems[1].Text == "0" ? "Thức uống" : "Đồ ăn";
+
+            // Hiển thị nút cập nhật và xóa
+            btnUpdate.Enabled = true;
+            btnDelete.Enabled = true;
+        }
+
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+            // Tạo đối tượng kết nối    
+            string connectionString = "server=.; database = RestaurantManagement; Integrated Security = true;";
+            SqlConnection sqlConnection = new SqlConnection(connectionString);
+
+            // Tạo đối tượng command
+            SqlCommand sqlCommand = sqlConnection.CreateCommand();
+
+            // Thiết lập lệnh truy vấn cho đối tượng command
+            sqlCommand.CommandText = "UPDATE Caterogy SET Name = N'" + txtName.Text +
+                                                   "',[Type] = " + txtType.Text +
+                                                   "WHERE ID = " + txtID.Text;
+            // Mở kết nối tới csdl
+            sqlConnection.Open();
+
+            // Thực thi lệnh bằng phương thức ExcuteReader
+            int numOfRowEffected = sqlCommand.ExecuteNonQuery();
+
+            // Đóng kết nối
+            sqlConnection.Close();
+
+            if (numOfRowEffected == 1)
+            {
+                // Cập nhật lại dữ liệu trên Lv
+                ListViewItem item = lvCategory.SelectedItems[0];
+
+                item.SubItems[1].Text = txtName.Text;
+                item.SubItems[2].Text = txtType.Text;
+
+                // Xóa các ô nhập
+                txtID.Text = "";
+                txtName.Text = "";
+                txtType.Text = "";
+
+                // Disable các nút xóa và cập nhật
+                btnUpdate.Enabled = true;
+                btnDelete.Enabled = true;
+
+                MessageBox.Show("Cập nhật nhóm món ăn thành công");
+            }
+            else
+                MessageBox.Show("Đã có lỗi xảy ra. Vui lòng thử lại");
+        }
+
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            // Tạo đối tượng kết nối    
+            string connectionString = "server=.; database = RestaurantManagement; Integrated Security = true;";
+            SqlConnection sqlConnection = new SqlConnection(connectionString);
+
+            // Tạo đối tượng command
+            SqlCommand sqlCommand = sqlConnection.CreateCommand();
+
+            // Thiết lập lệnh truy vấn cho đối tượng command
+            sqlCommand.CommandText = "DELETE  FROM Category " +
+                "WHERE ID = " + txtID.Text;
+
+            // Mở kết nối csdl
+            sqlConnection.Open();
+
+            // Thực thi lệnh bằng phương thức ExcuteReader
+            int numberOfRowsEffected = sqlCommand.ExecuteNonQuery();
+
+            // Đóng kết nối
+            sqlConnection.Close();
+
+            if(numberOfRowsEffected == 1)
+            {
+                // Cập nhật dữ liệu trên lv
+                ListViewItem item = lvCategory.SelectedItems[0];
+                lvCategory.Items.Remove(item);
+
+                // Xóa các ô nhập
+                txtID.Text = "";
+                txtName.Text = "";
+                txtType.Text = "";
+
+                // Disable các nút xóa và cập nhật
+                btnUpdate.Enabled = true;
+                btnDelete.Enabled = true;
+                MessageBox.Show("Cập nhật nhóm món ăn thành công");
+            }
+            else
+                MessageBox.Show("Đã có lỗi xảy ra. Vui lòng thử lại");
+        }
+
+        private void tmsDelete_Click(object sender, EventArgs e)
+        {
+            if(lvCategory.SelectedItems.Count > 0)
+            {
+                btnDelete.PerformClick();
+            }
+        }
+    }
+}
