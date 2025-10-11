@@ -3,12 +3,16 @@
   "WorkspaceRootPath": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\ChuDe4\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{DDD47CBD-071C-4D49-BB51-CE9875E3A5A3}|ChuDe4\\Lab_Basic_Command.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\chude4\\chude4\\categoryform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{DDD47CBD-071C-4D49-BB51-CE9875E3A5A3}|ChuDe4\\Lab_Basic_Command.csproj|D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\ChuDe4\\chude4\\categoryform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{DDD47CBD-071C-4D49-BB51-CE9875E3A5A3}|ChuDe4\\Lab_Basic_Command.csproj|solutionrelative:chude4\\categoryform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
       "AbsoluteMoniker": "D:0:0:{DDD47CBD-071C-4D49-BB51-CE9875E3A5A3}|ChuDe4\\Lab_Basic_Command.csproj|d:\\university\\ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng desktop\\chude4\\chude4\\categoryform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{DDD47CBD-071C-4D49-BB51-CE9875E3A5A3}|ChuDe4\\Lab_Basic_Command.csproj|solutionrelative:chude4\\categoryform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DDD47CBD-071C-4D49-BB51-CE9875E3A5A3}|ChuDe4\\Lab_Basic_Command.csproj|D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\ChuDe4\\chude4\\categoryform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DDD47CBD-071C-4D49-BB51-CE9875E3A5A3}|ChuDe4\\Lab_Basic_Command.csproj|solutionrelative:chude4\\categoryform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,11 +22,24 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "CategoryForm.Designer.cs",
+              "DocumentMoniker": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\ChuDe4\\ChuDe4\\CategoryForm.Designer.cs",
+              "RelativeDocumentMoniker": "ChuDe4\\CategoryForm.Designer.cs",
+              "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\ChuDe4\\ChuDe4\\CategoryForm.Designer.cs",
+              "RelativeToolTip": "ChuDe4\\CategoryForm.Designer.cs",
+              "ViewState": "AgIAADkAAAAAAAAAAAAgwEIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T00:45:49.131Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -32,7 +49,7 @@
               "RelativeDocumentMoniker": "ChuDe4\\CategoryForm.cs",
               "ToolTip": "D:\\University\\Ph\u00E1t tri\u1EC3n \u1EE9ng d\u1EE5ng Desktop\\ChuDe4\\ChuDe4\\CategoryForm.cs",
               "RelativeToolTip": "ChuDe4\\CategoryForm.cs",
-              "ViewState": "AgIAAB8AAAAAAAAAAAAuwCQAAAAMAAAAAAAAAA==",
+              "ViewState": "AgIAAMQAAAAAAAAAAIAwwNMAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-10T17:26:29.411Z",
               "EditorCaption": ""
