@@ -1,0 +1,71 @@
+﻿using System;
+using System.Windows.Forms;
+using System.Data.SqlClient;
+using WindowsFormsApp2.Infrastructure;
+
+namespace WindowsFormsApp2
+{
+	public partial class frmDangNhap : Form
+	{
+		public frmDangNhap()
+		{
+			InitializeComponent();
+		}
+
+        private void container(object _form)
+        {
+            if (pnHienThi.Controls.Count > 0) pnHienThi.Controls.Clear();
+
+            Form fm = _form as Form;
+            fm.TopLevel = false;
+            fm.FormBorderStyle = FormBorderStyle.None;
+            fm.Dock = DockStyle.Fill;
+            pnHienThi.Controls.Add(fm);
+            pnHienThi.Tag = fm;
+            fm.Show();
+        }
+
+        private void lbLogin_Click(object sender, EventArgs e)
+        {
+        }
+
+        private void guna2TextBox2_TextChanged(object sender, EventArgs e)
+        {
+        }
+
+        private void btnDangNhap_Click(object sender, EventArgs e)
+        {
+            var user = txtTenTaiKhoan.Text.Trim();
+            var pass = txtMatKhau.Text;
+            using (var conn = Db.Open())
+            using (var cmd = new SqlCommand("USP_Login", conn))
+            {
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@TenTaiKhoan", user);
+                cmd.Parameters.AddWithValue("@password", pass);
+                using (var rd = cmd.ExecuteReader())
+                {
+                    if (rd.Read())
+                    {
+                        this.Hide();
+                        using (var main = new frmMain())
+                        {
+                            main.ShowDialog();
+                        }
+                        this.Close();
+                        return;
+                    }
+                }
+            }
+            MessageBox.Show("Sai thông tin đăng nhập", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private void btnQuenMatKhau_Click(object sender, EventArgs e)
+        {
+            frmQuenMatKhau frm = new frmQuenMatKhau(this);
+            this.Hide(); 
+            frm.Show(); 
+            frm.FormClosed += (s, args) => this.Show();
+        }
+    }
+}

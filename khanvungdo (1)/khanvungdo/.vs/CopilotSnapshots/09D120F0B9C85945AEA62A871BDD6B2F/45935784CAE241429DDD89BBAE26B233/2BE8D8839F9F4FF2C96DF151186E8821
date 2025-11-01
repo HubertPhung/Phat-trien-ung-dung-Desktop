@@ -1,0 +1,217 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Windows.Forms;
+using WindowsFormsApp2.Infrastructure;
+
+namespace WindowsFormsApp2
+{
+    public partial class frmKhachHang : Form
+    {
+        public frmKhachHang()
+        {
+            InitializeComponent();
+            Load += FrmKhachHang_Load;
+            btnThem.Click += BtnThem_Click;
+            btnSua.Click += BtnSua_Click;
+            btnXoa.Click += BtnXoa_Click;
+            btnTim.Click += BtnTim_Click;
+            lvKhachHang.SelectedIndexChanged += LvKhachHang_SelectedIndexChanged;
+        }
+
+        private void FrmKhachHang_Load(object sender, EventArgs e)
+        {
+            LoadKhachHang();
+        }
+
+        private void LoadKhachHang(string keyword = null, int? id = null)
+        {
+            lvKhachHang.Items.Clear();
+            string sql = @"SELECT id, TenKH, CMND_CCCD, DiaChi, SDT, LoaiKH, GhiChu FROM dbo.KhachHang
+                            WHERE (@kw IS NULL OR TenKH LIKE '%' + @kw + '%')
+                              AND (@id IS NULL OR id = @id)
+                            ORDER BY id DESC";
+            using (var conn = Db.Open())
+            using (var cmd = new SqlCommand(sql, conn))
+            {
+                cmd.Parameters.AddWithValue("@kw", (object)keyword ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@id", (object)id ?? DBNull.Value);
+                using (var rd = cmd.ExecuteReader())
+                {
+                    while (rd.Read())
+                    {
+                        var item = new ListViewItem(Convert.ToString(rd["id"]));
+                        item.SubItems.Add(rd["TenKH"].ToString());
+                        item.SubItems.Add(rd["CMND_CCCD"].ToString());
+                        item.SubItems.Add(rd["DiaChi"] == DBNull.Value ? "" : rd["DiaChi"].ToString());
+                        item.SubItems.Add(rd["SDT"] == DBNull.Value ? "" : rd["SDT"].ToString());
+                        item.SubItems.Add(rd["LoaiKH"].ToString());
+                        item.SubItems.Add(rd["GhiChu"] == DBNull.Value ? "" : rd["GhiChu"].ToString());
+                        lvKhachHang.Items.Add(item);
+                    }
+                }
+            }
+        }
+
+        private void LvKhachHang_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lvKhachHang.SelectedItems.Count == 0) return;
+            var it = lvKhachHang.SelectedItems[0];
+            txtMaKH.Text = it.SubItems[0].Text;
+            txtTenKH.Text = it.SubItems[1].Text;
+            mtxtCMND.Text = it.SubItems[2].Text;
+            txtDiaChiKH.Text = it.SubItems[3].Text;
+            mtxtSDTKH.Text = it.SubItems[4].Text;
+            // LoaiKH, GhiChu nếu cần thêm control để chỉnh
+        }
+
+        private void BtnTim_Click(object sender, EventArgs e)
+        {
+            int id;
+            if (int.TryParse(txtMaKH.Text.Trim(), out id))
+            {
+                LoadKhachHang(null, id);
+            }
+            else
+            {
+                var kw = string.IsNullOrWhiteSpace(txtTenKH.Text) ? null : txtTenKH.Text.Trim();
+                LoadKhachHang(kw, null);
+            }
+        }
+
+        private void BtnThem_Click(object sender, EventArgs e)
+        {
+            var ten = txtTenKH.Text.Trim();
+            var cmnd = mtxtCMND.Text.Replace("_", "").Trim();
+            var diachi = string.IsNullOrWhiteSpace(txtDiaChiKH.Text) ? (object)DBNull.Value : txtDiaChiKH.Text.Trim();
+            var sdt = string.IsNullOrWhiteSpace(mtxtSDTKH.Text) ? (object)DBNull.Value : mtxtSDTKH.Text.Trim();
+            var loaikh = "Khách lẻ"; // có thể thêm combobox nếu cần
+
+            if (string.IsNullOrWhiteSpace(ten) || string.IsNullOrWhiteSpace(cmnd))
+            {
+                MessageBox.Show("Nhập Tên và CMND/CCCD."); return;
+            }
+
+            using (var conn = Db.Open())
+            using (var cmd = new SqlCommand(@"INSERT dbo.KhachHang(TenKH, CMND_CCCD, DiaChi, SDT, LoaiKH)
+                                             VALUES(@Ten,@CMND,@DiaChi,@SDT,@Loai)", conn))
+            {
+                cmd.Parameters.AddWithValue("@Ten", ten);
+                cmd.Parameters.AddWithValue("@CMND", cmnd);
+                cmd.Parameters.AddWithValue("@DiaChi", diachi);
+                cmd.Parameters.AddWithValue("@SDT", sdt);
+                cmd.Parameters.AddWithValue("@Loai", loaikh);
+                try
+                {
+                    cmd.ExecuteNonQuery();
+                    MessageBox.Show("Đã thêm khách hàng.");
+                    ClearInputs();
+                    LoadKhachHang();
+                }
+                catch (SqlException ex)
+                {
+                    MessageBox.Show("Lỗi khi thêm: " + ex.Message);
+                }
+            }
+        }
+
+        private void BtnSua_Click(object sender, EventArgs e)
+        {
+            int id;
+            if (!int.TryParse(txtMaKH.Text.Trim(), out id))
+            {
+                MessageBox.Show("Nhập mã KH hợp lệ để sửa."); return;
+            }
+
+            var ten = txtTenKH.Text.Trim();
+            var cmnd = mtxtCMND.Text.Replace("_", "").Trim();
+            var diachi = string.IsNullOrWhiteSpace(txtDiaChiKH.Text) ? (object)DBNull.Value : txtDiaChiKH.Text.Trim();
+            var sdt = string.IsNullOrWhiteSpace(mtxtSDTKH.Text) ? (object)DBNull.Value : mtxtSDTKH.Text.Trim();
+            var loaikh = "Khách lẻ"; // hoặc lấy từ control nếu có
+
+            if (string.IsNullOrWhiteSpace(ten) || string.IsNullOrWhiteSpace(cmnd))
+            {
+                MessageBox.Show("Nhập Tên và CMND/CCCD."); return;
+            }
+
+            using (var conn = Db.Open())
+            using (var cmd = new SqlCommand(@"UPDATE dbo.KhachHang
+                                            SET TenKH=@Ten, CMND_CCCD=@CMND, DiaChi=@DiaChi, SDT=@SDT, LoaiKH=@Loai
+                                            WHERE id=@Id", conn))
+            {
+                cmd.Parameters.AddWithValue("@Id", id);
+                cmd.Parameters.AddWithValue("@Ten", ten);
+                cmd.Parameters.AddWithValue("@CMND", cmnd);
+                cmd.Parameters.AddWithValue("@DiaChi", diachi);
+                cmd.Parameters.AddWithValue("@SDT", sdt);
+                cmd.Parameters.AddWithValue("@Loai", loaikh);
+                try
+                {
+                    var rows = cmd.ExecuteNonQuery();
+                    if (rows == 0) { MessageBox.Show("Không tìm thấy KH để sửa."); return; }
+                    MessageBox.Show("Đã sửa khách hàng.");
+                    ClearInputs();
+                    LoadKhachHang();
+                }
+                catch (SqlException ex)
+                {
+                    MessageBox.Show("Lỗi khi sửa: " + ex.Message);
+                }
+            }
+        }
+
+        private void BtnXoa_Click(object sender, EventArgs e)
+        {
+            var ids = new List<int>();
+            foreach (ListViewItem it in lvKhachHang.Items)
+            {
+                if (it.Checked)
+                {
+                    int id; if (int.TryParse(it.SubItems[0].Text, out id)) ids.Add(id);
+                }
+            }
+            if (ids.Count == 0 && lvKhachHang.SelectedItems.Count > 0)
+            {
+                int id; if (int.TryParse(lvKhachHang.SelectedItems[0].SubItems[0].Text, out id)) ids.Add(id);
+            }
+            if (ids.Count == 0)
+            {
+                MessageBox.Show("Chọn ít nhất một KH để xóa."); return;
+            }
+
+            if (MessageBox.Show($"Xóa {ids.Count} khách hàng?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+                return;
+
+            using (var conn = Db.Open())
+            using (var cmd = new SqlCommand("DELETE dbo.KhachHang WHERE id=@Id", conn))
+            {
+                cmd.Parameters.Add("@Id", SqlDbType.Int);
+                try
+                {
+                    foreach (var id in ids)
+                    {
+                        cmd.Parameters["@Id"].Value = id;
+                        cmd.ExecuteNonQuery();
+                    }
+                    MessageBox.Show("Đã xóa.");
+                    LoadKhachHang();
+                }
+                catch (SqlException ex)
+                {
+                    MessageBox.Show("Lỗi khi xóa: " + ex.Message);
+                }
+            }
+        }
+
+        private void ClearInputs()
+        {
+            txtMaKH.Clear();
+            txtTenKH.Clear();
+            mtxtCMND.Clear();
+            txtDiaChiKH.Clear();
+            mtxtSDTKH.Clear();
+        }
+    }
+}

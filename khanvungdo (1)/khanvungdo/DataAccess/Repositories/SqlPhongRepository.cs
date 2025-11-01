@@ -1,0 +1,36 @@
+using System.Collections.Generic;
+using System.Data;
+using DataAccess.Db;
+
+namespace DataAccess.Repositories
+{
+    public class SqlPhongRepository
+    {
+        public IEnumerable<(int Id, string TenPhong, string Status, int? MaKH, string TenKH)> GetAll()
+        {
+            const string sql = @"SELECT p.id, p.TenPhong, p.status, p.MaKH, kh.TenKH
+                                   FROM dbo.Phong p
+                                   LEFT JOIN dbo.KhachHang kh ON kh.id = p.MaKH
+                                   ORDER BY p.id";
+            using (var conn = SqlConnectionFactory.Create())
+            using (var cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = sql;
+                cmd.CommandType = CommandType.Text;
+                conn.Open();
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var id = System.Convert.ToInt32(reader["id"]);
+                        var ten = reader["TenPhong"].ToString();
+                        var status = reader["status"].ToString();
+                        int? maKH = reader["MaKH"] == System.DBNull.Value ? (int?)null : System.Convert.ToInt32(reader["MaKH"]);
+                        var tenKH = reader["TenKH"] == System.DBNull.Value ? null : reader["TenKH"].ToString();
+                        yield return (id, ten, status, maKH, tenKH);
+                    }
+                }
+            }
+        }
+    }
+}

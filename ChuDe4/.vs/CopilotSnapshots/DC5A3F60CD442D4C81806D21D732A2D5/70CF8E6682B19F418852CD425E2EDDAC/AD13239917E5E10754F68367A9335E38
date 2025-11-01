@@ -1,0 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ChuDe4
+{
+    public class Role
+    {
+        public int RoleID { get; set; }
+        public string RoleName { get; set; }
+        public string Description { get; set; }
+        public string UserName { get; set; } // Liên kết với tài khoản
+        public bool IsActive { get; set; } // Trạng thái của vai trò gán cho tài khoản
+    }
+}

@@ -1,0 +1,27 @@
+﻿using System.Collections.Generic;
+using System.Linq;
+using BussinessLogic.Interfaces;
+using BussinessLogic.Models;
+
+namespace DataAccess.Repositories
+{
+    // Simple in-memory repository just to wire layers together
+    public class InMemoryRoomRepository : IRoomRepository
+    {
+        private readonly List<Room> _rooms = new List<Room>
+        {
+            new Room{ Number = "101", Type = "Standard", IsOccupied = false, PricePerNight = 500000 },
+            new Room{ Number = "102", Type = "Deluxe", IsOccupied = true, PricePerNight = 800000 },
+        };
+
+        public IEnumerable<Room> GetAll() => _rooms;
+
+        public Room GetByNumber(string number) => _rooms.FirstOrDefault(r => r.Number == number);
+
+        public void Update(Room room)
+        {
+            var idx = _rooms.FindIndex(r => r.Number == room.Number);
+            if (idx >= 0) _rooms[idx] = room;
+        }
+    }
+}

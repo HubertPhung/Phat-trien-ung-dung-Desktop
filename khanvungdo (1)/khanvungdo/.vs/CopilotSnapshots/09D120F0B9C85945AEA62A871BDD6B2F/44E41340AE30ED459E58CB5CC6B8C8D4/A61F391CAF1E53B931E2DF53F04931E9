@@ -1,0 +1,159 @@
+﻿using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
+using WindowsFormsApp2.Infrastructure;
+
+namespace WindowsFormsApp2
+{
+    public partial class frmDoanhThu : Form
+    {
+        public frmDoanhThu()
+        {
+            InitializeComponent();
+            btnXem.Click += BtnXem_Click;
+            btnIn.Click += BtnIn_Click;
+            dtpTuNgay.Value = DateTime.Today.AddDays(-7);
+            dtpDenNgay.Value = DateTime.Today;
+        }
+
+        private void BtnXem_Click(object sender, EventArgs e)
+        {
+            LoadDoanhThu();
+        }
+
+        private void LoadDoanhThu()
+        {
+            lvDoanhThu.Items.Clear();
+            chartDanhThu.Series.Clear();
+            var series = new Series("Doanh thu") { ChartType = SeriesChartType.Column };
+            chartDanhThu.Series.Add(series);
+
+            DateTime tu = dtpTuNgay.Value.Date;
+            DateTime den = dtpDenNgay.Value.Date.AddDays(1).AddTicks(-1);
+
+            // Lấy tổng quan hóa đơn theo khoảng thời gian
+            using (var conn = Db.Open())
+            using (var cmd = new SqlCommand(@"SELECT hd.id, p.TenPhong, hd.NgayLapHD, hd.NgayKetThucHD, hd.GiamGia, hd.TongTien, hd.ThanhTien
+                                             FROM dbo.HoaDon hd JOIN dbo.Phong p ON p.id = hd.MaPhong
+                                             WHERE hd.status = 1 AND hd.NgayLapHD >= @tu AND hd.NgayKetThucHD <= @den
+                                             ORDER BY hd.NgayLapHD", conn))
+            {
+                cmd.Parameters.AddWithValue("@tu", tu);
+                cmd.Parameters.AddWithValue("@den", den);
+                decimal tongDV = 0, tienGiam = 0, tongDoanhThu = 0; int tongSoDV = 0;
+                using (var rd = cmd.ExecuteReader())
+                {
+                    while (rd.Read())
+                    {
+                        var id = Convert.ToInt32(rd["id"]);
+                        var tenPhong = rd["TenPhong"].ToString();
+                        var giam = Convert.ToDecimal(rd["GiamGia"]);
+                        var tong = Convert.ToDecimal(rd["TongTien"]);
+                        var thanh = Convert.ToDecimal(rd["ThanhTien"]);
+                        tienGiam += tong - thanh;
+                        tongDV += tong;
+                        tongDoanhThu += thanh;
+                        series.Points.AddXY($"HD {id}", thanh);
+                    }
+                }
+
+                // Lấy chi tiết dịch vụ trong khoảng (gộp theo dịch vụ)
+                using (var cmd2 = new SqlCommand(@"SELECT dv.id AS MaDV, dv.TenDV, dv.DVT, SUM(ct.SoLuong) AS SoLuong, SUM(ct.ThanhTien) AS ThanhTien
+                                                  FROM dbo.HoaDon hd
+                                                  JOIN dbo.ChiTietHD ct ON ct.MaHD = hd.id
+                                                  JOIN dbo.DSDichVu dv ON dv.id = ct.MaDV
+                                                  WHERE hd.status = 1 AND hd.NgayLapHD >= @tu AND hd.NgayKetThucHD <= @den
+                                                  GROUP BY dv.id, dv.TenDV, dv.DVT
+                                                  ORDER BY dv.TenDV", conn))
+                {
+                    cmd2.Parameters.AddWithValue("@tu", tu);
+                    cmd2.Parameters.AddWithValue("@den", den);
+                    using (var rd2 = cmd2.ExecuteReader())
+                    {
+                        while (rd2.Read())
+                        {
+                            var item = new ListViewItem(Convert.ToString(rd2["MaDV"]));
+                            item.SubItems.Add(rd2["TenDV"].ToString());
+                            item.SubItems.Add(Convert.ToString(rd2["SoLuong"]));
+                            item.SubItems.Add(rd2["DVT"].ToString());
+                            item.SubItems.Add(string.Format("{0:N0}", rd2["ThanhTien"]));
+                            item.SubItems.Add("");
+                            lvDoanhThu.Items.Add(item);
+                            tongSoDV += Convert.ToInt32(rd2["SoLuong"]);
+                        }
+                    }
+                }
+
+                txtTongDichVu.Text = tongSoDV.ToString();
+                txtTongTienDichVu.Text = string.Format("{0:N0}", tongDV);
+                txtTienGiam.Text = string.Format("{0:N0}", tienGiam);
+                txtTongDoanhThu.Text = string.Format("{0:N0}", tongDoanhThu);
+            }
+        }
+
+        private void BtnIn_Click(object sender, EventArgs e)
+        {
+            // Xuất Excel bằng HTML table (mở tốt trong Excel), không cần thư viện ngoài
+            using (var sfd = new SaveFileDialog { Filter = "Excel Workbook (*.xls)|*.xls", FileName = "DoanhThu.xls" })
+            {
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        var html = BuildExcelHtml();
+                        var bytes = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(html)).ToArray();
+                        System.IO.File.WriteAllBytes(sfd.FileName, bytes);
+                        MessageBox.Show("Đã xuất Excel.");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Lỗi khi xuất: " + ex.Message);
+                    }
+                }
+            }
+        }
+
+        private string BuildExcelHtml()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body>");
+            sb.AppendLine($"<h2 style='text-align:center'>BÁO CÁO DOANH THU</h2>");
+            sb.AppendLine($"<div>Khoảng thời gian: {dtpTuNgay.Value:dd/MM/yyyy} - {dtpDenNgay.Value:dd/MM/yyyy}</div>");
+
+            // Bảng tổng hợp dịch vụ
+            sb.AppendLine("<table border='1' cellspacing='0' cellpadding='5'>");
+            sb.Append("<tr>");
+            foreach (ColumnHeader col in lvDoanhThu.Columns)
+                sb.Append($"<th>{System.Security.SecurityElement.Escape(col.Text)}</th>");
+            sb.AppendLine("</tr>");
+
+            foreach (ListViewItem it in lvDoanhThu.Items)
+            {
+                sb.Append("<tr>");
+                foreach (ListViewItem.ListViewSubItem sub in it.SubItems)
+                {
+                    var text = System.Security.SecurityElement.Escape(sub.Text);
+                    sb.Append($"<td>{text}</td>");
+                }
+                sb.AppendLine("</tr>");
+            }
+            sb.AppendLine("</table>");
+
+            // Thống kê
+            sb.AppendLine("<br/>");
+            sb.AppendLine("<table border='1' cellspacing='0' cellpadding='5'>");
+            sb.AppendLine($"<tr><td>Tổng dịch vụ</td><td>{txtTongDichVu.Text}</td></tr>");
+            sb.AppendLine($"<tr><td>Tổng tiền dịch vụ</td><td>{txtTongTienDichVu.Text}</td></tr>");
+            sb.AppendLine($"<tr><td>Tiền giảm</td><td>{txtTienGiam.Text}</td></tr>");
+            sb.AppendLine($"<tr><td>Tổng doanh thu</td><td>{txtTongDoanhThu.Text}</td></tr>");
+            sb.AppendLine("</table>");
+
+            sb.AppendLine("</body></html>");
+            return sb.ToString();
+        }
+    }
+}

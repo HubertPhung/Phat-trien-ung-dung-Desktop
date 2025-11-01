@@ -1,0 +1,14 @@
+using System;
+
+namespace BussinessLogic
+{
+    internal static class Program
+    {
+        [STAThread]
+        private static void Main()
+        {
+            // This project provides business logic types only.
+            // No startup UI here.
+        }
+    }
+}

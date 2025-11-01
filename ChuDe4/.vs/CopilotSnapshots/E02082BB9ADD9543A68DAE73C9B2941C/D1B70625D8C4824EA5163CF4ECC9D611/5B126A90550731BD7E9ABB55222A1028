@@ -1,0 +1,253 @@
+﻿using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace ChuDe4
+{
+ public class MainForm : Form
+ {
+ private FlowLayoutPanel pnlTables;
+ private Button btnAddTable;
+ private Button btnRefresh;
+ private string ConnectionString => "server=.; database=RestaurantManagement; Integrated Security=true;";
+
+ public MainForm()
+ {
+ InitializeComponent();
+ }
+
+ private void InitializeComponent()
+ {
+ this.Text = "Quản lý bàn";
+ this.Width =1000;
+ this.Height =700;
+ pnlTables = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoScroll = true };
+ var topPanel = new Panel { Dock = DockStyle.Top, Height =40 };
+ btnAddTable = new Button { Text = "Thêm bàn", Location = new Point(10,8) };
+ btnRefresh = new Button { Text = "Làm mới", Location = new Point(110,8) };
+ btnAddTable.Click += BtnAddTable_Click;
+ btnRefresh.Click += (s,e) => LoadTables();
+ topPanel.Controls.Add(btnAddTable);
+ topPanel.Controls.Add(btnRefresh);
+ this.Controls.Add(pnlTables);
+ this.Controls.Add(topPanel);
+ LoadTables();
+ }
+
+ private void LoadTables()
+ {
+ pnlTables.Controls.Clear();
+ using (var conn = new SqlConnection(ConnectionString))
+ using (var cmd = conn.CreateCommand())
+ {
+ cmd.CommandText = "SELECT ID, Name, IsActive FROM dbo.Tables ORDER BY ID";
+ var da = new SqlDataAdapter(cmd);
+ var dt = new DataTable();
+ da.Fill(dt);
+ foreach (DataRow r in dt.Rows)
+ {
+ var btn = new Button { Width =120, Height =80, Margin = new Padding(8) };
+ btn.Text = $"{r["Name"]}\n{(Convert.ToBoolean(r["IsActive"]) ? "Active" : "Inactive" )}";
+ int tableId = Convert.ToInt32(r["ID"]);
+ btn.ContextMenuStrip = BuildTableMenu(tableId);
+ btn.Click += (s,e) => ViewCurrentBill(tableId);
+ pnlTables.Controls.Add(btn);
+ }
+ }
+ }
+
+ private ContextMenuStrip BuildTableMenu(int tableId)
+ {
+ var ctx = new ContextMenuStrip();
+ var mnuEdit = new ToolStripMenuItem("Cập nhật thông tin bàn", null, (s,e) => EditTable(tableId));
+ var mnuDelete = new ToolStripMenuItem("Xóa bàn", null, (s,e) => DeleteTable(tableId));
+ var mnuBills = new ToolStripMenuItem("Xem danh mục hóa đơn", null, (s,e) => ShowTableBills(tableId));
+ var mnuBillLog = new ToolStripMenuItem("Xem nhật ký hóa đơn", null, (s,e) => ShowBillsForm());
+ ctx.Items.AddRange(new ToolStripItem[]{ mnuEdit, mnuDelete, mnuBills, mnuBillLog });
+ return ctx;
+ }
+
+ private void ViewCurrentBill(int tableId)
+ {
+ using (var conn = new SqlConnection(ConnectionString))
+ using (var cmd = conn.CreateCommand())
+ {
+ cmd.CommandText = @"SELECT TOP 1 b.ID
+FROM dbo.Bills b
+WHERE b.TableID = @t AND b.IsPaid =0
+ORDER BY b.CheckIn DESC";
+ cmd.Parameters.Add("@t", SqlDbType.Int).Value = tableId;
+ conn.Open();
+ var billIdObj = cmd.ExecuteScalar();
+ if (billIdObj == null)
+ {
+ MessageBox.Show("Không có hóa đơn hiện tại cho bàn này.");
+ }
+ else
+ {
+ int billId = Convert.ToInt32(billIdObj);
+ var f = new BillDetailsForm();
+ f.LoadDetails(billId);
+ f.Show(this);
+ }
+ }
+ }
+
+ private void EditTable(int tableId)
+ {
+ using (var conn = new SqlConnection(ConnectionString))
+ using (var cmd = conn.CreateCommand())
+ {
+ cmd.CommandText = "SELECT Name, IsActive FROM dbo.Tables WHERE ID=@id";
+ cmd.Parameters.Add("@id", SqlDbType.Int).Value = tableId;
+ conn.Open();
+ using (var rd = cmd.ExecuteReader())
+ {
+ if (!rd.Read()) return;
+ string name = rd.GetString(0);
+ bool isActive = rd.GetBoolean(1);
+ using (var dlg = new Form())
+ {
+ dlg.Text = $"Cập nhật bàn {tableId}";
+ dlg.Width =320; dlg.Height =180; dlg.FormBorderStyle = FormBorderStyle.FixedDialog; dlg.StartPosition = FormStartPosition.CenterParent; dlg.MaximizeBox = false; dlg.MinimizeBox = false;
+ var lblName = new Label { Text = "Tên bàn:", Location = new Point(10,15) };
+ var txtName = new TextBox { Location = new Point(80,12), Width =200, Text = name };
+ var chkActive = new CheckBox { Text = "Active", Location = new Point(80,45), Checked = isActive };
+ var btnOk = new Button { Text = "Lưu", DialogResult = DialogResult.OK, Location = new Point(120,80) };
+ var btnCancel = new Button { Text = "Hủy", DialogResult = DialogResult.Cancel, Location = new Point(200,80) };
+ dlg.Controls.AddRange(new Control[] { lblName, txtName, chkActive, btnOk, btnCancel });
+ dlg.AcceptButton = btnOk; dlg.CancelButton = btnCancel;
+ if (dlg.ShowDialog(this) == DialogResult.OK)
+ {
+ rd.Close();
+ using (var cmdU = conn.CreateCommand())
+ {
+ cmdU.CommandText = "UPDATE dbo.Tables SET Name=@n, IsActive=@a WHERE ID=@id";
+ cmdU.Parameters.Add("@n", SqlDbType.NVarChar,100).Value = txtName.Text?.Trim();
+ cmdU.Parameters.Add("@a", SqlDbType.Bit).Value = chkActive.Checked;
+ cmdU.Parameters.Add("@id", SqlDbType.Int).Value = tableId;
+ cmdU.ExecuteNonQuery();
+ }
+ LoadTables();
+ }
+ }
+ }
+ }
+ }
+
+ private void DeleteTable(int tableId)
+ {
+ if (MessageBox.Show("Xóa bàn này?", "Xác nhận", MessageBoxButtons.YesNo) != DialogResult.Yes) return;
+ using (var conn = new SqlConnection(ConnectionString))
+ using (var cmd = conn.CreateCommand())
+ {
+ cmd.CommandText = "DELETE FROM dbo.Tables WHERE ID=@id";
+ cmd.Parameters.Add("@id", SqlDbType.Int).Value = tableId;
+ conn.Open();
+ cmd.ExecuteNonQuery();
+ }
+ LoadTables();
+ }
+
+ private void ShowTableBills(int tableId)
+ {
+ using (var f = new Form())
+ {
+ f.Text = $"Hóa đơn của bàn {tableId}";
+ f.Width =900; f.Height =600;
+ var listBox = new ListBox { Dock = DockStyle.Left, Width =220 };
+ var grid = new DataGridView { Dock = DockStyle.Fill, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill };
+ listBox.SelectedIndexChanged += (s,e) =>
+ {
+ if (listBox.SelectedItem == null) return;
+ DateTime dt = (DateTime)listBox.SelectedItem;
+ LoadBillsByDate(tableId, dt.Date, grid);
+ };
+ f.Controls.Add(grid);
+ f.Controls.Add(listBox);
+ LoadBillDates(tableId, listBox);
+ f.ShowDialog(this);
+ }
+ }
+
+ private void LoadBillDates(int tableId, ListBox lb)
+ {
+ lb.Items.Clear();
+ using (var conn = new SqlConnection(ConnectionString))
+ using (var cmd = conn.CreateCommand())
+ {
+ cmd.CommandText = "SELECT DISTINCT CAST(CheckIn AS date) AS d FROM dbo.Bills WHERE TableID=@t ORDER BY d DESC";
+ cmd.Parameters.Add("@t", SqlDbType.Int).Value = tableId;
+ var da = new SqlDataAdapter(cmd);
+ var dt = new DataTable();
+ da.Fill(dt);
+ foreach (DataRow r in dt.Rows)
+ {
+ lb.Items.Add((DateTime)r[0]);
+ }
+ }
+ }
+
+ private void LoadBillsByDate(int tableId, DateTime date, DataGridView grid)
+ {
+ using (var conn = new SqlConnection(ConnectionString))
+ using (var cmd = conn.CreateCommand())
+ {
+ cmd.CommandText = @"SELECT b.ID AS BillID, b.CheckIn, b.CheckOut, b.DiscountPercent, b.IsPaid,
+ f.Name AS FoodName, d.Quantity, d.UnitPrice, (d.Quantity*d.UnitPrice) AS Amount
+ FROM dbo.Bills b
+ LEFT JOIN dbo.BillDetails d ON d.BillID=b.ID
+ LEFT JOIN dbo.Food f ON f.ID = d.FoodID
+ WHERE b.TableID=@t AND CAST(b.CheckIn AS date)=@d
+ ORDER BY b.CheckIn DESC, b.ID, f.Name";
+ cmd.Parameters.Add("@t", SqlDbType.Int).Value = tableId;
+ cmd.Parameters.Add("@d", SqlDbType.Date).Value = date.Date;
+ var da = new SqlDataAdapter(cmd);
+ var dt = new DataTable();
+ da.Fill(dt);
+ grid.DataSource = dt;
+ }
+ }
+
+ private void ShowBillsForm()
+ {
+ var f = new BillsForm();
+ f.Show(this);
+ }
+
+ private void BtnAddTable_Click(object sender, EventArgs e)
+ {
+ using (var dlg = new Form())
+ {
+ dlg.Text = "Thêm bàn";
+ dlg.Width =320; dlg.Height =170; dlg.FormBorderStyle = FormBorderStyle.FixedDialog; dlg.StartPosition = FormStartPosition.CenterParent; dlg.MaximizeBox = false; dlg.MinimizeBox = false;
+ var lbl = new Label { Text = "Tên bàn:", Location = new Point(10,15) };
+ var txt = new TextBox { Location = new Point(80,12), Width =200 };
+ var chkActive = new CheckBox { Text = "Active", Location = new Point(80,45), Checked = true };
+ var btnOk = new Button { Text = "OK", DialogResult = DialogResult.OK, Location = new Point(120,80) };
+ var btnCancel = new Button { Text = "Cancel", DialogResult = DialogResult.Cancel, Location = new Point(200,80) };
+ dlg.Controls.AddRange(new Control[] { lbl, txt, chkActive, btnOk, btnCancel });
+ dlg.AcceptButton = btnOk; dlg.CancelButton = btnCancel;
+ if (dlg.ShowDialog(this) == DialogResult.OK)
+ {
+ var name = txt.Text?.Trim();
+ if (!string.IsNullOrWhiteSpace(name))
+ {
+ using (var conn = new SqlConnection(ConnectionString))
+ using (var cmd = conn.CreateCommand())
+ {
+ cmd.CommandText = "INSERT INTO dbo.Tables(Name, IsActive) VALUES(@n,@a)";
+ cmd.Parameters.Add("@n", SqlDbType.NVarChar,100).Value = name;
+ cmd.Parameters.Add("@a", SqlDbType.Bit).Value = chkActive.Checked;
+ conn.Open();
+ cmd.ExecuteNonQuery();
+ }
+ LoadTables();
+ }
+ }
+ }
+ }
+ }
+}

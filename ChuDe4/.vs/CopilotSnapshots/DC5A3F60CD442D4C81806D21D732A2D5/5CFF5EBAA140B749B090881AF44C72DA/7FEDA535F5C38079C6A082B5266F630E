@@ -1,0 +1,55 @@
+﻿using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Windows.Forms;
+
+namespace ChuDe4
+{
+    public partial class BillLogForm : Form
+    {
+        private readonly DataAccess _db = new DataAccess();
+
+        public BillLogForm()
+        {
+            InitializeComponent();
+            this.Load += BillLogForm_Load;
+        }
+
+        private void BillLogForm_Load(object sender, EventArgs e)
+        {
+            LoadLog();
+        }
+
+        private void LoadLog()
+        {
+            string sql = @"SELECT b.ID,
+                            b.CheckIn AS [Ngày lập],
+                            b.CheckOut AS [Ngày thanh toán],
+                            b.TableID AS [Bàn],
+                            u.DisplayName AS [Nhân viên],
+                            ISNULL(SUM(d.Quantity*d.UnitPrice),0) AS [Tổng trước giảm],
+                            CAST(ISNULL(SUM(d.Quantity*d.UnitPrice),0)*(b.DiscountPercent/100.0) AS INT) AS [Tiền giảm],
+                            CAST(ISNULL(SUM(d.Quantity*d.UnitPrice),0)*(1-b.DiscountPercent/100.0) AS INT) AS [Thực thu]
+                            FROM Bills b
+                            LEFT JOIN BillDetails d ON d.BillID = b.ID
+                            LEFT JOIN Accounts u ON u.ID = b.StaffID
+                            GROUP BY b.ID, b.CheckIn, b.CheckOut, b.TableID, u.DisplayName, b.DiscountPercent
+                            ORDER BY b.CheckIn DESC";
+            var dt = _db.ExecuteQuery(sql);
+            dgvLog.DataSource = dt;
+            dgvLog.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            if (dgvLog.Columns.Contains("Tổng trước giảm")) dgvLog.Columns["Tổng trước giảm"].DefaultCellStyle.Format = "N0";
+            if (dgvLog.Columns.Contains("Tiền giảm")) dgvLog.Columns["Tiền giảm"].DefaultCellStyle.Format = "N0";
+            if (dgvLog.Columns.Contains("Thực thu")) dgvLog.Columns["Thực thu"].DefaultCellStyle.Format = "N0";
+            long c = dt.Rows.Count;
+            long sumSub=0, sumDis=0, sumAct=0;
+            foreach (DataRow r in dt.Rows)
+            {
+                sumSub += Convert.ToInt64(r["Tổng trước giảm"]);
+                sumDis += Convert.ToInt64(r["Tiền giảm"]);
+                sumAct += Convert.ToInt64(r["Thực thu"]);
+            }
+            lblTotals.Text = $"Số HĐ: {c} | Tổng tiền: {sumSub:N0} đ | Tổng giảm: {sumDis:N0} đ | Thực thu: {sumAct:N0} đ";
+        }
+    }
+}

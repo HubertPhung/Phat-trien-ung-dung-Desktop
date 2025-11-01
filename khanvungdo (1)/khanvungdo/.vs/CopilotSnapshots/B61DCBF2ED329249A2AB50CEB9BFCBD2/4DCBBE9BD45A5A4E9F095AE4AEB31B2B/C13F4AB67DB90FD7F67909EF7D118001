@@ -1,0 +1,19 @@
+﻿using System.Text.RegularExpressions;
+using System.Linq;
+
+namespace WindowsFormsApp2.Validation
+{
+    public static class Validators
+    {
+        public static bool IsValidVietnamPhone(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return false;
+            var digits = new string(input.Where(char.IsDigit).ToArray());
+            if (digits.Length == 10 || digits.Length == 11)
+            {
+                return digits.StartsWith("0");
+            }
+            return false;
+        }
+    }
+}

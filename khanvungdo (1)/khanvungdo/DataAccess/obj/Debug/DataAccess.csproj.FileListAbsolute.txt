@@ -1,0 +1,4 @@
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\DataAccess\obj\Debug\DataAccess.csproj.AssemblyReference.cache
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\DataAccess\obj\Debug\DataAccess.Properties.Resources.resources
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\DataAccess\obj\Debug\DataAccess.csproj.GenerateResource.cache
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\DataAccess\obj\Debug\DataAccess.csproj.CoreCompileInputs.cache

@@ -1,0 +1,240 @@
+﻿// AccountManager.cs
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Windows.Forms;
+
+namespace ChuDe4
+{
+    public partial class AccountManager : Form
+    {
+        private DataAccess db = new DataAccess();
+
+        public AccountManager()
+        {
+            InitializeComponent();
+
+            // Wire up events
+            this.Load += AccountManager_Load;
+            this.dgvAccounts.SelectionChanged += dgvAccounts_SelectionChanged;
+            this.btnAdd.Click += btnAdd_Click;
+            this.btnUpdate.Click += btnUpdate_Click;
+            this.btnResetPassword.Click += btnResetPassword_Click;
+            this.tsmDelete.Click += tsmDelete_Click;
+            this.tsmViewRoles.Click += tsmViewRoles_Click;
+        }
+
+        private void AccountManager_Load(object sender, EventArgs e)
+        {
+            LoadFilterComboBoxes();
+            LoadAccounts();
+        }
+
+        private void LoadFilterComboBoxes()
+        {
+            // Load Account Groups
+            cboAccountGroup.Items.Add("Tất cả");
+            string query = "SELECT DISTINCT [Group] FROM Accounts WHERE [Group] IS NOT NULL";
+            DataTable groupTable = db.ExecuteQuery(query);
+            foreach (DataRow row in groupTable.Rows)
+            {
+                cboAccountGroup.Items.Add(row["Group"].ToString());
+            }
+            cboAccountGroup.SelectedIndex = 0;
+
+            // Load Status
+            cboStatus.Items.Add("Ngưng hoạt động"); // value = 0
+            cboStatus.Items.Add("Hoạt động"); // value = 1
+            cboStatus.Items.Add("Tất cả"); // value = 2
+            cboStatus.SelectedIndex = 1;
+
+            // Tự động tải lại khi thay đổi lựa chọn
+            cboAccountGroup.SelectedIndexChanged += (s, ev) => LoadAccounts();
+            cboStatus.SelectedIndexChanged += (s, ev) => LoadAccounts();
+        }
+
+        private void LoadAccounts()
+        {
+            string query = "SELECT ID, UserName, DisplayName, [Group], IsActive FROM Accounts WHERE 1=1";
+            var parameters = new System.Collections.Generic.List<SqlParameter>();
+
+            if (cboAccountGroup.SelectedIndex > 0)
+            {
+                query += " AND [Group] = @Group";
+                parameters.Add(new SqlParameter("@Group", cboAccountGroup.SelectedItem.ToString()));
+            }
+
+            if (cboStatus.SelectedIndex != 2)
+            {
+                query += " AND IsActive = @IsActive";
+                parameters.Add(new SqlParameter("@IsActive", cboStatus.SelectedIndex));
+            }
+
+            dgvAccounts.DataSource = db.ExecuteQuery(query, parameters.ToArray());
+            if (dgvAccounts.Columns.Contains("ID")) dgvAccounts.Columns["ID"].Visible = false; //Ẩn cột ID
+            if (dgvAccounts.Columns.Contains("UserName")) dgvAccounts.Columns["UserName"].HeaderText = "Tên đăng nhập";
+            if (dgvAccounts.Columns.Contains("DisplayName")) dgvAccounts.Columns["DisplayName"].HeaderText = "Tên hiển thị";
+            if (dgvAccounts.Columns.Contains("Group")) dgvAccounts.Columns["Group"].HeaderText = "Nhóm";
+            if (dgvAccounts.Columns.Contains("IsActive")) dgvAccounts.Columns["IsActive"].HeaderText = "Kích hoạt";
+            dgvAccounts.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            // Tránh tự động chọn dòng đầu tiên
+            dgvAccounts.ClearSelection();
+        }
+
+        private void dgvAccounts_SelectionChanged(object sender, EventArgs e)
+        {
+            if (dgvAccounts.SelectedRows.Count > 0)
+            {
+                var row = dgvAccounts.SelectedRows[0];
+                txtUsername.Text = row.Cells["UserName"].Value.ToString();
+                txtFullName.Text = row.Cells["DisplayName"].Value.ToString();
+                // Lấy thêm các trường khác nếu có trên form (email, tel)
+                var isActiveVal = row.Cells["IsActive"].Value;
+                bool isActive = false;
+                if (isActiveVal is bool) isActive = (bool)isActiveVal;
+                else if (isActiveVal != null) bool.TryParse(isActiveVal.ToString(), out isActive);
+                chkActive.Checked = isActive;
+
+                txtUsername.Enabled = false; // Không cho sửa tên đăng nhập (khóa chính logic)
+                btnAdd.Enabled = false;
+                btnUpdate.Enabled = true;
+            }
+            else
+            {
+                ClearForm();
+            }
+        }
+
+        private void ClearForm()
+        {
+            txtUsername.Text = "";
+            txtFullName.Text = "";
+            chkActive.Checked = false;
+            txtUsername.Enabled = true;
+            btnAdd.Enabled = true;
+            btnUpdate.Enabled = false;
+            dgvAccounts.ClearSelection();
+        }
+
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtUsername.Text))
+            {
+                MessageBox.Show("Tên đăng nhập không được để trống.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Mật khẩu mặc định
+            string defaultPassword = "123"; // TODO: Nên mã hóa mật khẩu này
+
+            string query = "INSERT INTO Accounts (UserName, DisplayName, Password, [Group], IsActive) VALUES (@UserName, @DisplayName, @Password, @Group, @IsActive)";
+            SqlParameter[] parameters = {
+                new SqlParameter("@UserName", txtUsername.Text),
+                new SqlParameter("@DisplayName", txtFullName.Text),
+                new SqlParameter("@Password", defaultPassword),
+                new SqlParameter("@Group", "Staff"), // Mặc định là Staff
+                new SqlParameter("@IsActive", chkActive.Checked)
+            };
+
+            try
+            {
+                if (db.ExecuteNonQuery(query, parameters) > 0)
+                {
+                    MessageBox.Show("Thêm tài khoản thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    LoadAccounts();
+                    ClearForm();
+                }
+            }
+            catch (SqlException ex) when (ex.Number == 2627) // Lỗi UNIQUE constraint
+            {
+                MessageBox.Show("Tên đăng nhập đã tồn tại. Vui lòng chọn tên khác.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Đã xảy ra lỗi: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+            if (dgvAccounts.SelectedRows.Count == 0) return;
+
+            int accountId = (int)dgvAccounts.SelectedRows[0].Cells["ID"].Value;
+
+            string query = "UPDATE Accounts SET DisplayName = @DisplayName, IsActive = @IsActive WHERE ID = @ID";
+            SqlParameter[] parameters = {
+                new SqlParameter("@DisplayName", txtFullName.Text),
+                new SqlParameter("@IsActive", chkActive.Checked),
+                new SqlParameter("@ID", accountId)
+            };
+
+            if (db.ExecuteNonQuery(query, parameters) > 0)
+            {
+                MessageBox.Show("Cập nhật thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LoadAccounts();
+            }
+        }
+
+        private void btnResetPassword_Click(object sender, EventArgs e)
+        {
+            if (dgvAccounts.SelectedRows.Count == 0) return;
+
+            var row = dgvAccounts.SelectedRows[0];
+            int accountId = (int)row.Cells["ID"].Value;
+            string username = row.Cells["UserName"].Value.ToString();
+            string defaultPassword = "123"; // TODO: Mã hóa mật khẩu
+
+            if (MessageBox.Show($"Bạn có chắc muốn đặt lại mật khẩu cho '{username}'?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                string query = "UPDATE Accounts SET Password = @Password WHERE ID = @ID";
+                SqlParameter[] parameters = {
+                    new SqlParameter("@Password", defaultPassword),
+                    new SqlParameter("@ID", accountId)
+                };
+
+                if (db.ExecuteNonQuery(query, parameters) > 0)
+                {
+                    MessageBox.Show($"Mật khẩu của '{username}' đã được đặt lại thành '{defaultPassword}'.", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+        }
+
+        // --- Context Menu Events ---
+
+        private void tsmDelete_Click(object sender, EventArgs e)
+        {
+            if (dgvAccounts.SelectedRows.Count == 0) return;
+
+            int accountId = (int)dgvAccounts.SelectedRows[0].Cells["ID"].Value;
+            string username = dgvAccounts.SelectedRows[0].Cells["UserName"].Value.ToString();
+
+            if (MessageBox.Show($"Thao tác này sẽ ngưng kích hoạt toàn bộ vai trò của tài khoản '{username}'. Bạn có chắc chắn?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+            {
+                // Theo yêu cầu: chỉ đánh dấu không kích hoạt vai trò
+                string query = "UPDATE AccountRoles SET IsActive = 0 WHERE AccountID = @AccountID";
+                SqlParameter[] parameters = { new SqlParameter("@AccountID", accountId) };
+
+                int rowsAffected = db.ExecuteNonQuery(query, parameters);
+                MessageBox.Show($"Đã ngưng kích hoạt {rowsAffected} vai trò của tài khoản '{username}'.", "Hoàn tất", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                // Optional: ngưng kích hoạt luôn tài khoản
+                // string queryAcc = "UPDATE Accounts SET IsActive =0 WHERE ID = @ID";
+                // db.ExecuteNonQuery(queryAcc, new SqlParameter[] { new SqlParameter("@ID", accountId) });
+                // LoadAccounts();
+            }
+        }
+
+        private void tsmViewRoles_Click(object sender, EventArgs e)
+        {
+            if (dgvAccounts.SelectedRows.Count > 0)
+            {
+                int accountId = (int)dgvAccounts.SelectedRows[0].Cells["ID"].Value;
+                string username = dgvAccounts.SelectedRows[0].Cells["UserName"].Value.ToString();
+
+                var rolesForm = new AccountRolesForm(accountId, username);
+                rolesForm.ShowDialog();
+            }
+        }
+    }
+}}

@@ -1,341 +1,411 @@
-﻿CREATE DATABASE QuanLyDVKS
-go
-use QuanLyDVKS
-go
-
-create table KhachHang
-(id INT IDENTITY PRIMARY KEY,
-TenKH nvarchar(50) not null,
-CMND_CCCD nvarchar(12) not null,
-DiaChi  nvarchar(100),
-SDT  nvarchar(100),
-LoaiKH nvarchar(20) not null,
-GhiChu nvarchar(100) ) 
-go
-
-create table Phong
-(id INT IDENTITY PRIMARY KEY,
-TenPhong nvarchar(50),
-MaKH int references KhachHang (ID),
-GhiChu nvarchar(100) ,
-status NVARCHAR(100) NOT NULL DEFAULT N'Trống')
-
-go
-create table HoaDon
-(id INT IDENTITY PRIMARY KEY,
-NgayLapHD DateTime NOT NULL DEFAULT GETDATE(),
-NgayKetThucHD DateTime ,
-MaPhong int references Phong (id),
-TongTien float DEFAULT 0 ,
-GiamGia float DEFAULT 0,
-ThanhTien float DEFAULT 0,
-status INT NOT NULL DEFAULT 0,-- 1: đã thanh toán && 0: chưa thanh toán
-) 
-go
-
-CREATE TABLE LoaiDichVu
-(
-	id INT IDENTITY PRIMARY KEY,
-	name NVARCHAR(100) NOT NULL DEFAULT N'Chưa đặt tên'
-)
+﻿/* Tạo mới DB */
+IF DB_ID(N'QuanLyDVKS') IS NOT NULL
+BEGIN
+    ALTER DATABASE QuanLyDVKS SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE QuanLyDVKS;
+END
+GO
+CREATE DATABASE QuanLyDVKS;
+GO
+USE QuanLyDVKS;
 GO
 
-create table DSDichVu
+/* Bảng KhachHang */
+CREATE TABLE dbo.KhachHang
 (
-id INT IDENTITY PRIMARY KEY,
-TenDV nvarchar(70) not null,
-idLoaiDichVu INT references LoaiDichVu (id),
-DonGia float not null,
-DVT nvarchar(20)not null,
-LuuY nvarchar(100)
-)
-go
-
-create table ChiTietHD
-(
-id INT IDENTITY PRIMARY KEY,
-MaHD int references HoaDon(id),
-MaDV int references DSDichVu(id),
-SoLuong int ,
-ThanhTien float ,
-GhiChu nvarchar(100),
-)
-go
-
- create table DoanhThu
-(id INT IDENTITY PRIMARY KEY,
-MaHD int references HoaDon(id),
-TenDV nvarchar(70) not null,
-SoLuong int not null,
-DVT nvarchar(20)not null,
-ThanhTien float not null,
-)
-go 
-create table TaiKhoan
-(
-MaTaiKhoan char(6) primary key,
-TenTaiKhoan nvarchar(70) not null,
-PassWord NVARCHAR(1000) NOT NULL,
-Type INT NOT NULL DEFAULT 0	-- 1: admin && 0: staff
-)
-go
-
-INSERT INTO dbo.TaiKhoan (MaTaiKhoan, TenTaiKhoan, PassWord, Type)
-VALUES 
-	(N'dttdiep', N'TIEU DIEP', N'123', 1),
-	(N'datanh', N'THUY ANH', N'123', 1),
-	(N'pttquyen', N'THAO QUYEN', N'123', 0),
-	(N'btthuy', N'THI THUY', N'123', 0)
-SELECT * FROM dbo.TaiKhoan
+    id            INT IDENTITY(1,1) PRIMARY KEY,
+    TenKH         NVARCHAR(50)  NOT NULL,
+    CMND_CCCD     NVARCHAR(12)  NOT NULL UNIQUE,
+    DiaChi        NVARCHAR(100) NULL,
+    SDT           NVARCHAR(20)  NULL,
+    LoaiKH        NVARCHAR(20)  NOT NULL,
+    GhiChu        NVARCHAR(100) NULL
+);
 GO
 
-CREATE PROC USP_DangNhap
-@TenTaiKhoan NVARCHAR(100)
+/* Bảng Phong */
+CREATE TABLE dbo.Phong
+(
+    id       INT IDENTITY(1,1) PRIMARY KEY,
+    TenPhong NVARCHAR(50)  NOT NULL UNIQUE,
+    MaKH     INT           NULL
+        CONSTRAINT FK_Phong_KhachHang
+        REFERENCES dbo.KhachHang(id) ON DELETE SET NULL,
+    GhiChu   NVARCHAR(100) NULL,
+    status   NVARCHAR(20)  NOT NULL DEFAULT N'Trống'
+);
+GO
+
+/* Bảng HoaDon (tiền dùng decimal) */
+CREATE TABLE dbo.HoaDon
+(
+    id              INT IDENTITY(1,1) PRIMARY KEY,
+    NgayLapHD       DATETIME       NOT NULL DEFAULT GETDATE(),
+    NgayKetThucHD   DATETIME       NULL,
+    MaPhong         INT            NOT NULL
+        CONSTRAINT FK_HoaDon_Phong
+        REFERENCES dbo.Phong(id),
+    TongTien        DECIMAL(18,2)  NOT NULL DEFAULT(0),
+    GiamGia         DECIMAL(5,2)   NOT NULL DEFAULT(0),   -- %
+    -- ThanhTien tính từ TongTien và GiamGia
+    ThanhTien AS (CONVERT(DECIMAL(18,2), CASE WHEN GiamGia >= 0
+                     THEN (TongTien * (1 - (GiamGia/100.0)))
+                     ELSE TongTien END)) PERSISTED,
+    status          TINYINT        NOT NULL DEFAULT(0)    -- 1: đã TT, 0: chưa TT
+);
+GO
+
+/* Loại dịch vụ */
+CREATE TABLE dbo.LoaiDichVu
+(
+    id   INT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(100) NOT NULL UNIQUE
+);
+GO
+
+/* Danh sách dịch vụ */
+CREATE TABLE dbo.DSDichVu
+(
+    id            INT IDENTITY(1,1) PRIMARY KEY,
+    TenDV         NVARCHAR(70)  NOT NULL,
+    idLoaiDichVu  INT           NOT NULL
+        CONSTRAINT FK_DSDichVu_Loai
+        REFERENCES dbo.LoaiDichVu(id),
+    DonGia        DECIMAL(18,2) NOT NULL,
+    DVT           NVARCHAR(20)  NOT NULL,
+    LuuY          NVARCHAR(100) NULL,
+    CONSTRAINT UQ_DSDichVu UNIQUE(TenDV, idLoaiDichVu)
+);
+GO
+
+/* Chi tiết hóa đơn: lưu đơn giá snapshot, TT là cột tính */
+CREATE TABLE dbo.ChiTietHD
+(
+    id        INT IDENTITY(1,1) PRIMARY KEY,
+    MaHD      INT           NOT NULL
+        CONSTRAINT FK_CTHD_HD
+        REFERENCES dbo.HoaDon(id) ON DELETE CASCADE,
+    MaDV      INT           NOT NULL
+        CONSTRAINT FK_CTHD_DV
+        REFERENCES dbo.DSDichVu(id),
+    SoLuong   INT           NOT NULL DEFAULT(1) CHECK (SoLuong > 0),
+    DonGia    DECIMAL(18,2) NOT NULL, -- snapshot tại thời điểm thêm
+    ThanhTien AS (CONVERT(DECIMAL(18,2), SoLuong * DonGia)) PERSISTED,
+    GhiChu    NVARCHAR(100) NULL,
+    CONSTRAINT UQ_CTHD UNIQUE(MaHD, MaDV)
+);
+GO
+
+/* Bảng tài khoản (đơn giản, demo – khuyến nghị hash/salt trong thực tế) */
+CREATE TABLE dbo.TaiKhoan
+(
+    MaTaiKhoan  NVARCHAR(20)  PRIMARY KEY,     -- mã đăng nhập
+    TenTaiKhoan NVARCHAR(70)  NOT NULL UNIQUE, -- tên hiển thị/đăng nhập
+    PassWord    NVARCHAR(256) NOT NULL,        -- demo: plaintext
+    [Type]      TINYINT       NOT NULL DEFAULT(0)   -- 1: admin, 0: staff
+);
+GO
+
+/* Seed dữ liệu tối thiểu để FK không lỗi */
+INSERT dbo.KhachHang(TenKH, CMND_CCCD, DiaChi, SDT, LoaiKH, GhiChu)
+VALUES (N'Nguyễn Văn A', N'012345678901', N'Hà Nội', N'0912345678', N'Khách lẻ', NULL),
+       (N'Trần Thị B',   N'012345678902', N'HCM',    N'0912345679', N'Khách đoàn', NULL);
+
+INSERT dbo.Phong(TenPhong, MaKH, GhiChu, status)
+VALUES (N'Phòng 101', 1, NULL, N'Trống'),
+       (N'Phòng 102', 2, NULL, N'Trống');
+GO
+
+INSERT dbo.TaiKhoan (MaTaiKhoan, TenTaiKhoan, PassWord, [Type])
+VALUES (N'dttdiep',  N'TIEU DIEP',  N'123', 1),
+       (N'datanh',   N'THUY ANH',   N'123', 1),
+       (N'pttquyen', N'THAO QUYEN', N'123', 0),
+       (N'btthuy',   N'THI THUY',   N'123', 0),
+	   (N'admin',   N'ADMIN',   N'123456789', 1);
+GO
+
+/* Thủ tục đăng nhập (demo) */
+IF OBJECT_ID('dbo.USP_DangNhap') IS NOT NULL DROP PROC dbo.USP_DangNhap;
+GO
+CREATE PROC dbo.USP_DangNhap
+    @TenTaiKhoan NVARCHAR(100)
 AS
 BEGIN
-	SELECT * FROM dbo.TaiKhoan WHERE TenTaiKhoan = @TenTaiKhoan
+    SET NOCOUNT ON;
+    SELECT * FROM dbo.TaiKhoan WHERE TenTaiKhoan = @TenTaiKhoan;
 END
 GO
 
-EXEC USP_DangNhap @TenTaiKhoan = N'THUY ANH'
+IF OBJECT_ID('dbo.USP_Login') IS NOT NULL DROP PROC dbo.USP_Login;
 GO
-
-CREATE PROC USP_Login
-@TenTaiKhoan NVARCHAR(100),
-@password NVARCHAR(100)
+CREATE PROC dbo.USP_Login
+    @TenTaiKhoan NVARCHAR(100),
+    @password    NVARCHAR(100)
 AS
 BEGIN
-	SELECT * FROM dbo.TaiKhoan WHERE TenTaiKhoan = @TenTaiKhoan AND PassWord = @password
+    SET NOCOUNT ON;
+    SELECT * FROM dbo.TaiKhoan WHERE TenTaiKhoan = @TenTaiKhoan AND PassWord = @password;
 END
 GO
 
-EXEC USP_Login @TenTaiKhoan = N'THUY ANH', @password = N'123'
-
-SELECT * FROM Phong
+/* View/Proc tiện ích */
+IF OBJECT_ID('dbo.USP_XemPhong') IS NOT NULL DROP PROC dbo.USP_XemPhong;
+GO
+CREATE PROC dbo.USP_XemPhong
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT * FROM dbo.Phong;
+END
 GO
 
-CREATE PROC USP_XemPhong
-AS SELECT * FROM Phong
-GO
+/* Seed loại và dịch vụ */
+INSERT dbo.LoaiDichVu(name)
+VALUES (N'Ăn uống'), (N'Đi lại'), (N'Giặt là'), (N'Spa'), (N'Giải trí');
 
-EXEC USP_XemPhong
-GO
-
-INSERT LoaiDichVu(name) 
+INSERT dbo.DSDichVu(TenDV, idLoaiDichVu, DonGia, DVT, LuuY)
 VALUES
-	(N'Ăn uống'),
-	(N'Đi lại'),
-	(N'Giặt là'),
-	(N'Spa'),
-	(N'GiaiTri')
-
-INSERT DSDichVu(TenDV, idLoaiDichVu, DonGia,DVT,LuuY)
-VALUES
-	(N'Nhà hàng', 1, 30000,N'Lan',null),
-	(N'Quầy bar ', 1, 20000,N'Lan',null),
-	(N'Massage - bấm huyệt', 2, 120000,N'Lan',null),
-	(N'Chăm sóc da mặt', 2, 50000,N'Lan',null),
-	(N'Tắm trắng- tắm dưỡng', 2, 10000,N'Lan',null),
-	(N'Xông hơi', 2, 10000,N'Lan',null),
-	(N'Đưa đón sân bay', 3, 10000,N'Lan',null),
-	(N'Thuê xe tự lái', 3, 10000,N'Lan',null),
-	(N'Giặt khô', 4, 10000,N'Cai',null),
-	(N'Giặt ướt', 4, 10000,N'Cai',null),
-	(N'Sân golf và tennis', 3, 90000,N'Ngay',null),
-	(N'Phòng thể hình', 3, 70000,N'Ngay',null),
-	(N'Khu vui chơi phức hợp', 4, 70000,N'Ngay',null),
-	(N'Phòng karaoke', 4, 90000,N'Ngay',null)
-
-INSERT HoaDon(NgayLapHD, NgayKetThucHD, MaPhong, TongTien,GiamGia,ThanhTien,status)
-VALUES 
-	(GETDATE(), NULL, 1, 0),
-	(GETDATE(), NULL, 2, 0),
-	(GETDATE(), GETDATE(), 2, 1)
-
-
-
-INSERT ChiTietHD(MaHD, MaDV, SoLuong,ThanhTien,GhiChu)
-VALUES 
-	(1, 1, 2),
-	(2, 3, 4),
-	(3, 5, 1),
-	(4, 1, 2),
-	(5, 5, 3),
-	(6, 1, 2),
-	(7, 5, 1)
-
-SELECT * FROM HoaDon
-SELECT * FROM ChiTietHD
-SELECT * FROM DSDichVu
-SELECT * FROM LoaiDichVu
+    (N'Nhà hàng',               1, 30000, N'Lần',  NULL),
+    (N'Quầy bar',               1, 20000, N'Lần',  NULL),
+    (N'Massage - bấm huyệt',    4, 120000, N'Lần', NULL),
+    (N'Chăm sóc da mặt',        4, 50000,  N'Lần', NULL),
+    (N'Tắm trắng - tắm dưỡng',  4, 10000,  N'Lần', NULL),
+    (N'Xông hơi',               4, 10000,  N'Lần', NULL),
+    (N'Đưa đón sân bay',        2, 100000, N'Chuyến', NULL),
+    (N'Thuê xe tự lái',         2, 100000, N'Ngày',   NULL),
+    (N'Giặt khô',               3, 10000,  N'Cái',  NULL),
+    (N'Giặt ướt',               3, 10000,  N'Cái',  NULL),
+    (N'Sân golf và tennis',     5, 90000,  N'Ngày', NULL),
+    (N'Phòng thể hình',         5, 70000,  N'Ngày', NULL),
+    (N'Khu vui chơi phức hợp',  5, 70000,  N'Ngày', NULL),
+    (N'Phòng karaoke',          5, 90000,  N'Giờ',  NULL);
 GO
 
-CREATE PROC USP_XuatHoaDonTheoPhong
-@phongID INT
+/* Tạo hóa đơn (chưa thanh toán) đúng cột */
+INSERT dbo.HoaDon(NgayLapHD, NgayKetThucHD, MaPhong, TongTien, GiamGia, status)
+VALUES (GETDATE(), NULL, 1, 0, 0, 0),
+       (GETDATE(), NULL, 2, 0, 0, 0);
+GO
+
+/* Proc xuất dữ liệu hóa đơn/phòng */
+IF OBJECT_ID('dbo.USP_XuatHoaDonTheoPhong') IS NOT NULL DROP PROC dbo.USP_XuatHoaDonTheoPhong;
+GO
+CREATE PROC dbo.USP_XuatHoaDonTheoPhong
+    @phongID INT
 AS
 BEGIN
-	SELECT * FROM HoaDon WHERE MaPhong = @phongID AND status = 0
+    SET NOCOUNT ON;
+    SELECT TOP 1 * FROM dbo.HoaDon WHERE MaPhong = @phongID AND status = 0 ORDER BY id DESC;
 END
 GO
 
-EXEC USP_XuatHoaDonTheoPhong 1
+IF OBJECT_ID('dbo.USP_XuatChiTietHD_HoaDon') IS NOT NULL DROP PROC dbo.USP_XuatChiTietHD_HoaDon;
 GO
-
-CREATE PROC USP_XuatChiTietHD_HoaDon
-@billID INT
+CREATE PROC dbo.USP_XuatChiTietHD_HoaDon
+    @billID INT
 AS
 BEGIN
-	SELECT * FROM ChiTietHD WHERE MaHD = @billID
+    SET NOCOUNT ON;
+    SELECT cthd.*, dv.TenDV, dv.DVT
+    FROM dbo.ChiTietHD cthd
+    JOIN dbo.DSDichVu dv ON dv.id = cthd.MaDV
+    WHERE cthd.MaHD = @billID;
 END
 GO
 
-EXEC USP_XuatChiTietHD_HoaDon 2
+IF OBJECT_ID('dbo.USP_XuatDS_IDHoaDon') IS NOT NULL DROP PROC dbo.USP_XuatDS_IDHoaDon;
 GO
-
-CREATE PROC USP_XuatDS_IDHoaDon
-@billID INT
+CREATE PROC dbo.USP_XuatDS_IDHoaDon
+    @billID INT
 AS
 BEGIN
-	SELECT DSDichVu.TenDV ,DonGia ,DVT ,ChiTietHD.SoLuong 
-	From DSDichVu, ChiTietHD,HoaDon
-	WHERE ChiTietHD.MaHD = @billID and ChiTietHD.MaHD = HoaDon.id and ChiTietHD.MaDV = DSDichVu.id
+    SET NOCOUNT ON;
+    SELECT dv.TenDV, cthd.DonGia, dv.DVT, cthd.SoLuong, cthd.ThanhTien
+    FROM dbo.ChiTietHD cthd
+    JOIN dbo.DSDichVu dv ON dv.id = cthd.MaDV
+    WHERE cthd.MaHD = @billID;
 END
 GO
 
-EXEC USP_XuatDS_IDHoaDon 2
+IF OBJECT_ID('dbo.USP_XuatLoaiDichVu') IS NOT NULL DROP PROC dbo.USP_XuatLoaiDichVu;
 GO
-
-CREATE PROC USP_XuatLoaiDichVu
-AS SELECT * FROM LoaiDichVu
-GO
-
-EXEC USP_XuatLoaiDichVu
-GO
-
-CREATE PROC USP_XuatDichVuTheoLoai
-@ID INT
+CREATE PROC dbo.USP_XuatLoaiDichVu
 AS
 BEGIN
-	SELECT * FROM DSDichVu WHERE DSDichVu.idLoaiDichVu = @ID
+    SET NOCOUNT ON;
+    SELECT * FROM dbo.LoaiDichVu;
 END
 GO
 
-EXEC USP_XuatDichVuTheoLoai 3
+IF OBJECT_ID('dbo.USP_XuatDichVuTheoLoai') IS NOT NULL DROP PROC dbo.USP_XuatDichVuTheoLoai;
 GO
-
-CREATE PROC USP_ThemHoaDon
-@idPhong INT
+CREATE PROC dbo.USP_XuatDichVuTheoLoai
+    @ID INT
 AS
 BEGIN
-	IF (NOT EXISTS(SELECT * FROM HoaDon WHERE MaPhong = @idPhong AND status = 0))
-	BEGIN
-		INSERT HoaDon(NgayLapHD, NgayKetThucHD, MaPhong,TongTien,GiamGia,ThanhTien, status)
-		VALUES (GETDATE(), NULL, @idPhong, 0, 0,0,0)
-	END
+    SET NOCOUNT ON;
+    SELECT * FROM dbo.DSDichVu WHERE idLoaiDichVu = @ID;
 END
 GO
 
-EXEC USP_ThemHoaDon 1
+/* Thêm hóa đơn nếu phòng chưa có hóa đơn mở */
+IF OBJECT_ID('dbo.USP_ThemHoaDon') IS NOT NULL DROP PROC dbo.USP_ThemHoaDon;
 GO
---Them chi tiết hóa đơn
-CREATE PROC USP_InsertChiTietHD
-@idHoaDon INT, @idDichVu INT, @soluong INT, @thanhtien float, @ghichu nvarchar(100)
+CREATE PROC dbo.USP_ThemHoaDon
+    @idPhong INT
 AS
 BEGIN
-	DECLARE @ChiTietHD INT
-	DECLARE @soluongDV INT = 1
-
-	SELECT @ChiTietHD = id, @soluongDV = SoLuong 
-	FROM ChiTietHD 
-	WHERE MaHD = @idHoaDon AND MADV = @idDichVu
-
-	IF (@ChiTietHD > 0)
-	BEGIN
-		DECLARE @newCount INT = @soluongDV + @soluong
-		IF (@newCount > 0)
-			UPDATE ChiTietHD
-			SET SoLuong = @newCount
-			WHERE MaHD = @idHoaDon AND MADV = @idDichVu
-		ELSE
-			DELETE ChiTietHD WHERE MaHD = @idHoaDon AND MADV = @idDichVu
-	END
-	ELSE
-	BEGIN
-		INSERT ChiTietHD(MaHD, MADV, SoLuong,ThanhTien,GhiChu)
-		VALUES (@idHoaDon , @idDichVu , @soluong , @thanhtien , @ghichu)
-	END
+    SET NOCOUNT ON;
+    IF (NOT EXISTS(SELECT 1 FROM dbo.HoaDon WHERE MaPhong = @idPhong AND status = 0))
+    BEGIN
+        INSERT dbo.HoaDon(NgayLapHD, NgayKetThucHD, MaPhong, TongTien, GiamGia, status)
+        VALUES (GETDATE(), NULL, @idPhong, 0, 0, 0);
+    END
+    SELECT TOP 1 * FROM dbo.HoaDon WHERE MaPhong = @idPhong AND status = 0 ORDER BY id DESC;
 END
 GO
 
-EXEC USP_InsertChiTietHD 1, 1, 1,1, N'da co'
+/* Proc thêm/cập nhật chi tiết hóa đơn: tự tính DonGia/ThanhTien, upsert */
+IF OBJECT_ID('dbo.USP_InsertChiTietHD') IS NOT NULL DROP PROC dbo.USP_InsertChiTietHD;
 GO
-
-CREATE PROC USP_DienHoaDon
-@billID INT, @tongtien float, @giamgia float
+CREATE PROC dbo.USP_InsertChiTietHD
+    @idHoaDon INT, @idDichVu INT, @soLuong INT, @ghiChu NVARCHAR(100) = NULL
 AS
 BEGIN
-	UPDATE HoaDon
-	SET status = 1, GiamGia = @giamgia, NgayKetThucHD = GETDATE(),TongTien = @tongtien
-	WHERE id = @billID
+    SET NOCOUNT ON;
+
+    DECLARE @donGia DECIMAL(18,2);
+    SELECT @donGia = DonGia FROM dbo.DSDichVu WHERE id = @idDichVu;
+
+    IF EXISTS (SELECT 1 FROM dbo.ChiTietHD WHERE MaHD = @idHoaDon AND MaDV = @idDichVu)
+    BEGIN
+        DECLARE @newCount INT = (SELECT SoLuong FROM dbo.ChiTietHD WHERE MaHD = @idHoaDon AND MaDV = @idDichVu) + @soLuong;
+
+        IF (@newCount > 0)
+            UPDATE dbo.ChiTietHD
+            SET SoLuong = @newCount,
+                GhiChu = ISNULL(@ghiChu, GhiChu)
+            WHERE MaHD = @idHoaDon AND MaDV = @idDichVu;
+        ELSE
+            DELETE dbo.ChiTietHD WHERE MaHD = @idHoaDon AND MaDV = @idDichVu;
+    END
+    ELSE
+    BEGIN
+        INSERT dbo.ChiTietHD(MaHD, MaDV, SoLuong, DonGia, GhiChu)
+        VALUES (@idHoaDon, @idDichVu, @soLuong, @donGia, @ghiChu);
+    END
+
+    -- Cập nhật tổng tiền hóa đơn theo chi tiết
+    UPDATE hd
+    SET TongTien = ISNULL(x.TongCT, 0)
+    FROM dbo.HoaDon hd
+    CROSS APPLY (
+        SELECT SUM(ThanhTien) AS TongCT
+        FROM dbo.ChiTietHD
+        WHERE MaHD = hd.id
+    ) x
+    WHERE hd.id = @idHoaDon AND hd.status = 0;
 END
 GO
 
-EXEC USP_DienHoaDon 1,1,1
+/* Hoàn tất hóa đơn: set status = 1, set ngày kết thúc, cập nhật giảm giá */
+IF OBJECT_ID('dbo.USP_DienHoaDon') IS NOT NULL DROP PROC dbo.USP_DienHoaDon;
 GO
-
-
--- Khi thêm mới hoặc cập nhật ChiTietHDt hì thay đổi trạng thái của phong
-CREATE TRIGGER UTG_UpdateChiTietHD
-ON dbo.ChiTietHD FOR INSERT, UPDATE
+CREATE PROC dbo.USP_DienHoaDon
+    @billID INT, @giamgia DECIMAL(5,2)
 AS
 BEGIN
-	DECLARE @idHD INT
+    SET NOCOUNT ON;
 
-	SELECT @idHD = MaHD FROM inserted
+    -- làm tròn tổng chi tiết trước khi kết
+    UPDATE hd
+    SET TongTien = ISNULL(x.TongCT, 0)
+    FROM dbo.HoaDon hd
+    CROSS APPLY (
+        SELECT SUM(ThanhTien) AS TongCT
+        FROM dbo.ChiTietHD
+        WHERE MaHD = hd.id
+    ) x
+    WHERE hd.id = @billID;
 
-	DECLARE @idPhong INT
-
-	SELECT @idPhong = MaPhong FROM HoaDon WHERE id = @idHD AND status = 0
-
-	UPDATE Phong SET status = N'Có dich vụ' WHERE id = @idPhong
-END
-GO	
-
-CREATE TRIGGER UTG_UpdateHoaDon
-ON dbo.HoaDon FOR UPDATE
-AS
-BEGIN
-	DECLARE @idHoaDon INT
-	
-	SELECT @idHoaDon = id FROM inserted
-
-	DECLARE @idPhong INT
-
-	SELECT @idPhong = MaPhong FROM HoaDon WHERE id = @idHoaDon
-
-	DECLARE @count INT = 0
-
-	SELECT @count = COUNT(*) FROM HoaDon WHERE MaPhong = @idPhong AND status = 0
-
-	IF (@count = 0)
-		UPDATE Phong SET status = N'Trống' WHERE id = @idPhong
-END
-GO 
-
-SELECT * FROM HoaDon
-
-CREATE PROC USP_XuatDSHoaDon_Ngay
-@ngaylap DateTime, @ngayketthuc DateTime
-AS
-BEGIN
-	SELECT Phong.TenPhong AS [Tên phòng], NgayLapHD  AS [Ngày vào], NgayKetThucHD  AS [Ngày ra], GiamGia  AS [Giảm giá], TongTien  AS [Tổng tiền]
-	FROM HoaDon
-	JOIN Phong ON HoaDon.MaPhong = Phong.id
-	WHERE HoaDon.status = 1 AND HoaDon.NgayLapHD >= @ngaylap AND HoaDon.NgayKetThucHD <= @ngayketthuc
+    UPDATE dbo.HoaDon
+    SET status = 1,
+        GiamGia = @giamgia,
+        NgayKetThucHD = GETDATE()
+    WHERE id = @billID;
 END
 GO
 
+/* Trigger: cập nhật trạng thái phòng khi có chi tiết DV (hóa đơn mở) */
+IF OBJECT_ID('dbo.UTG_UpdateChiTietHD') IS NOT NULL DROP TRIGGER dbo.UTG_UpdateChiTietHD;
+GO
+CREATE TRIGGER dbo.UTG_UpdateChiTietHD
+ON dbo.ChiTietHD
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
 
+    DECLARE @AffectedHD TABLE(id INT);
+    INSERT @AffectedHD(id)
+    SELECT DISTINCT COALESCE(i.MaHD, d.MaHD)
+    FROM inserted i
+    FULL JOIN deleted d ON 1 = 0;
 
+    -- Cập nhật tổng tiền hóa đơn (đã có trong proc, thêm đảm bảo khi update trực tiếp)
+    UPDATE hd
+    SET TongTien = ISNULL(x.TongCT, 0)
+    FROM dbo.HoaDon hd
+    JOIN @AffectedHD a ON a.id = hd.id
+    CROSS APPLY (
+        SELECT SUM(ThanhTien) AS TongCT
+        FROM dbo.ChiTietHD
+        WHERE MaHD = hd.id
+    ) x;
 
+    -- cập nhật trạng thái phòng: nếu có CTHD và HĐ mở -> 'Có dịch vụ'
+    UPDATE p
+    SET status = N'Có dịch vụ'
+    FROM dbo.Phong p
+    JOIN dbo.HoaDon hd ON hd.MaPhong = p.id AND hd.status = 0
+    WHERE EXISTS (SELECT 1 FROM dbo.ChiTietHD c WHERE c.MaHD = hd.id);
+END
+GO
 
+/* Trigger: khi hóa đơn đóng, nếu không còn HĐ mở thì trả phòng về 'Trống' */
+IF OBJECT_ID('dbo.UTG_UpdateHoaDon') IS NOT NULL DROP TRIGGER dbo.UTG_UpdateHoaDon;
+GO
+CREATE TRIGGER dbo.UTG_UpdateHoaDon
+ON dbo.HoaDon
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    ;WITH A AS (
+        SELECT DISTINCT i.id, i.MaPhong
+        FROM inserted i
+    )
+    UPDATE p
+    SET status = N'Trống'
+    FROM dbo.Phong p
+    JOIN A ON A.MaPhong = p.id
+    WHERE NOT EXISTS (SELECT 1 FROM dbo.HoaDon h WHERE h.MaPhong = p.id AND h.status = 0);
+END
+GO
+
+/* Demo thêm chi tiết bằng proc mới */
+DECLARE @Bill1 INT = (SELECT TOP 1 id FROM dbo.HoaDon WHERE MaPhong = 1 AND status = 0 ORDER BY id DESC);
+EXEC dbo.USP_InsertChiTietHD @Bill1, 1, 2, N'Gọi 2 suất Nhà hàng';
+EXEC dbo.USP_InsertChiTietHD @Bill1, 2, 1, N'Quầy bar';
+GO
+
+/* Kiểm tra */
+SELECT * FROM dbo.TaiKhoan;
+SELECT * FROM dbo.KhachHang;
+SELECT * FROM dbo.Phong;
+SELECT * FROM dbo.LoaiDichVu;
+SELECT * FROM dbo.DSDichVu;
+SELECT * FROM dbo.HoaDon;
+SELECT * FROM dbo.ChiTietHD;
+GO

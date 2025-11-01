@@ -1,0 +1,357 @@
+﻿using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Windows.Forms;
+
+namespace ChuDe4
+{
+ public partial class MainForm : Form
+ {
+ private readonly DataAccess _db = new DataAccess();
+ private int? _selectedTableId;
+
+ public MainForm()
+ {
+ InitializeComponent();
+ this.Load += MainForm_Load;
+ dgvTables.SelectionChanged += DgvTables_SelectionChanged;
+ btnAddTable.Click += BtnAddTable_Click;
+ btnUpdateTable.Click += BtnUpdateTable_Click;
+ btnDeleteTable.Click += BtnDeleteTable_Click;
+ btnViewCurrentBill.Click += BtnViewCurrentBill_Click;
+ tsmDeleteTable.Click += TsmDeleteTable_Click;
+ tsmViewBillCatalog.Click += TsmViewBillCatalog_Click;
+ tsmViewBillLog.Click += TsmViewBillLog_Click;
+ }
+
+ private void MainForm_Load(object sender, EventArgs e)
+ {
+ LoadTables();
+ }
+
+ private void LoadTables()
+ {
+ var dt = _db.ExecuteQuery("SELECT ID, Name, IsActive, Notes FROM dbo.Tables ORDER BY Name");
+ dgvTables.DataSource = dt;
+ if (dgvTables.Columns.Contains("ID")) dgvTables.Columns["ID"].Visible = false;
+ if (dgvTables.Columns.Contains("Name")) dgvTables.Columns["Name"].HeaderText = "T�n b�n";
+ if (dgvTables.Columns.Contains("IsActive")) dgvTables.Columns["IsActive"].HeaderText = "K�ch ho?t";
+ if (dgvTables.Columns.Contains("Notes")) dgvTables.Columns["Notes"].HeaderText = "Ghi ch�";
+ dgvTables.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+ dgvTables.ClearSelection();
+ _selectedTableId = null;
+ ClearTableEditor();
+ }
+
+ private void DgvTables_SelectionChanged(object sender, EventArgs e)
+ {
+ if (dgvTables.SelectedRows.Count >0)
+ {
+ var row = dgvTables.SelectedRows[0];
+ _selectedTableId = Convert.ToInt32(row.Cells["ID"].Value);
+ txtTableName.Text = row.Cells["Name"].Value?.ToString();
+ var isActiveVal = row.Cells["IsActive"].Value;
+ bool isActive = false;
+ if (isActiveVal is bool) isActive = (bool)isActiveVal; else if (isActiveVal != null) bool.TryParse(isActiveVal.ToString(), out isActive);
+ chkTableActive.Checked = isActive;
+ txtNotes.Text = row.Cells["Notes"].Value?.ToString();
+ }
+ else
+ {
+ _selectedTableId = null;
+ ClearTableEditor();
+ }
+ }
+
+ private void ClearTableEditor()
+ {
+ txtTableName.Text = string.Empty;
+ chkTableActive.Checked = true;
+ txtNotes.Text = string.Empty;
+ }
+
+ private void BtnAddTable_Click(object sender, EventArgs e)
+ {
+ if (string.IsNullOrWhiteSpace(txtTableName.Text))
+ {
+ MessageBox.Show("T�n b�n kh�ng ��?c �? tr?ng.", "L?i", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+ return;
+ }
+ string sql = "INSERT INTO dbo.Tables (Name, IsActive, Notes) VALUES (@Name, @IsActive, @Notes)";
+ var prms = new[]
+ {
+ new SqlParameter("@Name", txtTableName.Text.Trim()),
+ new SqlParameter("@IsActive", chkTableActive.Checked),
+ new SqlParameter("@Notes", (object)(txtNotes.Text??string.Empty))
+ };
+ try
+ {
+ _db.ExecuteNonQuery(sql, prms);
+ LoadTables();
+ }
+ catch (SqlException ex)
+ {
+ MessageBox.Show("Kh�ng th? th�m b�n: " + ex.Message, "L?i", MessageBoxButtons.OK, MessageBoxIcon.Error);
+ }
+ }
+
+ private void BtnUpdateTable_Click(object sender, EventArgs e)
+ {
+ if (_selectedTableId == null)
+ {
+ MessageBox.Show("Ch�a ch�n b�n.", "Th�ng b�o", MessageBoxButtons.OK, MessageBoxIcon.Information);
+ return;
+ }
+ if (string.IsNullOrWhiteSpace(txtTableName.Text))
+ {
+ MessageBox.Show("T�n b�n kh�ng ��?c �? tr?ng.", "L?i", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+ return;
+ }
+ string sql = "UPDATE dbo.Tables SET Name=@Name, IsActive=@IsActive, Notes=@Notes WHERE ID=@ID";
+ var prms = new[]
+ {
+ new SqlParameter("@Name", txtTableName.Text.Trim()),
+ new SqlParameter("@IsActive", chkTableActive.Checked),
+ new SqlParameter("@Notes", (object)(txtNotes.Text??string.Empty)),
+ new SqlParameter("@ID", _selectedTableId.Value)
+ };
+ try
+ {
+ _db.ExecuteNonQuery(sql, prms);
+ LoadTables();
+ }
+ catch (SqlException ex)
+ {
+ MessageBox.Show("Kh�ng th? c?p nh?t b�n: " + ex.Message, "L?i", MessageBoxButtons.OK, MessageBoxIcon.Error);
+ }
+ }
+
+ private void BtnDeleteTable_Click(object sender, EventArgs e)
+ {
+ DeleteSelectedTable();
+ }
+
+ private void TsmDeleteTable_Click(object sender, EventArgs e)
+ {
+ DeleteSelectedTable();
+ }
+
+ private void DeleteSelectedTable()
+ {
+ if (_selectedTableId == null) return;
+ var name = txtTableName.Text;
+ if (MessageBox.Show($"X�a b�n '{name}'?", "X�c nh�n", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+ try
+ {
+ var prms = new[] { new SqlParameter("@ID", _selectedTableId.Value) };
+ _db.ExecuteNonQuery("DELETE FROM dbo.Tables WHERE ID=@ID", prms);
+ LoadTables();
+ }
+ catch (SqlException ex)
+ {
+ MessageBox.Show("Kh�ng th? x�a b�n (c� th? �ang c� h�a ��n li�n quan).\nChi ti?t: " + ex.Message, "L?i", MessageBoxButtons.OK, MessageBoxIcon.Error);
+ }
+ }
+
+ private void BtnViewCurrentBill_Click(object sender, EventArgs e)
+ {
+ if (_selectedTableId == null)
+ {
+ MessageBox.Show("Ch�a ch�n b�n.", "Th�ng b�o", MessageBoxButtons.OK, MessageBoxIcon.Information);
+ return;
+ }
+ var prms = new[] { new SqlParameter("@TableID", _selectedTableId.Value) };
+ var dt = _db.ExecuteQuery("SELECT TOP 1 ID FROM dbo.Bills WHERE TableID=@TableID AND IsPaid=0 ORDER BY CheckIn DESC", prms);
+ if (dt.Rows.Count ==0)
+ {
+ MessageBox.Show("B�n hi�n kh�ng c� h�a ��n m?.", "Th�ng b�o", MessageBoxButtons.OK, MessageBoxIcon.Information);
+ return;
+ }
+ int billId = Convert.ToInt32(dt.Rows[0]["ID"]);
+ var frm = new BillDetailsForm(billId);
+ frm.ShowDialog(this);
+ }
+
+ private void TsmViewBillCatalog_Click(object sender, EventArgs e)
+ {
+ if (_selectedTableId == null) return;
+ var frm = new BillCatalogForm(_selectedTableId.Value, txtTableName.Text);
+ frm.ShowDialog(this);
+ }
+
+ private void TsmViewBillLog_Click(object sender, EventArgs e)
+ {
+ var frm = new BillLogForm();
+ frm.ShowDialog(this);
+ }
+ }
+
+ partial class MainForm
+ {
+ private System.ComponentModel.IContainer components = null;
+ private System.Windows.Forms.DataGridView dgvTables;
+ private System.Windows.Forms.TextBox txtTableName;
+ private System.Windows.Forms.TextBox txtNotes;
+ private System.Windows.Forms.CheckBox chkTableActive;
+ private System.Windows.Forms.Button btnAddTable;
+ private System.Windows.Forms.Button btnUpdateTable;
+ private System.Windows.Forms.Button btnDeleteTable;
+ private System.Windows.Forms.Button btnViewCurrentBill;
+ private System.Windows.Forms.ContextMenuStrip ctxTable;
+ private System.Windows.Forms.ToolStripMenuItem tsmDeleteTable;
+ private System.Windows.Forms.ToolStripMenuItem tsmViewBillCatalog;
+ private System.Windows.Forms.ToolStripMenuItem tsmViewBillLog;
+
+ protected override void Dispose(bool disposing)
+ {
+ if (disposing && (components != null)) components.Dispose();
+ base.Dispose(disposing);
+ }
+
+ private void InitializeComponent()
+ {
+ this.components = new System.ComponentModel.Container();
+ this.dgvTables = new System.Windows.Forms.DataGridView();
+ this.txtTableName = new System.Windows.Forms.TextBox();
+ this.txtNotes = new System.Windows.Forms.TextBox();
+ this.chkTableActive = new System.Windows.Forms.CheckBox();
+ this.btnAddTable = new System.Windows.Forms.Button();
+ this.btnUpdateTable = new System.Windows.Forms.Button();
+ this.btnDeleteTable = new System.Windows.Forms.Button();
+ this.btnViewCurrentBill = new System.Windows.Forms.Button();
+ this.ctxTable = new System.Windows.Forms.ContextMenuStrip(this.components);
+ this.tsmDeleteTable = new System.Windows.Forms.ToolStripMenuItem();
+ this.tsmViewBillCatalog = new System.Windows.Forms.ToolStripMenuItem();
+ this.tsmViewBillLog = new System.Windows.Forms.ToolStripMenuItem();
+ ((System.ComponentModel.ISupportInitialize)(this.dgvTables)).BeginInit();
+ this.ctxTable.SuspendLayout();
+ this.SuspendLayout();
+ // 
+ // dgvTables
+ // 
+ this.dgvTables.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+ | System.Windows.Forms.AnchorStyles.Left) 
+ | System.Windows.Forms.AnchorStyles.Right)));
+ this.dgvTables.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+ this.dgvTables.Location = new System.Drawing.Point(12,12);
+ this.dgvTables.MultiSelect = false;
+ this.dgvTables.Name = "dgvTables";
+ this.dgvTables.RowHeadersWidth =51;
+ this.dgvTables.RowTemplate.Height =24;
+ this.dgvTables.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+ this.dgvTables.Size = new System.Drawing.Size(560,350);
+ this.dgvTables.TabIndex =0;
+ this.dgvTables.ContextMenuStrip = this.ctxTable;
+ // 
+ // txtTableName
+ // 
+ this.txtTableName.Location = new System.Drawing.Point(590,20);
+ this.txtTableName.Name = "txtTableName";
+ this.txtTableName.Size = new System.Drawing.Size(250,22);
+ this.txtTableName.TabIndex =1;
+ // 
+ // txtNotes
+ // 
+ this.txtNotes.Location = new System.Drawing.Point(590,60);
+ this.txtNotes.Multiline = true;
+ this.txtNotes.Name = "txtNotes";
+ this.txtNotes.Size = new System.Drawing.Size(250,100);
+ this.txtNotes.TabIndex =2;
+ // 
+ // chkTableActive
+ // 
+ this.chkTableActive.AutoSize = true;
+ this.chkTableActive.Location = new System.Drawing.Point(590,170);
+ this.chkTableActive.Name = "chkTableActive";
+ this.chkTableActive.Size = new System.Drawing.Size(142,20);
+ this.chkTableActive.TabIndex =3;
+ this.chkTableActive.Text = "K�ch ho?t (s? d?ng)";
+ this.chkTableActive.UseVisualStyleBackColor = true;
+ // 
+ // btnAddTable
+ // 
+ this.btnAddTable.Location = new System.Drawing.Point(590,210);
+ this.btnAddTable.Name = "btnAddTable";
+ this.btnAddTable.Size = new System.Drawing.Size(110,30);
+ this.btnAddTable.TabIndex =4;
+ this.btnAddTable.Text = "Th�m b�n";
+ this.btnAddTable.UseVisualStyleBackColor = true;
+ // 
+ // btnUpdateTable
+ // 
+ this.btnUpdateTable.Location = new System.Drawing.Point(730,210);
+ this.btnUpdateTable.Name = "btnUpdateTable";
+ this.btnUpdateTable.Size = new System.Drawing.Size(110,30);
+ this.btnUpdateTable.TabIndex =5;
+ this.btnUpdateTable.Text = "C?p nh?t";
+ this.btnUpdateTable.UseVisualStyleBackColor = true;
+ // 
+ // btnDeleteTable
+ // 
+ this.btnDeleteTable.Location = new System.Drawing.Point(590,250);
+ this.btnDeleteTable.Name = "btnDeleteTable";
+ this.btnDeleteTable.Size = new System.Drawing.Size(110,30);
+ this.btnDeleteTable.TabIndex =6;
+ this.btnDeleteTable.Text = "X�a b�n";
+ this.btnDeleteTable.UseVisualStyleBackColor = true;
+ // 
+ // btnViewCurrentBill
+ // 
+ this.btnViewCurrentBill.Location = new System.Drawing.Point(730,250);
+ this.btnViewCurrentBill.Name = "btnViewCurrentBill";
+ this.btnViewCurrentBill.Size = new System.Drawing.Size(110,30);
+ this.btnViewCurrentBill.TabIndex =7;
+ this.btnViewCurrentBill.Text = "H�a �n hi�n t�i";
+ this.btnViewCurrentBill.UseVisualStyleBackColor = true;
+ // 
+ // ctxTable
+ // 
+ this.ctxTable.ImageScalingSize = new System.Drawing.Size(20,20);
+ this.ctxTable.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+ this.tsmDeleteTable,
+ this.tsmViewBillCatalog,
+ this.tsmViewBillLog});
+ this.ctxTable.Name = "ctxTable";
+ this.ctxTable.Size = new System.Drawing.Size(218,76);
+ // 
+ // tsmDeleteTable
+ // 
+ this.tsmDeleteTable.Name = "tsmDeleteTable";
+ this.tsmDeleteTable.Size = new System.Drawing.Size(217,24);
+ this.tsmDeleteTable.Text = "X�a b�n";
+ // 
+ // tsmViewBillCatalog
+ // 
+ this.tsmViewBillCatalog.Name = "tsmViewBillCatalog";
+ this.tsmViewBillCatalog.Size = new System.Drawing.Size(217,24);
+ this.tsmViewBillCatalog.Text = "Xem danh m?c h�a ��n";
+ // 
+ // tsmViewBillLog
+ // 
+ this.tsmViewBillLog.Name = "tsmViewBillLog";
+ this.tsmViewBillLog.Size = new System.Drawing.Size(217,24);
+ this.tsmViewBillLog.Text = "Xem nh�t k? h�a ��n";
+ // 
+ // MainForm
+ // 
+ this.AutoScaleDimensions = new System.Drawing.SizeF(8F,16F);
+ this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+ this.ClientSize = new System.Drawing.Size(860,380);
+ this.Controls.Add(this.btnViewCurrentBill);
+ this.Controls.Add(this.btnDeleteTable);
+ this.Controls.Add(this.btnUpdateTable);
+ this.Controls.Add(this.btnAddTable);
+ this.Controls.Add(this.chkTableActive);
+ this.Controls.Add(this.txtNotes);
+ this.Controls.Add(this.txtTableName);
+ this.Controls.Add(this.dgvTables);
+ this.Name = "MainForm";
+ this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+ this.Text = "Qu�n l? b�n";
+ ((System.ComponentModel.ISupportInitialize)(this.dgvTables)).EndInit();
+ this.ctxTable.ResumeLayout(false);
+ this.ResumeLayout(false);
+ this.PerformLayout();
+ }
+ }
+}

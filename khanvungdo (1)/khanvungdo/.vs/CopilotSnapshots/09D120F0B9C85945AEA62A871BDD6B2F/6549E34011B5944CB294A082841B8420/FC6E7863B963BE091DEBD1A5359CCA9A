@@ -1,0 +1,176 @@
+﻿using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Windows.Forms;
+using WindowsFormsApp2.Infrastructure;
+
+namespace WindowsFormsApp2
+{
+    public partial class frmTaiKhoan : Form
+    {
+        public frmTaiKhoan()
+        {
+            InitializeComponent();
+            Load += FrmTaiKhoan_Load;
+            btnThem.Click += BtnThem_Click;
+            btnCapNhat.Click += BtnCapNhat_Click;
+            btnXoa.Click += BtnXoa_Click;
+            btnTim.Click += BtnTim_Click;
+            guna2DataGridView1.SelectionChanged += Guna2DataGridView1_SelectionChanged;
+        }
+
+        private void FrmTaiKhoan_Load(object sender, EventArgs e)
+        {
+            LoadAccounts();
+        }
+
+        private void LoadAccounts(string keyword = null)
+        {
+            guna2DataGridView1.Rows.Clear();
+            using (var conn = Db.Open())
+            using (var cmd = new SqlCommand(@"SELECT MaTaiKhoan, TenTaiKhoan, PassWord, [Type]
+                                              FROM dbo.TaiKhoan
+                                              WHERE (@kw IS NULL OR TenTaiKhoan LIKE '%' + @kw + '%')
+                                              ORDER BY TenTaiKhoan", conn))
+            {
+                cmd.Parameters.AddWithValue("@kw", (object)keyword ?? DBNull.Value);
+                using (var rd = cmd.ExecuteReader())
+                {
+                    while (rd.Read())
+                    {
+                        int idx = guna2DataGridView1.Rows.Add();
+                        var row = guna2DataGridView1.Rows[idx];
+                        row.Cells["Column1"].Value = rd["MaTaiKhoan"].ToString();
+                        row.Cells["Column2"].Value = rd["TenTaiKhoan"].ToString();
+                        row.Cells["Column3"].Value = rd["PassWord"].ToString();
+                        row.Cells["Column4"].Value = Convert.ToInt32(rd["Type"]) == 1 ? "Admin" : "Staff";
+                    }
+                }
+            }
+        }
+
+        private void Guna2DataGridView1_SelectionChanged(object sender, EventArgs e)
+        {
+            if (guna2DataGridView1.SelectedRows.Count == 0) return;
+            var row = guna2DataGridView1.SelectedRows[0];
+            txtMaTaiKhoan.Text = Convert.ToString(row.Cells["Column1"].Value);
+            txtTenTaiKhoan.Text = Convert.ToString(row.Cells["Column2"].Value);
+            txtMatKhau.Text = Convert.ToString(row.Cells["Column3"].Value);
+            txtChucVu.Text = Convert.ToString(row.Cells["Column4"].Value);
+        }
+
+        private void BtnTim_Click(object sender, EventArgs e)
+        {
+            var kw = string.IsNullOrWhiteSpace(txtTenTaiKhoan.Text) ? null : txtTenTaiKhoan.Text.Trim();
+            LoadAccounts(kw);
+        }
+
+        private void BtnThem_Click(object sender, EventArgs e)
+        {
+            var ma = txtMaTaiKhoan.Text.Trim();
+            var ten = txtTenTaiKhoan.Text.Trim();
+            var mk = txtMatKhau.Text.Trim();
+            var chucvu = txtChucVu.Text.Trim().ToLower();
+            int type = (chucvu == "admin") ? 1 : 0;
+
+            if (string.IsNullOrWhiteSpace(ma) || string.IsNullOrWhiteSpace(ten) || string.IsNullOrWhiteSpace(mk))
+            {
+                MessageBox.Show("Nhập Mã, Tên, Mật khẩu."); return;
+            }
+
+            using (var conn = Db.Open())
+            using (var cmd = new SqlCommand(@"INSERT dbo.TaiKhoan(MaTaiKhoan, TenTaiKhoan, PassWord, [Type])
+                                              VALUES(@Ma,@Ten,@Pass,@Type)", conn))
+            {
+                cmd.Parameters.AddWithValue("@Ma", ma);
+                cmd.Parameters.AddWithValue("@Ten", ten);
+                cmd.Parameters.AddWithValue("@Pass", mk);
+                cmd.Parameters.AddWithValue("@Type", type);
+                try
+                {
+                    cmd.ExecuteNonQuery();
+                    MessageBox.Show("Đã thêm tài khoản.");
+                    ClearInputs();
+                    LoadAccounts();
+                }
+                catch (SqlException ex)
+                {
+                    MessageBox.Show("Lỗi khi thêm: " + ex.Message);
+                }
+            }
+        }
+
+        private void BtnCapNhat_Click(object sender, EventArgs e)
+        {
+            var ma = txtMaTaiKhoan.Text.Trim();
+            var ten = txtTenTaiKhoan.Text.Trim();
+            var mk = txtMatKhau.Text.Trim();
+            var chucvu = txtChucVu.Text.Trim().ToLower();
+            int type = (chucvu == "admin") ? 1 : 0;
+
+            if (string.IsNullOrWhiteSpace(ma))
+            {
+                MessageBox.Show("Nhập Mã tài khoản để cập nhật."); return;
+            }
+
+            using (var conn = Db.Open())
+            using (var cmd = new SqlCommand(@"UPDATE dbo.TaiKhoan
+                                              SET TenTaiKhoan=@Ten, PassWord=@Pass, [Type]=@Type
+                                              WHERE MaTaiKhoan=@Ma", conn))
+            {
+                cmd.Parameters.AddWithValue("@Ma", ma);
+                cmd.Parameters.AddWithValue("@Ten", ten);
+                cmd.Parameters.AddWithValue("@Pass", mk);
+                cmd.Parameters.AddWithValue("@Type", type);
+                try
+                {
+                    var rows = cmd.ExecuteNonQuery();
+                    if (rows == 0) { MessageBox.Show("Không tìm thấy tài khoản."); return; }
+                    MessageBox.Show("Đã cập nhật tài khoản.");
+                    ClearInputs();
+                    LoadAccounts();
+                }
+                catch (SqlException ex)
+                {
+                    MessageBox.Show("Lỗi khi cập nhật: " + ex.Message);
+                }
+            }
+        }
+
+        private void BtnXoa_Click(object sender, EventArgs e)
+        {
+            var ma = txtMaTaiKhoan.Text.Trim();
+            if (string.IsNullOrWhiteSpace(ma))
+            {
+                MessageBox.Show("Nhập Mã tài khoản để xóa hoặc chọn dòng."); return;
+            }
+            if (MessageBox.Show($"Xóa tài khoản {ma}?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+                return;
+
+            using (var conn = Db.Open())
+            using (var cmd = new SqlCommand("DELETE dbo.TaiKhoan WHERE MaTaiKhoan=@Ma", conn))
+            {
+                cmd.Parameters.AddWithValue("@Ma", ma);
+                try
+                {
+                    cmd.ExecuteNonQuery();
+                    MessageBox.Show("Đã xóa.");
+                    ClearInputs();
+                    LoadAccounts();
+                }
+                catch (SqlException ex)
+                {
+                    MessageBox.Show("Lỗi khi xóa: " + ex.Message);
+                }
+            }
+        }
+
+        private void ClearInputs()
+        {
+            txtMaTaiKhoan.Clear();
+            txtTenTaiKhoan.Clear();
+            txtMatKhau.Clear();
+            txtChucVu.Clear();
+        }
+    }
+}

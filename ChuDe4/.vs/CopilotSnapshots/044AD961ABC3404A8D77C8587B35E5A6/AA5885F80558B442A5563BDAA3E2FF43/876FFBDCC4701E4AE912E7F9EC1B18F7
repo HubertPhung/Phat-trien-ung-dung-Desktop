@@ -1,0 +1,110 @@
+﻿// BillsForm.cs
+using ChuDe4;
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Globalization;
+using System.Linq;
+using System.Windows.Forms;
+
+public partial class BillsForm : Form
+{
+    private DataAccess db = new DataAccess();
+
+    public BillsForm()
+    {
+        InitializeComponent();
+    }
+
+    private void BillsForm_Load(object sender, EventArgs e)
+    {
+        dtpFromDate.Value = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+        dtpToDate.Value = DateTime.Now;
+        LoadBills();
+    }
+
+    private void btnFilter_Click(object sender, EventArgs e)
+    {
+        LoadBills();
+    }
+
+    private void LoadBills()
+    {
+        // Câu truy vấn SQL để lấy danh sách hóa đơn và tính toán tổng tiền
+        string query = @"
+            SELECT
+                b.ID,
+                t.Name AS TableName,
+                b.CheckIn,
+                b.CheckOut,
+                -- Tính tổng tiền hàng trước khi giảm giá
+                ISNULL((SELECT SUM(Quantity * UnitPrice) FROM BillDetails bd WHERE bd.BillID = b.ID), 0) AS SubTotal,
+                b.DiscountPercent,
+                -- Tính số tiền được giảm giá
+                ISNULL((SELECT SUM(Quantity * UnitPrice) FROM BillDetails bd WHERE bd.BillID = b.ID), 0) * b.DiscountPercent / 100.0 AS DiscountAmount,
+                -- Tính thực thu
+                ISNULL((SELECT SUM(Quantity * UnitPrice) FROM BillDetails bd WHERE bd.BillID = b.ID), 0) * (1 - b.DiscountPercent / 100.0) AS GrandTotal,
+                b.IsPaid
+            FROM Bills b
+            JOIN Tables t ON b.TableID = t.ID
+            WHERE b.CheckIn BETWEEN @FromDate AND @ToDate
+            ORDER BY b.CheckIn DESC";
+
+        // Tạo tham số để tránh SQL Injection
+        SqlParameter[] parameters = new SqlParameter[]
+        {
+            new SqlParameter("@FromDate", dtpFromDate.Value.Date),
+            // Thêm 1 ngày và trừ 1 tick để bao gồm cả ngày kết thúc
+            new SqlParameter("@ToDate", dtpToDate.Value.Date.AddDays(1).AddTicks(-1))
+        };
+
+        DataTable billsTable = db.ExecuteQuery(query, parameters);
+        dgvBills.DataSource = billsTable;
+
+        SetupDataGridViewColumns();
+        CalculateTotals(billsTable);
+    }
+
+    private void SetupDataGridViewColumns()
+    {
+        dgvBills.Columns["ID"].HeaderText = "Mã HĐ";
+        dgvBills.Columns["TableName"].HeaderText = "Tên Bàn";
+        dgvBills.Columns["CheckIn"].HeaderText = "Giờ vào";
+        dgvBills.Columns["CheckOut"].HeaderText = "Giờ ra";
+        dgvBills.Columns["SubTotal"].HeaderText = "Tiền hàng";
+        dgvBills.Columns["DiscountPercent"].HeaderText = "% Giảm giá";
+        dgvBills.Columns["DiscountAmount"].HeaderText = "Tiền giảm giá";
+        dgvBills.Columns["GrandTotal"].HeaderText = "Thực thu";
+        dgvBills.Columns["IsPaid"].HeaderText = "Đã thanh toán";
+
+        // Định dạng tiền tệ
+        string currencyFormat = "N0";
+        dgvBills.Columns["SubTotal"].DefaultCellStyle.Format = currencyFormat;
+        dgvBills.Columns["DiscountAmount"].DefaultCellStyle.Format = currencyFormat;
+        dgvBills.Columns["GrandTotal"].DefaultCellStyle.Format = currencyFormat;
+
+        dgvBills.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+    }
+
+    private void CalculateTotals(DataTable billsTable)
+    {
+        // Sử dụng LINQ to DataSet để tính tổng
+        decimal subTotal = billsTable.AsEnumerable().Sum(row => row.Field<decimal>("SubTotal"));
+        decimal discountAmount = billsTable.AsEnumerable().Sum(row => row.Field<decimal>("DiscountAmount"));
+        decimal grandTotal = billsTable.AsEnumerable().Sum(row => row.Field<decimal>("GrandTotal"));
+
+        lblSubTotal.Text = subTotal.ToString("N0", CultureInfo.InvariantCulture) + " VNĐ";
+        lblTotalDiscount.Text = discountAmount.ToString("N0", CultureInfo.InvariantCulture) + " VNĐ";
+        lblGrandTotal.Text = grandTotal.ToString("N0", CultureInfo.InvariantCulture) + " VNĐ";
+    }
+
+    private void dgvBills_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+    {
+        if (e.RowIndex >= 0)
+        {
+            int selectedBillId = Convert.ToInt32(dgvBills.Rows[e.RowIndex].Cells["ID"].Value);
+            BillDetailsForm detailsForm = new BillDetailsForm(selectedBillId);
+            detailsForm.ShowDialog();
+        }
+    }
+}

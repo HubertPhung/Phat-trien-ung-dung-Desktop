@@ -1,0 +1,102 @@
+﻿-- RestaurantManagement database and schema for Lab_Basic_Command project
+-- This script targets Microsoft SQL Server
+
+SET NOCOUNT ON;
+
+IF DB_ID(N'RestaurantManagement') IS NULL
+BEGIN
+ PRINT N'Creating database [RestaurantManagement]...';
+ CREATE DATABASE [RestaurantManagement];
+END
+GO
+
+USE [RestaurantManagement];
+GO
+
+-- Drop tables if they already exist (safe to re-run the script)
+IF OBJECT_ID(N'dbo.Food', N'U') IS NOT NULL
+ DROP TABLE dbo.Food;
+IF OBJECT_ID(N'dbo.Category', N'U') IS NOT NULL
+ DROP TABLE dbo.Category;
+GO
+
+-- Category table expected by the app (ID, Name, Type)
+CREATE TABLE dbo.Category
+(
+ ID INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_Category PRIMARY KEY,
+ Name NVARCHAR(200) NOT NULL,
+ [Type] INT NOT NULL CONSTRAINT CK_Category_Type CHECK ([Type] IN (0,1))
+);
+GO
+
+-- Food table expected by the app (uses FoodCategoryID)
+CREATE TABLE dbo.Food
+(
+ ID INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_Food PRIMARY KEY,
+ Name NVARCHAR(200) NOT NULL,
+ Unit NVARCHAR(50) NULL,
+ FoodCategoryID INT NOT NULL,
+ Price INT NOT NULL CONSTRAINT DF_Food_Price DEFAULT(0),
+ Notes NVARCHAR(4000) NULL,
+ CONSTRAINT FK_Food_Category FOREIGN KEY (FoodCategoryID) REFERENCES dbo.Category(ID)
+);
+GO
+
+-- Seed sample data
+INSERT INTO dbo.Category (Name, [Type]) VALUES
+(N'Thức uống',0),
+(N'Đồ ăn',1),
+(N'Khai vị',1),
+(N'Tráng miệng',1);
+GO
+
+
+DECLARE @DrinkId INT = (SELECT ID FROM dbo.Category WHERE Name = N'Thức uống');
+DECLARE @FoodId INT = (SELECT ID FROM dbo.Category WHERE Name = N'Đồ ăn');
+DECLARE @AppetId INT = (SELECT ID FROM dbo.Category WHERE Name = N'Khai vị');
+DECLARE @DessId INT = (SELECT ID FROM dbo.Category WHERE Name = N'Tráng miệng');
+
+-- Base items
+INSERT INTO dbo.Food (Name, Unit, FoodCategoryID, Price, Notes) VALUES
+(N'Cà phê đá', N'Ly', @DrinkId,20000, N''),
+(N'Trà đào', N'Ly', @DrinkId,30000, N''),
+(N'Cơm gà', N'Phần', @FoodId,45000, N''),
+(N'Bún bò', N'Tô', @FoodId,40000, N''),
+(N'Gỏi cuốn', N'Phần', @AppetId,25000, N''),
+(N'Bánh flan', N'Phần', @DessId,15000, N'');
+
+-- Additional drink items
+INSERT INTO dbo.Food (Name, Unit, FoodCategoryID, Price, Notes) VALUES
+(N'Sinh tố bơ', N'Ly', @DrinkId,35000, N''),
+(N'Nước cam', N'Ly', @DrinkId,30000, N''),
+(N'Soda chanh', N'Ly', @DrinkId,28000, N''),
+(N'Trà sữa trân châu', N'Ly', @DrinkId,35000, N''),
+(N'Nước suối', N'Chai', @DrinkId,15000, N'');
+
+-- Additional main food items
+INSERT INTO dbo.Food (Name, Unit, FoodCategoryID, Price, Notes) VALUES
+(N'Phở bò', N'Tô', @FoodId,45000, N''),
+(N'Bánh mì thịt', N'Ổ', @FoodId,25000, N''),
+(N'Mì xào bò', N'Phần', @FoodId,50000, N''),
+(N'Cơm tấm sườn', N'Phần', @FoodId,50000, N''),
+(N'Lẩu thái', N'Nồi', @FoodId,180000, N'2-3 người');
+
+-- Additional appetizers
+INSERT INTO dbo.Food (Name, Unit, FoodCategoryID, Price, Notes) VALUES
+(N'Khoai tây chiên', N'Dĩa', @AppetId,30000, N''),
+(N'Gà chiên mắm', N'Dĩa', @AppetId,60000, N''),
+(N'Súp bí đỏ', N'Tô', @AppetId,35000, N''),
+(N'Salad trộn', N'Dĩa', @AppetId,40000, N'');
+
+-- Additional desserts
+INSERT INTO dbo.Food (Name, Unit, FoodCategoryID, Price, Notes) VALUES
+(N'Kem vani', N'Ly', @DessId,20000, N''),
+(N'Chè đậu xanh', N'Chén', @DessId,20000, N''),
+(N'Trái cây dĩa', N'Dĩa', @DessId,40000, N''),
+(N'Cheesecake', N'Miếng', @DessId,45000, N'');
+GO
+
+PRINT N'RestaurantManagement database is ready.';
+
+Select * From dbo.Category
+Select * From dbo.Food

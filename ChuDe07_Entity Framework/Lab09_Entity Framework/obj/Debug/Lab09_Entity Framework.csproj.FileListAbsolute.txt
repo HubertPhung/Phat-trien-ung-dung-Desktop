@@ -1,0 +1,26 @@
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\obj\Debug\Lab09_Entity Framework.csproj.AssemblyReference.cache
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\obj\Debug\Lab09_Entity_Framework.AccountForm.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\obj\Debug\Lab09_Entity_Framework.BillsForm.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\obj\Debug\Lab09_Entity_Framework.ChangePasswordForm.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\obj\Debug\Lab09_Entity_Framework.EmployeeForm.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\obj\Debug\Lab09_Entity_Framework.FoodForm.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\obj\Debug\Lab09_Entity_Framework.MainForm.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\obj\Debug\Lab09_Entity_Framework.Properties.Resources.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\obj\Debug\Lab09_Entity_Framework.RoleForm.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\obj\Debug\Lab09_Entity_Framework.TableForm.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\obj\Debug\Lab09_Entity_Framework.UpdateAccountForm.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\obj\Debug\Lab09_Entity_Framework.UpdateCategoryForm.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\obj\Debug\Lab09_Entity_Framework.UpdateFoodForm.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\obj\Debug\Lab09_Entity Framework.csproj.GenerateResource.cache
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\obj\Debug\Lab09_Entity Framework.csproj.CoreCompileInputs.cache
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\bin\Debug\Lab09_Entity Framework.exe.config
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\bin\Debug\Lab09_Entity Framework.exe
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\bin\Debug\Lab09_Entity Framework.pdb
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\bin\Debug\EntityFramework.dll
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\bin\Debug\EntityFramework.SqlServer.dll
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\bin\Debug\EntityFramework.xml
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\bin\Debug\EntityFramework.SqlServer.xml
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\obj\Debug\Lab09_En.4E2F541C.Up2Date
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\obj\Debug\Lab09_Entity Framework.exe
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\obj\Debug\Lab09_Entity Framework.pdb
+D:\University\Phát triển ứng dụng Desktop\ChuDe07_Entity Framework\Lab09_Entity Framework\obj\Debug\Lab09_Entity Framework.exe.config

@@ -1,0 +1,52 @@
+﻿// BillDetailsForm.cs
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Windows.Forms;
+
+public partial class BillDetailsForm : Form
+{
+    private readonly int _billId;
+    private DataAccess db = new DataAccess();
+
+    public BillDetailsForm(int billId)
+    {
+        InitializeComponent();
+        _billId = billId;
+    }
+
+    private void BillDetailsForm_Load(object sender, EventArgs e)
+    {
+        this.Text = $"Chi tiết Hóa đơn #{_billId}";
+        lblBillInfo.Text = $"Các món trong hóa đơn #{_billId}";
+        LoadBillDetails();
+    }
+
+    private void LoadBillDetails()
+    {
+        string query = @"
+            SELECT
+                f.Name AS FoodName,
+                bd.Quantity,
+                bd.UnitPrice,
+                (bd.Quantity * bd.UnitPrice) AS Total
+            FROM BillDetails bd
+            JOIN Food f ON bd.FoodID = f.ID
+            WHERE bd.BillID = @BillID";
+
+        SqlParameter[] parameters = new SqlParameter[] { new SqlParameter("@BillID", _billId) };
+
+        dgvBillDetails.DataSource = db.ExecuteQuery(query, parameters);
+
+        // Cấu hình cột
+        dgvBillDetails.Columns["FoodName"].HeaderText = "Tên món";
+        dgvBillDetails.Columns["Quantity"].HeaderText = "Số lượng";
+        dgvBillDetails.Columns["UnitPrice"].HeaderText = "Đơn giá";
+        dgvBillDetails.Columns["Total"].HeaderText = "Thành tiền";
+
+        dgvBillDetails.Columns["UnitPrice"].DefaultCellStyle.Format = "N0";
+        dgvBillDetails.Columns["Total"].DefaultCellStyle.Format = "N0";
+
+        dgvBillDetails.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+    }
+}

@@ -1,0 +1,9 @@
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\obj\Debug\BussinessLogic.csproj.AssemblyReference.cache
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\obj\Debug\BussinessLogic.Properties.Resources.resources
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\obj\Debug\BussinessLogic.csproj.GenerateResource.cache
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\obj\Debug\BussinessLogic.csproj.CoreCompileInputs.cache
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\bin\Debug\BussinessLogic.exe.config
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\bin\Debug\BussinessLogic.exe
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\bin\Debug\BussinessLogic.pdb
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\obj\Debug\BussinessLogic.exe
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\obj\Debug\BussinessLogic.pdb

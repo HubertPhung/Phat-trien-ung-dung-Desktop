@@ -33,6 +33,9 @@
             this.chID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.tmsDelete = new System.Windows.Forms.ToolStripMenuItem();
+            this.tmsViewFood = new System.Windows.Forms.ToolStripMenuItem();
             this.btnLoad = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -43,9 +46,6 @@
             this.txtID = new System.Windows.Forms.TextBox();
             this.txtName = new System.Windows.Forms.TextBox();
             this.txtType = new System.Windows.Forms.TextBox();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.tmsDelete = new System.Windows.Forms.ToolStripMenuItem();
-            this.tmsViewFood = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -55,12 +55,13 @@
             this.chID,
             this.chName,
             this.chType});
+            this.lvCategory.ContextMenuStrip = this.contextMenuStrip1;
             this.lvCategory.FullRowSelect = true;
             this.lvCategory.HideSelection = false;
             this.lvCategory.Location = new System.Drawing.Point(1, 170);
             this.lvCategory.MultiSelect = false;
             this.lvCategory.Name = "lvCategory";
-            this.lvCategory.Size = new System.Drawing.Size(569, 280);
+            this.lvCategory.Size = new System.Drawing.Size(590, 280);
             this.lvCategory.TabIndex = 0;
             this.lvCategory.UseCompatibleStateImageBehavior = false;
             this.lvCategory.View = System.Windows.Forms.View.Details;
@@ -80,13 +81,36 @@
             // 
             this.chType.Text = "Loại";
             // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tmsDelete,
+            this.tmsViewFood});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(233, 52);
+            // 
+            // tmsDelete
+            // 
+            this.tmsDelete.Name = "tmsDelete";
+            this.tmsDelete.Size = new System.Drawing.Size(232, 24);
+            this.tmsDelete.Text = "Xóa nhóm món ăn";
+            this.tmsDelete.Click += new System.EventHandler(this.tmsDelete_Click);
+            // 
+            // tmsViewFood
+            // 
+            this.tmsViewFood.Name = "tmsViewFood";
+            this.tmsViewFood.Size = new System.Drawing.Size(232, 24);
+            this.tmsViewFood.Text = "Xem danh sách món ăn";
+            this.tmsViewFood.Click += new System.EventHandler(this.tmsViewFood_Click);
+            // 
             // btnLoad
             // 
             this.btnLoad.BackColor = System.Drawing.Color.Silver;
             this.btnLoad.ForeColor = System.Drawing.Color.Black;
             this.btnLoad.Location = new System.Drawing.Point(12, 127);
             this.btnLoad.Name = "btnLoad";
-            this.btnLoad.Size = new System.Drawing.Size(111, 37);
+            this.btnLoad.Size = new System.Drawing.Size(131, 37);
             this.btnLoad.TabIndex = 1;
             this.btnLoad.Text = "Lấy danh sách";
             this.btnLoad.UseVisualStyleBackColor = false;
@@ -179,33 +203,11 @@
             this.txtType.Size = new System.Drawing.Size(229, 22);
             this.txtType.TabIndex = 4;
             // 
-            // contextMenuStrip1
-            // 
-            this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tmsDelete,
-            this.tmsViewFood});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(233, 80);
-            // 
-            // tmsDelete
-            // 
-            this.tmsDelete.Name = "tmsDelete";
-            this.tmsDelete.Size = new System.Drawing.Size(232, 24);
-            this.tmsDelete.Text = "Xóa nhóm món ăn";
-            this.tmsDelete.Click += new System.EventHandler(this.tmsDelete_Click);
-            // 
-            // tmsViewFood
-            // 
-            this.tmsViewFood.Name = "tmsViewFood";
-            this.tmsViewFood.Size = new System.Drawing.Size(232, 24);
-            this.tmsViewFood.Text = "Xem danh sách món ăn";
-            // 
             // CategoryForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(571, 450);
+            this.ClientSize = new System.Drawing.Size(594, 450);
             this.Controls.Add(this.txtType);
             this.Controls.Add(this.txtName);
             this.Controls.Add(this.txtID);
@@ -218,7 +220,7 @@
             this.Controls.Add(this.btnLoad);
             this.Controls.Add(this.lvCategory);
             this.Name = "CategoryForm";
-            this.Text = "Quản lý nhóm món ăn";
+            this.Text = "Quản lí nhóm món ăn";
             this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();

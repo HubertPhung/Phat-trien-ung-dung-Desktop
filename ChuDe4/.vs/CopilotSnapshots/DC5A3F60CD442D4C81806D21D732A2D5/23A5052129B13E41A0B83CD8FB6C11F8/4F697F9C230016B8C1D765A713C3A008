@@ -1,0 +1,106 @@
+﻿using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Windows.Forms;
+
+namespace ChuDe4
+{
+    public partial class BillsForm : Form
+    {
+        private readonly DataAccess _db = new DataAccess();
+
+        public BillsForm()
+        {
+            InitializeComponent();
+            // Sự kiện
+            this.Load += BillsForm_Load;
+            this.btnXem.Click += BtnXem_Click;
+            this.dgvBills.CellDoubleClick += DgvBills_CellDoubleClick;
+        }
+
+        private void BillsForm_Load(object sender, EventArgs e)
+        {
+            // Mặc định: từ đầu tháng đến hôm nay
+            var today = DateTime.Today;
+            dtpNgayKetThuc.Value = today;
+            dtpNgayBatDau.Value = new DateTime(today.Year, today.Month, 1);
+
+            LoadBills();
+        }
+
+        private void BtnXem_Click(object sender, EventArgs e)
+        {
+            LoadBills();
+        }
+
+        private void LoadBills()
+        {
+            var from = dtpNgayBatDau.Value.Date;
+            var to = dtpNgayKetThuc.Value.Date;
+
+            if (from > to)
+            {
+                MessageBox.Show("Ngày bắt đầu không được lớn hơn ngày kết thúc.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string sql = @"
+SELECT 
+ b.ID,
+ b.TableID,
+ b.CheckIn,
+ b.CheckOut,
+ b.DiscountPercent,
+ b.IsPaid,
+ b.Notes,
+ ISNULL(SUM(bd.Quantity * bd.UnitPrice),0) AS SubTotal,
+ CAST(ISNULL(SUM(bd.Quantity * bd.UnitPrice),0) * (b.DiscountPercent/100.0) AS INT) AS DiscountAmount,
+ CAST(ISNULL(SUM(bd.Quantity * bd.UnitPrice),0) * (1 - b.DiscountPercent/100.0) AS INT) AS ActualAmount
+FROM dbo.Bills b
+LEFT JOIN dbo.BillDetails bd ON bd.BillID = b.ID
+WHERE b.CheckIn >= @FromDate AND b.CheckIn < DATEADD(day,1, @ToDate)
+GROUP BY b.ID, b.TableID, b.CheckIn, b.CheckOut, b.DiscountPercent, b.IsPaid, b.Notes
+ORDER BY b.CheckIn DESC;";
+
+            var prms = new[]
+            {
+                new SqlParameter("@FromDate", from),
+                new SqlParameter("@ToDate", to)
+            };
+
+            var dt = _db.ExecuteQuery(sql, prms);
+            dgvBills.DataSource = dt;
+
+            // Định dạng số: đã cấu hình sẵn trong Designer cho các cột SubTotal/DiscountAmount/ActualAmount
+            dgvBills.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            // Tính tổng
+            long sumSub = 0, sumDiscount = 0, sumActual = 0;
+            foreach (DataRow row in dt.Rows)
+            {
+                long sub = Convert.ToInt64(row["SubTotal"]);
+                long dis = Convert.ToInt64(row["DiscountAmount"]);
+                long act = Convert.ToInt64(row["ActualAmount"]);
+                sumSub += sub; sumDiscount += dis; sumActual += act;
+            }
+
+            lbChuaGiamGia.Text = string.Format("{0:N0} đ", sumSub);
+            lbDaGiamGia.Text = string.Format("{0:N0} đ", sumDiscount);
+            lbThucThu.Text = string.Format("{0:N0} đ", sumActual);
+        }
+
+        private void DgvBills_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            var row = dgvBills.Rows[e.RowIndex];
+            if (!dgvBills.Columns.Contains("ID")) return;
+
+            if (int.TryParse(Convert.ToString(row.Cells["ID"].Value), out int billId))
+            {
+                var frm = new BillDetailsForm(billId);
+                frm.ShowDialog(this);
+            }
+        }
+    }
+}

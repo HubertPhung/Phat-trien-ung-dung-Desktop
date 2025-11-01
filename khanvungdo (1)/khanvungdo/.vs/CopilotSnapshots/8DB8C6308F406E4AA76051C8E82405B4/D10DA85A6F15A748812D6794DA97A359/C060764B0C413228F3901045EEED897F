@@ -1,0 +1,117 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using WindowsFormsApp2.Services;
+
+namespace WindowsFormsApp2
+{
+    public partial class frmHome : Form
+    {
+        private readonly HomeFormService _svc = new HomeFormService();
+        private int _currentLoaiId = 0;
+        private int _currentBillId = 0;
+
+        public frmHome()
+        {
+            InitializeComponent();
+            WireEvents();
+            LoadLoaiDichVu();
+        }
+
+        private void WireEvents()
+        {
+            rdAnUong.CheckedChanged += (s,e) => { if (rdAnUong.Checked) LoadDichVuTheoLoai(1); };
+            rdDiLai.CheckedChanged += (s,e) => { if (rdDiLai.Checked) LoadDichVuTheoLoai(2); };
+            rdGiatLa.CheckedChanged += (s,e) => { if (rdGiatLa.Checked) LoadDichVuTheoLoai(3); };
+            rdSpa.CheckedChanged += (s,e) => { if (rdSpa.Checked) LoadDichVuTheoLoai(4); };
+            rdGiaiTri.CheckedChanged += (s,e) => { if (rdGiaiTri.Checked) LoadDichVuTheoLoai(5); };
+            btnThemDV.Click += BtnThemDV_Click;
+            btnThanhToan.Click += BtnThanhToan_Click;
+        }
+
+        private void LoadLoaiDichVu()
+        {
+            // if you want dynamic from DB: use _svc.GetLoaiDichVu(); currently mapping radio by index
+            rdAnUong.Checked = true; // default load
+        }
+
+        private void LoadDichVuTheoLoai(int loaiId)
+        {
+            _currentLoaiId = loaiId;
+            dgvDSDV.Rows.Clear();
+            foreach (var dv in _svc.GetDichVuTheoLoai(loaiId))
+            {
+                dgvDSDV.Rows.Add(null, dv.Name, dv.Unit, dv.Price);
+            }
+        }
+
+        private void EnsureBill()
+        {
+            int roomId;
+            if (!int.TryParse(txtSoPhong.Text, out roomId))
+            {
+                MessageBox.Show("Nhập số phòng hợp lệ (id phòng).", "Thông báo");
+                return;
+            }
+            _currentBillId = _svc.EnsureBillForRoom(roomId);
+        }
+
+        private void BtnThemDV_Click(object sender, EventArgs e)
+        {
+            if (dgvDSDV.CurrentRow == null)
+            {
+                MessageBox.Show("Chọn dịch vụ.");
+                return;
+            }
+
+            EnsureBill();
+            if (_currentBillId == 0)
+            {
+                MessageBox.Show("Không tạo được hóa đơn.");
+                return;
+            }
+
+            var row = dgvDSDV.CurrentRow;
+            var ten = Convert.ToString(row.Cells["Ten"].Value);
+            var dvt = Convert.ToString(row.Cells["DVT"].Value);
+            var gia = Convert.ToDecimal(row.Cells["Gia"].Value);
+            var qty = (int)nudSoLuong.Value;
+
+            // service id is not on grid; need fetch by name within current category
+            var ds = _svc.GetDichVuTheoLoai(_currentLoaiId);
+            var dv = ds.FirstOrDefault(x => x.Name == ten && x.Unit == dvt && x.Price == gia);
+            if (dv == null)
+            {
+                MessageBox.Show("Không tìm thấy dịch vụ.");
+                return;
+            }
+
+            int dvId = int.Parse(dv.Code);
+            _svc.AddServiceToBill(_currentBillId, dvId, qty, null);
+
+            // append to chi tiết grid simple view
+            int stt = dgvChiTiet.Rows.Count + 1;
+            dgvChiTiet.Rows.Add(stt, dvId, ten, DateTime.Now.ToString("dd/MM/yyyy"), gia, qty, gia*qty, "");
+        }
+
+        private void BtnThanhToan_Click(object sender, EventArgs e)
+        {
+            if (_currentBillId == 0)
+            {
+                MessageBox.Show("Chưa có hóa đơn.");
+                return;
+            }
+            var giam = (decimal)nudGiamGia.Value;
+            _svc.CloseBill(_currentBillId, giam);
+            MessageBox.Show("Đã thanh toán hóa đơn.");
+            _currentBillId = 0;
+            dgvChiTiet.Rows.Clear();
+        }
+    }
+}

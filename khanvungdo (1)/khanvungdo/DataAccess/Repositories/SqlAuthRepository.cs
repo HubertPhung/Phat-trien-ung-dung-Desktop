@@ -1,0 +1,25 @@
+using System.Data;
+using DataAccess.Db;
+
+namespace DataAccess.Repositories
+{
+    public class SqlAuthRepository
+    {
+        public bool Login(string tenTaiKhoan, string password)
+        {
+            using (var conn = SqlConnectionFactory.Create())
+            using (var cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = "USP_Login";
+                cmd.CommandType = CommandType.StoredProcedure;
+                var p1 = cmd.CreateParameter(); p1.ParameterName = "@TenTaiKhoan"; p1.Value = tenTaiKhoan; cmd.Parameters.Add(p1);
+                var p2 = cmd.CreateParameter(); p2.ParameterName = "@password"; p2.Value = password; cmd.Parameters.Add(p2);
+                conn.Open();
+                using (var reader = cmd.ExecuteReader())
+                {
+                    return reader.Read();
+                }
+            }
+        }
+    }
+}

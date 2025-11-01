@@ -8,3 +8,11 @@ D:\University\Phát triển ứng dụng Desktop\ChuDe4\ChuDe4\obj\Debug\Lab_Bas
 D:\University\Phát triển ứng dụng Desktop\ChuDe4\ChuDe4\obj\Debug\Lab_Basic_Command.csproj.CoreCompileInputs.cache
 D:\University\Phát triển ứng dụng Desktop\ChuDe4\ChuDe4\obj\Debug\ChuDe4.exe
 D:\University\Phát triển ứng dụng Desktop\ChuDe4\ChuDe4\obj\Debug\ChuDe4.pdb
+D:\University\Phát triển ứng dụng Desktop\ChuDe4\ChuDe4\obj\Debug\ChuDe4.FoodForm.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe4\ChuDe4\obj\Debug\ChuDe4.BillsForm.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe4\ChuDe4\obj\Debug\ChuDe4.BillDetailsForm.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe4\ChuDe4\obj\Debug\ChuDe4.MainForm.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe4\ChuDe4\obj\Debug\ChuDe4.AccountRolesForm.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe4\ChuDe4\obj\Debug\ChuDe4.BillCatalogForm.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe4\ChuDe4\obj\Debug\ChuDe4.BillLogForm.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe4\ChuDe4\obj\Debug\ChuDe4.AccountManager.resources

@@ -1,0 +1,15 @@
+﻿using System.Data.SqlClient;
+
+namespace WindowsFormsApp2.Infrastructure
+{
+    internal static class Db
+    {
+        private const string DefaultConnectionString = "Data Source=.;Initial Catalog=QuanLyDVKS;Integrated Security=True;MultipleActiveResultSets=True";
+        public static SqlConnection Open()
+        {
+            var conn = new SqlConnection(DefaultConnectionString);
+            conn.Open();
+            return conn;
+        }
+    }
+}

@@ -1,0 +1,15 @@
+﻿using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
+
+namespace DataAccess.Db
+{
+    public static class SqlConnectionFactory
+    {
+        public static IDbConnection Create()
+        {
+            var cs = ConfigurationManager.ConnectionStrings["QuanLyDVKS"].ConnectionString;
+            return new SqlConnection(cs);
+        }
+    }
+}

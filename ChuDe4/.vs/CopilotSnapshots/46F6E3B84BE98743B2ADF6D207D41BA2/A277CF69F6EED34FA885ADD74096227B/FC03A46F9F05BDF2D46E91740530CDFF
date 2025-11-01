@@ -1,0 +1,63 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Data.SqlClient;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace ChuDe4
+{
+    public partial class FoodForm : Form
+    {
+        public FoodForm()
+        {
+            InitializeComponent();
+        }
+
+        private void dgvFood_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        public void LoadFood(int categoryID)
+        {
+            // Tạo đối tượng kết nối
+            string connectionString = "server=.; database = RestaurantManagement; Integrated Security = true";
+            SqlConnection sqlConnection = new SqlConnection(connectionString);
+
+            // Tạo đối tượng thực thi lệnh
+            SqlCommand sqlCommand = sqlConnection.CreateCommand();
+
+            // Thiết lập lệnh truy vấn cho đối tượng command
+            sqlCommand.CommandText = "SELECT Name FROM Category where ID = " + categoryID;
+
+            // Mở kết nối
+            sqlConnection.Open();
+
+            // Gán tên nhóm sản phẩm cho tiêu đề
+            string categoryName = (string)sqlCommand.ExecuteScalar().ToString();
+            this.Text = "Danh sách các món ăn thuộc nhóm: " + categoryName;
+
+            sqlCommand.CommandText = "SELECT * FROM Food WHERE FoodCategoryID = " + categoryID;
+
+            // Tạo đối tượng DataAdapter
+            SqlDataAdapter da = new SqlDataAdapter(sqlCommand);
+
+            // Tạo đối tượng DataTable để chứa dữ liệu
+            DataTable dt = new DataTable("Food");
+            da.Fill(dt);
+
+            // Hiển thị dữ liệu lên DataGridView
+            dgvFood.DataSource = dt;
+
+            // Đóng kết nối
+            sqlConnection.Close();
+            sqlConnection.Dispose();
+            da.Dispose();
+        }
+    }
+}

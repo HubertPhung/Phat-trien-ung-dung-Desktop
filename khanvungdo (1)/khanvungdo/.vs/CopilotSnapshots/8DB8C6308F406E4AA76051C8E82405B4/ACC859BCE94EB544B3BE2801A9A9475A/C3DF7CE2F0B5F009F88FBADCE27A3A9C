@@ -1,0 +1,284 @@
+﻿using System;
+using System.Data;
+using System.Linq;
+using System.Windows.Forms;
+using System.Data.SqlClient;
+using WindowsFormsApp2.Infrastructure;
+
+namespace WindowsFormsApp2
+{
+    public partial class frmHome : Form
+    {
+        private int _currentLoaiId = 1;
+        private int _currentBillId = 0;
+        private int? _currentCustomerId = null;
+
+        public frmHome()
+        {
+            InitializeComponent();
+            WireEvents();
+            rdAnUong.Checked = true;
+            LoadDichVuTheoLoai(_currentLoaiId);
+        }
+
+        private void WireEvents()
+        {
+            rdAnUong.CheckedChanged += (s,e) => { if (rdAnUong.Checked) LoadDichVuTheoLoai(1); };
+            rdDiLai.CheckedChanged += (s,e) => { if (rdDiLai.Checked) LoadDichVuTheoLoai(2); };
+            rdGiatLa.CheckedChanged += (s,e) => { if (rdGiatLa.Checked) LoadDichVuTheoLoai(3); };
+            rdSpa.CheckedChanged += (s,e) => { if (rdSpa.Checked) LoadDichVuTheoLoai(4); };
+            rdGiaiTri.CheckedChanged += (s,e) => { if (rdGiaiTri.Checked) LoadDichVuTheoLoai(5); };
+            btnThemDV.Click += BtnThemDV_Click;
+            btnThanhToan.Click += BtnThanhToan_Click;
+            btnThemKH.Click += BtnThemKH_Click;
+            btnHuyDon.Click += BtnHuyDon_Click;
+            btnLuu.Click += BtnLuu_Click;
+            btnThoat.Click += (s,e)=> this.Close();
+            nudGiamGia.ValueChanged += (s,e)=> RecalcThanhTienLocal();
+        }
+
+        private void LoadDichVuTheoLoai(int loaiId)
+        {
+            _currentLoaiId = loaiId;
+            dgvDSDV.Rows.Clear();
+            using (var conn = Db.Open())
+            using (var cmd = new SqlCommand("USP_XuatDichVuTheoLoai", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@ID", loaiId);
+                using (var rd = cmd.ExecuteReader())
+                {
+                    while (rd.Read())
+                    {
+                        dgvDSDV.Rows.Add(null, rd["TenDV"], rd["DVT"], rd["DonGia"]);
+                    }
+                }
+            }
+        }
+
+        private bool EnsureBill()
+        {
+            int roomId;
+            if (!int.TryParse(txtSoPhong.Text, out roomId))
+            {
+                MessageBox.Show("Nhập ID phòng (số).", "Thông báo");
+                return false;
+            }
+
+            using (var conn = Db.Open())
+            using (var cmd = new SqlCommand("USP_ThemHoaDon", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@idPhong", roomId);
+                var dt = new DataTable();
+                using (var da = new SqlDataAdapter(cmd))
+                {
+                    da.Fill(dt);
+                }
+                if (dt.Rows.Count > 0)
+                {
+                    _currentBillId = Convert.ToInt32(dt.Rows[0]["id"]);
+                    txtNgayLap.Text = Convert.ToDateTime(dt.Rows[0]["NgayLapHD"]).ToString("dd/MM/yyyy HH:mm");
+                    RefreshBillUI();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void RefreshBillUI()
+        {
+            if (_currentBillId <= 0) return;
+
+            // Load chi tiết
+            dgvChiTiet.Rows.Clear();
+            decimal tongDV = 0;
+            using (var conn = Db.Open())
+            using (var cmd = new SqlCommand("USP_XuatDS_IDHoaDon", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@billID", _currentBillId);
+                using (var rd = cmd.ExecuteReader())
+                {
+                    int stt = 1;
+                    while (rd.Read())
+                    {
+                        string ten = rd["TenDV"].ToString();
+                        string dvt = rd["DVT"].ToString();
+                        int sl = Convert.ToInt32(rd["SoLuong"]);
+                        decimal dongia = Convert.ToDecimal(rd["DonGia"]);
+                        decimal thanhtien = rd["ThanhTien"] == DBNull.Value ? (sl * dongia) : Convert.ToDecimal(rd["ThanhTien"]);
+                        tongDV += thanhtien;
+                        dgvChiTiet.Rows.Add(stt++, null, ten, DateTime.Now.ToString("dd/MM/yyyy"), dongia, sl, thanhtien, "");
+                    }
+                }
+            }
+
+            txtTongDV.Text = string.Format("{0:N0}", tongDV);
+            txtTongTien.Text = txtTongDV.Text; // không có tiền phòng => tổng tiền = tổng dịch vụ
+            RecalcThanhTienLocal();
+        }
+
+        private void RecalcThanhTienLocal()
+        {
+            decimal tong = 0;
+            decimal.TryParse(txtTongTien.Text.Replace(",",""), out tong);
+            var giam = (decimal)nudGiamGia.Value;
+            var thanh = Math.Max(0, tong * (1 - (giam / 100m)));
+            txtThanhTien.Text = string.Format("{0:N0}", thanh);
+        }
+
+        private void BtnThemDV_Click(object sender, EventArgs e)
+        {
+            if (dgvDSDV.CurrentRow == null)
+            {
+                MessageBox.Show("Chọn dịch vụ.");
+                return;
+            }
+            if (!EnsureBill()) return;
+
+            var row = dgvDSDV.CurrentRow;
+            var ten = Convert.ToString(row.Cells["Ten"].Value);
+            var dvt = Convert.ToString(row.Cells["DVT"].Value);
+            var gia = Convert.ToDecimal(row.Cells["Gia"].Value);
+            var qty = (int)nudSoLuong.Value;
+            var ghiChu = string.IsNullOrWhiteSpace(txtGhiChu.Text) ? (object)DBNull.Value : txtGhiChu.Text.Trim();
+
+            // Lấy id dịch vụ theo Ten + DVT + DonGia trong loại hiện tại
+            int dvId = 0;
+            using (var conn = Db.Open())
+            using (var cmd = new SqlCommand("SELECT TOP 1 id FROM DSDichVu WHERE TenDV=@Ten AND DVT=@DVT AND DonGia=@Gia AND idLoaiDichVu=@Loai", conn))
+            {
+                cmd.Parameters.AddWithValue("@Ten", ten);
+                cmd.Parameters.AddWithValue("@DVT", dvt);
+                cmd.Parameters.AddWithValue("@Gia", gia);
+                cmd.Parameters.AddWithValue("@Loai", _currentLoaiId);
+                var obj = cmd.ExecuteScalar();
+                if (obj != null) dvId = Convert.ToInt32(obj);
+            }
+            if (dvId == 0)
+            {
+                MessageBox.Show("Không tìm thấy dịch vụ.");
+                return;
+            }
+
+            using (var conn = Db.Open())
+            using (var cmd = new SqlCommand("USP_InsertChiTietHD", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@idHoaDon", _currentBillId);
+                cmd.Parameters.AddWithValue("@idDichVu", dvId);
+                cmd.Parameters.AddWithValue("@soLuong", qty);
+                cmd.Parameters.AddWithValue("@ghiChu", ghiChu);
+                cmd.ExecuteNonQuery();
+            }
+
+            RefreshBillUI();
+        }
+
+        private void BtnThanhToan_Click(object sender, EventArgs e)
+        {
+            if (_currentBillId == 0)
+            {
+                MessageBox.Show("Chưa có hóa đơn.");
+                return;
+            }
+            var giam = (decimal)nudGiamGia.Value;
+            using (var conn = Db.Open())
+            using (var cmd = new SqlCommand("USP_DienHoaDon", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@billID", _currentBillId);
+                cmd.Parameters.AddWithValue("@giamgia", giam);
+                cmd.ExecuteNonQuery();
+            }
+            MessageBox.Show("Đã thanh toán hóa đơn.");
+            _currentBillId = 0;
+            dgvChiTiet.Rows.Clear();
+            txtTongDV.Clear(); txtTongTien.Clear(); txtThanhTien.Clear();
+        }
+
+        private void BtnHuyDon_Click(object sender, EventArgs e)
+        {
+            if (_currentBillId == 0)
+            {
+                MessageBox.Show("Không có hóa đơn để hủy.");
+                return;
+            }
+            if (MessageBox.Show("Hủy hóa đơn hiện tại?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+
+            int roomId;
+            int.TryParse(txtSoPhong.Text, out roomId);
+
+            using (var conn = Db.Open())
+            using (var tran = conn.BeginTransaction())
+            {
+                try
+                {
+                    using (var cmd = new SqlCommand("DELETE dbo.ChiTietHD WHERE MaHD=@id", conn, tran))
+                    {
+                        cmd.Parameters.AddWithValue("@id", _currentBillId);
+                        cmd.ExecuteNonQuery();
+                    }
+                    using (var cmd = new SqlCommand("DELETE dbo.HoaDon WHERE id=@id AND status=0", conn, tran))
+                    {
+                        cmd.Parameters.AddWithValue("@id", _currentBillId);
+                        cmd.ExecuteNonQuery();
+                    }
+                    if (roomId > 0)
+                    {
+                        using (var cmd = new SqlCommand("UPDATE dbo.Phong SET status=N'Trống' WHERE id=@p", conn, tran))
+                        {
+                            cmd.Parameters.AddWithValue("@p", roomId);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                    tran.Commit();
+                }
+                catch
+                {
+                    tran.Rollback();
+                    throw;
+                }
+            }
+
+            _currentBillId = 0;
+            dgvChiTiet.Rows.Clear();
+            txtTongDV.Clear(); txtTongTien.Clear(); txtThanhTien.Clear();
+            MessageBox.Show("Đã hủy hóa đơn.");
+        }
+
+        private void BtnLuu_Click(object sender, EventArgs e)
+        {
+            // Lưu ghi chú vào các chi tiết mới thêm thì đã lưu trong BtnThemDV; có thể hiển thị thông báo
+            MessageBox.Show("Đã lưu thông tin tạm.");
+        }
+
+        private void BtnThemKH_Click(object sender, EventArgs e)
+        {
+            // Gán khách hàng cho phòng đang nhập, hiển thị lại thông tin
+            using (var f = new frmChonKhachHang())
+            {
+                if (f.ShowDialog(this) == DialogResult.OK && f.SelectedCustomer != null)
+                {
+                    _currentCustomerId = f.SelectedCustomer.Id;
+                    txtKhachHang.Text = f.SelectedCustomer.TenKH;
+                    txtCMND.Text = f.SelectedCustomer.CMND_CCCD;
+                    txtSoDT.Text = f.SelectedCustomer.SDT;
+
+                    int roomId;
+                    if (int.TryParse(txtSoPhong.Text, out roomId))
+                    {
+                        using (var conn = Db.Open())
+                        using (var cmd = new SqlCommand("UPDATE dbo.Phong SET MaKH=@kh WHERE id=@p", conn))
+                        {
+                            cmd.Parameters.AddWithValue("@kh", _currentCustomerId);
+                            cmd.Parameters.AddWithValue("@p", roomId);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,26 @@
+﻿using System.Collections.Generic;
+using System.Linq;
+using BussinessLogic.Interfaces;
+using BussinessLogic.Models;
+
+namespace DataAccess.Repositories
+{
+    public class InMemoryServiceRepository : IServiceRepository
+    {
+        private readonly List<ServiceItem> _services = new List<ServiceItem>
+        {
+            new ServiceItem{ Code = "F01", Name = "Bữa sáng", Unit = "suất", Price = 80000 },
+            new ServiceItem{ Code = "S01", Name = "Spa", Unit = "lần", Price = 200000 },
+            new ServiceItem{ Code = "T01", Name = "Đưa đón sân bay", Unit = "chuyến", Price = 300000 },
+        };
+
+        public IEnumerable<ServiceItem> GetByCategory(string category)
+        {
+            // For demo purposes, filter by prefix
+            if (string.IsNullOrWhiteSpace(category)) return _services;
+            return _services.Where(s => s.Code.StartsWith(category));
+        }
+
+        public ServiceItem GetByCode(string code) => _services.FirstOrDefault(s => s.Code == code);
+    }
+}

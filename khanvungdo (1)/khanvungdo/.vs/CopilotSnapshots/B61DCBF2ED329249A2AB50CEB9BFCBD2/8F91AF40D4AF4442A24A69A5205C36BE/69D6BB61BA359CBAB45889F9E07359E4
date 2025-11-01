@@ -1,0 +1,12 @@
+﻿namespace WindowsFormsApp2.Security
+{
+    public static class UserContext
+    {
+        public static string MaTaiKhoan { get; set; }
+        public static string TenTaiKhoan { get; set; }
+        public static int Type { get; set; } // 1: admin, 0: staff
+        public static string SessionId { get; set; }
+        public static System.DateTime? LoginTime { get; set; }
+        public static string ClientIp { get; set; }
+    }
+}

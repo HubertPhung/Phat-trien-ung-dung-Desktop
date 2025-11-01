@@ -1,0 +1,386 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Globalization;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
+using WindowsFormsApp2.Infrastructure;
+using WindowsFormsApp2.Security;
+
+namespace WindowsFormsApp2
+{
+    public partial class frmKhachHang : Form
+    {
+        private bool _isAdminOrStaff; // admin or staff can access
+        private bool _isAdmin;        // only admin can edit/delete
+        private bool _dirtyInputs;
+
+        public frmKhachHang()
+        {
+            InitializeComponent();
+            Load += FrmKhachHang_Load;
+            btnThem.Click += BtnThem_Click;
+            btnSua.Click += BtnSua_Click;
+            btnXoa.Click += BtnXoa_Click;
+            btnTim.Click += BtnTim_Click;
+            lvKhachHang.SelectedIndexChanged += LvKhachHang_SelectedIndexChanged;
+            this.FormClosing += FrmKhachHang_FormClosing;
+
+            txtTenKH.TextChanged += TxtTenKH_TextChanged;
+            mtxtCMND.TextChanged += MtxtCMND_TextChanged;
+            mtxtSDTKH.TextChanged += MtxtSDTKH_TextChanged;
+            txtDiaChiKH.TextChanged += (s,e)=> _dirtyInputs = true;
+        }
+
+        private void FrmKhachHang_Load(object sender, EventArgs e)
+        {
+            _isAdmin = UserContext.Type == 1;
+            _isAdminOrStaff = (UserContext.Type == 1 || UserContext.Type == 0);
+            if (!_isAdminOrStaff)
+            {
+                MessageBox.Show("Bạn không có quyền truy cập");
+                SetButtonsEnabled(false);
+                return;
+            }
+
+            try { using (var c = Db.Open()) { } }
+            catch
+            {
+                MessageBox.Show("Mất kết nối database", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                SetButtonsEnabled(false);
+                return;
+            }
+
+            try { mtxtCMND.MaxLength = 12; } catch { }
+            try { mtxtSDTKH.MaxLength = 12; } catch { }
+
+            LoadKhachHang();
+            ResetInputs();
+            UpdateButtonsOnSelection(false);
+        }
+
+        private void SetButtonsEnabled(bool enabled)
+        {
+            btnThem.Enabled = enabled && _isAdminOrStaff;
+            btnSua.Enabled = false;
+            btnXoa.Enabled = false;
+            btnTim.Enabled = enabled;
+        }
+
+        private void ResetInputs()
+        {
+            txtMaKH.Clear();
+            txtTenKH.Clear();
+            mtxtCMND.Clear();
+            txtDiaChiKH.Clear();
+            mtxtSDTKH.Clear();
+            _dirtyInputs = false;
+
+            try
+            {
+                var cb = this.GetType().GetField("cbLoaiKH", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public)?.GetValue(this) as ComboBox;
+                if (cb != null)
+                {
+                    if (cb.Items.Count == 0)
+                    {
+                        cb.Items.AddRange(new object[] { "Khách lẻ", "VIP" });
+                    }
+                    cb.SelectedIndex = 0;
+                }
+            }
+            catch { }
+        }
+
+        private void UpdateButtonsOnSelection(bool hasSelection)
+        {
+            btnThem.Enabled = _isAdminOrStaff;
+            btnSua.Enabled = hasSelection && _isAdmin;
+            btnXoa.Enabled = hasSelection && _isAdmin;
+        }
+
+        private void LoadKhachHang(string keyword = null, int? id = null)
+        {
+            lvKhachHang.Items.Clear();
+            string sql = @"SELECT id, TenKH, CMND_CCCD, DiaChi, SDT, LoaiKH, GhiChu FROM dbo.KhachHang
+                            WHERE (@kw IS NULL OR TenKH LIKE '%' + @kw + '%')
+                              AND (@id IS NULL OR id = @id)
+                            ORDER BY TenKH";
+            using (var conn = Db.Open())
+            using (var cmd = new SqlCommand(sql, conn))
+            {
+                cmd.Parameters.AddWithValue("@kw", (object)keyword ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@id", (object)id ?? DBNull.Value);
+                using (var rd = cmd.ExecuteReader())
+                {
+                    while (rd.Read())
+                    {
+                        var item = new ListViewItem(Convert.ToString(rd["id"])) { BackColor = System.Drawing.Color.White };
+                        item.SubItems.Add(rd["TenKH"].ToString());
+                        item.SubItems.Add(rd["CMND_CCCD"].ToString());
+                        item.SubItems.Add(rd["DiaChi"] == DBNull.Value ? "" : rd["DiaChi"].ToString());
+                        item.SubItems.Add(rd["SDT"] == DBNull.Value ? "" : rd["SDT"].ToString());
+                        item.SubItems.Add(rd["LoaiKH"].ToString());
+                        item.SubItems.Add(rd["GhiChu"] == DBNull.Value ? "" : rd["GhiChu"].ToString());
+                        lvKhachHang.Items.Add(item);
+                    }
+                }
+            }
+        }
+
+        private void LvKhachHang_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            foreach (ListViewItem itAll in lvKhachHang.Items) itAll.BackColor = System.Drawing.Color.White;
+            if (lvKhachHang.SelectedItems.Count == 0)
+            {
+                ResetInputs();
+                UpdateButtonsOnSelection(false);
+                return;
+            }
+
+            var it = lvKhachHang.SelectedItems[0];
+            it.BackColor = System.Drawing.Color.AliceBlue;
+
+            txtMaKH.Text = it.SubItems[0].Text;
+            txtTenKH.Text = it.SubItems[1].Text;
+            mtxtCMND.Text = it.SubItems[2].Text;
+            txtDiaChiKH.Text = it.SubItems[3].Text;
+            mtxtSDTKH.Text = it.SubItems[4].Text;
+
+            try
+            {
+                var cb = this.GetType().GetField("cbLoaiKH", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public)?.GetValue(this) as ComboBox;
+                if (cb != null)
+                {
+                    var loai = it.SubItems.Count > 5 ? it.SubItems[5].Text : "Khách lẻ";
+                    int idx = cb.Items.IndexOf(loai);
+                    if (idx >= 0) cb.SelectedIndex = idx;
+                }
+            }
+            catch { }
+
+            UpdateButtonsOnSelection(true);
+            _dirtyInputs = false;
+        }
+
+        private void BtnTim_Click(object sender, EventArgs e)
+        {
+            int id;
+            if (int.TryParse(txtMaKH.Text.Trim(), out id)) LoadKhachHang(null, id);
+            else LoadKhachHang(string.IsNullOrWhiteSpace(txtTenKH.Text) ? null : txtTenKH.Text.Trim(), null);
+        }
+
+        private bool ValidateInputs(out string ten, out string cmnd, out string sdt, out string diachi, out string loaikh)
+        {
+            ten = txtTenKH.Text.Trim();
+            cmnd = new string(mtxtCMND.Text.Where(char.IsDigit).ToArray());
+            sdt = new string(mtxtSDTKH.Text.Where(char.IsDigit).ToArray());
+            diachi = string.IsNullOrWhiteSpace(txtDiaChiKH.Text) ? null : txtDiaChiKH.Text.Trim();
+            loaikh = "Khách lẻ";
+            try
+            {
+                var cb = this.GetType().GetField("cbLoaiKH", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public)?.GetValue(this) as ComboBox;
+                if (cb != null && cb.SelectedItem != null) loaikh = cb.SelectedItem.ToString();
+            }
+            catch { }
+
+            if (string.IsNullOrWhiteSpace(ten)) { MessageBox.Show("Vui lòng nhập Tên khách hàng"); return false; }
+            if (string.IsNullOrWhiteSpace(cmnd) || !cmnd.All(char.IsDigit)) { MessageBox.Show("CMND/CCCD phải là số"); return false; }
+            if (!(cmnd.Length == 9 || cmnd.Length == 12)) { MessageBox.Show("CMND phải 9 số, CCCD phải 12 số"); return false; }
+            if (!string.IsNullOrWhiteSpace(sdt))
+            {
+                if (!sdt.All(char.IsDigit) || sdt.Length < 10 || sdt.Length > 12 || sdt[0] != '0')
+                { MessageBox.Show("Số điện thoại không hợp lệ"); return false; }
+            }
+            return true;
+        }
+
+        private void BtnThem_Click(object sender, EventArgs e)
+        {
+            if (!_isAdminOrStaff) { MessageBox.Show("Bạn không có quyền truy cập"); return; }
+            if (!ValidateInputs(out var ten, out var cmnd, out var sdt, out var diachi, out var loaikh)) return;
+
+            using (var conn = Db.Open())
+            {
+                using (var exists = new SqlCommand("SELECT COUNT(*) FROM dbo.KhachHang WHERE CMND_CCCD=@cm", conn))
+                {
+                    exists.Parameters.AddWithValue("@cm", cmnd);
+                    if ((int)exists.ExecuteScalar() > 0)
+                    {
+                        MessageBox.Show("CMND/CCCD đã tồn tại trong hệ thống");
+                        mtxtCMND.Focus();
+                        return;
+                    }
+                }
+
+                using (var cmd = new SqlCommand(@"INSERT dbo.KhachHang(TenKH, CMND_CCCD, DiaChi, SDT, LoaiKH)
+                                                  OUTPUT INSERTED.id
+                                                  VALUES(@Ten,@CM,@DiaChi,@SDT,@Loai)", conn))
+                {
+                    cmd.Parameters.AddWithValue("@Ten", ten);
+                    cmd.Parameters.AddWithValue("@CM", cmnd);
+                    cmd.Parameters.AddWithValue("@DiaChi", (object)diachi ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@SDT", string.IsNullOrWhiteSpace(sdt) ? (object)DBNull.Value : (object)sdt);
+                    cmd.Parameters.AddWithValue("@Loai", loaikh);
+                    try
+                    {
+                        var newIdObj = cmd.ExecuteScalar();
+                        var newId = Convert.ToInt32(newIdObj);
+                        MessageBox.Show("Thêm khách hàng mới thành công!");
+                        ResetInputs();
+                        LoadKhachHang();
+                        foreach (ListViewItem it in lvKhachHang.Items)
+                        {
+                            if (it.SubItems[0].Text == newId.ToString())
+                            { it.Selected = true; it.Focused = true; it.EnsureVisible(); break; }
+                        }
+                    }
+                    catch (SqlException ex)
+                    {
+                        MessageBox.Show("Lỗi khi thêm khách hàng: " + ex.Message);
+                    }
+                }
+            }
+        }
+
+        private void BtnSua_Click(object sender, EventArgs e)
+        {
+            if (!_isAdmin) { MessageBox.Show("Bạn không có quyền truy cập"); return; }
+            int id; if (!int.TryParse(txtMaKH.Text.Trim(), out id)) { MessageBox.Show("Phải chọn khách hàng để sửa."); return; }
+            if (!ValidateInputs(out var ten, out var cmnd, out var sdt, out var diachi, out var loaikh)) return;
+
+            if (MessageBox.Show("Bạn có chắc muốn cập nhật thông tin khách hàng này?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+
+            using (var conn = Db.Open())
+            {
+                using (var warn = new SqlCommand(@"SELECT COUNT(1) FROM dbo.HoaDon hd
+                                                  JOIN dbo.Phong p ON p.id = hd.MaPhong
+                                                  WHERE p.MaKH = @kh", conn))
+                {
+                    warn.Parameters.AddWithValue("@kh", id);
+                    if ((int)warn.ExecuteScalar() > 0)
+                        MessageBox.Show("Khách hàng đang có hóa đơn. Việc thay đổi có thể ảnh hưởng đến lịch sử giao dịch.");
+                }
+
+                using (var cmd = new SqlCommand(@"UPDATE dbo.KhachHang
+                                            SET TenKH=@Ten, CMND_CCCD=@CMND, DiaChi=@DiaChi, SDT=@SDT, LoaiKH=@Loai
+                                            WHERE id=@Id", conn))
+                {
+                    cmd.Parameters.AddWithValue("@Id", id);
+                    cmd.Parameters.AddWithValue("@Ten", ten);
+                    cmd.Parameters.AddWithValue("@CMND", cmnd);
+                    cmd.Parameters.AddWithValue("@DiaChi", (object)diachi ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@SDT", string.IsNullOrWhiteSpace(sdt) ? (object)DBNull.Value : (object)sdt);
+                    cmd.Parameters.AddWithValue("@Loai", loaikh);
+                    try
+                    {
+                        var rows = cmd.ExecuteNonQuery();
+                        if (rows == 0) { MessageBox.Show("Không tìm thấy KH để sửa."); return; }
+                        MessageBox.Show("Cập nhật khách hàng thành công!");
+                        LoadKhachHang();
+                        foreach (ListViewItem it in lvKhachHang.Items)
+                        {
+                            if (it.SubItems[0].Text == id.ToString())
+                            { it.Selected = true; it.Focused = true; it.EnsureVisible(); break; }
+                        }
+                        _dirtyInputs = false;
+                    }
+                    catch (SqlException ex)
+                    {
+                        MessageBox.Show("Lỗi khi sửa: " + ex.Message);
+                    }
+                }
+            }
+        }
+
+        private void BtnXoa_Click(object sender, EventArgs e)
+        {
+            if (!_isAdmin) { MessageBox.Show("Bạn không có quyền truy cập"); return; }
+            var ids = new List<int>();
+            foreach (ListViewItem it in lvKhachHang.Items)
+                if (it.Checked) { int id; if (int.TryParse(it.SubItems[0].Text, out id)) ids.Add(id); }
+            if (ids.Count == 0 && lvKhachHang.SelectedItems.Count > 0)
+            { int id; if (int.TryParse(lvKhachHang.SelectedItems[0].SubItems[0].Text, out id)) ids.Add(id); }
+            if (ids.Count == 0) { MessageBox.Show("Chọn ít nhất một KH để xóa."); return; }
+
+            using (var conn = Db.Open())
+            using (var hasInvoice = new SqlCommand(@"SELECT COUNT(1) FROM dbo.HoaDon hd
+                                                    JOIN dbo.Phong p ON p.id = hd.MaPhong
+                                                    WHERE p.MaKH=@kh", conn))
+            using (var del = new SqlCommand("DELETE dbo.KhachHang WHERE id=@Id", conn))
+            {
+                hasInvoice.Parameters.Add("@kh", SqlDbType.Int);
+                del.Parameters.Add("@Id", SqlDbType.Int);
+                foreach (var id in ids.ToList())
+                {
+                    hasInvoice.Parameters["@kh"].Value = id;
+                    if ((int)hasInvoice.ExecuteScalar() > 0)
+                    {
+                        MessageBox.Show($"Không thể xóa khách hàng ID {id} vì đang có hóa đơn trong hệ thống.");
+                        ids.Remove(id);
+                    }
+                }
+                if (ids.Count == 0) return;
+                if (MessageBox.Show($"Bạn có chắc muốn xóa {ids.Count} khách hàng đã chọn? Dữ liệu không thể khôi phục!", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+                try
+                {
+                    foreach (var id in ids) { del.Parameters["@Id"].Value = id; del.ExecuteNonQuery(); }
+                    MessageBox.Show("Xóa khách hàng thành công!");
+                    ResetInputs();
+                    LoadKhachHang();
+                }
+                catch (SqlException ex)
+                { MessageBox.Show("Không thể xóa vì khách hàng đang có giao dịch trong hệ thống\nChi tiết: " + ex.Message); }
+            }
+        }
+
+        private void TxtTenKH_TextChanged(object sender, EventArgs e)
+        {
+            _dirtyInputs = true;
+            if (!txtTenKH.Focused) return;
+            var caret = txtTenKH.SelectionStart;
+            var raw = Regex.Replace(txtTenKH.Text, @"[^\p{L} ]+", "");
+            var text = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(raw.ToLower());
+            if (text != txtTenKH.Text) { txtTenKH.Text = text; txtTenKH.SelectionStart = Math.Min(caret, txtTenKH.Text.Length); }
+        }
+
+        private void MtxtCMND_TextChanged(object sender, EventArgs e)
+        {
+            _dirtyInputs = true;
+            var digits = new string(mtxtCMND.Text.Where(char.IsDigit).ToArray());
+            string formatted = digits.Length <= 9 
+                ? Regex.Replace(digits, @"(\d{3})(\d{0,3})(\d{0,3})", m => string.Join("-", new[] { m.Groups[1].Value, m.Groups[2].Value, m.Groups[3].Value }.Where(s => s.Length > 0)))
+                : Regex.Replace(digits, @"(\d{3})(\d{0,3})(\d{0,3})(\d{0,3})", m => string.Join("-", new[] { m.Groups[1].Value, m.Groups[2].Value, m.Groups[3].Value, m.Groups[4].Value }.Where(s => s.Length > 0)));
+            int caret = mtxtCMND.SelectionStart; mtxtCMND.Text = formatted; mtxtCMND.SelectionStart = Math.Min(caret, mtxtCMND.Text.Length);
+            mtxtCMND.BackColor = (digits.Length == 9 || digits.Length == 12) ? System.Drawing.Color.White : System.Drawing.Color.MistyRose;
+        }
+
+        private void MtxtSDTKH_TextChanged(object sender, EventArgs e)
+        {
+            _dirtyInputs = true;
+            var digits = new string(mtxtSDTKH.Text.Where(char.IsDigit).ToArray());
+            string formatted = digits.Length >= 10
+                ? Regex.Replace(digits, @"(\d{0,3})(\d{0,3})(\d{0,4}).*", m => { var p1 = m.Groups[1].Value; var p2 = m.Groups[2].Value; var p3 = m.Groups[3].Value; return p3.Length > 0 ? $"({p1}) {p2}-{p3}" : (p2.Length > 0 ? $"({p1}) {p2}" : p1); })
+                : digits;
+            int caret = mtxtSDTKH.SelectionStart; mtxtSDTKH.Text = formatted; mtxtSDTKH.SelectionStart = Math.Min(caret, mtxtSDTKH.Text.Length);
+            mtxtSDTKH.BackColor = (digits.Length == 0 || ((digits.Length >= 10 && digits.Length <= 11) && digits.StartsWith("0"))) ? System.Drawing.Color.White : System.Drawing.Color.MistyRose;
+        }
+
+        private void FrmKhachHang_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (_dirtyInputs)
+            {
+                var ans = MessageBox.Show("Bạn có thay đổi chưa lưu. Có muốn lưu trước khi đóng?", "Xác nhận", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+                if (ans == DialogResult.Cancel) { e.Cancel = true; return; }
+                if (ans == DialogResult.Yes)
+                {
+                    if (string.IsNullOrWhiteSpace(txtMaKH.Text)) BtnThem_Click(this, EventArgs.Empty);
+                    else BtnSua_Click(this, EventArgs.Empty);
+                }
+            }
+        }
+
+ 
+    }
+}

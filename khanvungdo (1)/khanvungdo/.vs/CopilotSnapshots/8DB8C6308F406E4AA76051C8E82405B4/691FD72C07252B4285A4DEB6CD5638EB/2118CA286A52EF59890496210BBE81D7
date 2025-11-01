@@ -1,0 +1,345 @@
+﻿using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
+using WindowsFormsApp2.Infrastructure;
+using WindowsFormsApp2.Security;
+
+namespace WindowsFormsApp2
+{
+    public partial class frmTaiKhoan : Form
+    {
+        private bool _canAdmin;
+        private string _currentUser;
+
+        public frmTaiKhoan()
+        {
+            InitializeComponent();
+            Load += FrmTaiKhoan_Load;
+            btnThem.Click += BtnThem_Click;
+            btnCapNhat.Click += BtnCapNhat_Click;
+            btnXoa.Click += BtnXoa_Click;
+            btnTim.Click += BtnTim_Click;
+            guna2DataGridView1.SelectionChanged += Guna2DataGridView1_SelectionChanged;
+            guna2DataGridView1.CellFormatting += Guna2DataGridView1_CellFormatting; // mask password
+            this.FormClosing += FrmTaiKhoan_FormClosing;
+
+            // Mask input password
+            try { txtMatKhau.UseSystemPasswordChar = true; } catch { }
+            txtMatKhau.TextChanged += TxtMatKhau_TextChanged;
+        }
+
+        private void FrmTaiKhoan_Load(object sender, EventArgs e)
+        {
+            _currentUser = UserContext.TenTaiKhoan;
+            // Strict access: only Admin
+            if (UserContext.Type != 1)
+            {
+                try
+                {
+                    using (var conn = Db.Open())
+                    using (var cmd = new SqlCommand("SELECT [Type] FROM dbo.TaiKhoan WHERE TenTaiKhoan=@u", conn))
+                    {
+                        cmd.Parameters.AddWithValue("@u", _currentUser ?? (object)DBNull.Value);
+                        var obj = cmd.ExecuteScalar();
+                        _canAdmin = obj != null && Convert.ToInt32(obj) == 1;
+                    }
+                }
+                catch { _canAdmin = false; }
+            }
+            else _canAdmin = true;
+
+            if (!_canAdmin)
+            {
+                MessageBox.Show("Chỉ Admin được quản lý tài khoản");
+                this.BeginInvoke(new Action(Close));
+                return;
+            }
+
+            // DB connectivity
+            try { using (var c = Db.Open()) { } }
+            catch { MessageBox.Show("Mất kết nối database"); BeginInvoke(new Action(Close)); return; }
+
+            // Grid format
+            guna2DataGridView1.ReadOnly = true;
+            guna2DataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+
+            // Load data
+            LoadAccounts();
+
+            // Reset form
+            ResetInputs();
+            SetButtonsState(false);
+        }
+
+        private void Guna2DataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (guna2DataGridView1.Columns[e.ColumnIndex].Name == "Column3" && e.Value != null)
+            {
+                // Hide real password in grid
+                e.Value = new string('•', 8);
+                e.FormattingApplied = true;
+            }
+            else if (guna2DataGridView1.Columns[e.ColumnIndex].Name == "Column4" && e.Value != null)
+            {
+                var text = Convert.ToString(e.Value);
+                if (text == "1" || text.Equals("Admin", StringComparison.OrdinalIgnoreCase)) e.Value = "Admin";
+                else if (text == "0" || text.Equals("Staff", StringComparison.OrdinalIgnoreCase) || text.Equals("Nhân viên", StringComparison.OrdinalIgnoreCase)) e.Value = "Nhân viên";
+                e.FormattingApplied = true;
+            }
+        }
+
+        private void LoadAccounts(string ma = null, string ten = null, string role = null)
+        {
+            guna2DataGridView1.Rows.Clear();
+            using (var conn = Db.Open())
+            using (var cmd = new SqlCommand(@"SELECT MaTaiKhoan, TenTaiKhoan, PassWord, [Type]
+                                              FROM dbo.TaiKhoan
+                                              WHERE (@ma IS NULL OR MaTaiKhoan = @ma)
+                                                AND (@ten IS NULL OR TenTaiKhoan LIKE '%' + @ten + '%')
+                                                AND (@role IS NULL OR [Type] = CASE WHEN @role = N'Admin' THEN 1 ELSE 0 END)
+                                              ORDER BY TenTaiKhoan", conn))
+            {
+                cmd.Parameters.AddWithValue("@ma", (object)ma ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@ten", (object)ten ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@role", (object)role ?? DBNull.Value);
+                using (var rd = cmd.ExecuteReader())
+                {
+                    while (rd.Read())
+                    {
+                        int idx = guna2DataGridView1.Rows.Add();
+                        var row = guna2DataGridView1.Rows[idx];
+                        row.Cells["Column1"].Value = rd["MaTaiKhoan"].ToString();
+                        row.Cells["Column2"].Value = rd["TenTaiKhoan"].ToString();
+                        // store real pass in Tag, mask shown in CellFormatting
+                        var realPass = rd["PassWord"].ToString();
+                        row.Cells["Column3"].Value = realPass;
+                        row.Cells["Column3"].Tag = realPass;
+                        row.Cells["Column4"].Value = Convert.ToInt32(rd["Type"]) == 1 ? "Admin" : "Nhân viên";
+                    }
+                }
+            }
+        }
+
+        private void Guna2DataGridView1_SelectionChanged(object sender, EventArgs e)
+        {
+            if (guna2DataGridView1.SelectedRows.Count == 0) { SetButtonsState(false); return; }
+            var row = guna2DataGridView1.SelectedRows[0];
+            txtMaTaiKhoan.Text = Convert.ToString(row.Cells["Column1"].Value);
+            txtTenTaiKhoan.Text = Convert.ToString(row.Cells["Column2"].Value);
+            // keep masked in textbox
+            var realPass = Convert.ToString(row.Cells["Column3"].Tag ?? row.Cells["Column3"].Value);
+            txtMatKhau.Text = realPass; // still masked by UseSystemPasswordChar
+            txtChucVu.Text = Convert.ToString(row.Cells["Column4"].Value);
+
+            // Buttons
+            var isCurrent = string.Equals(txtTenTaiKhoan.Text, _currentUser, StringComparison.OrdinalIgnoreCase);
+            btnXoa.Enabled = !isCurrent; // cannot delete current user
+            btnCapNhat.Enabled = true;
+            btnThem.Enabled = true;
+            if (isCurrent)
+            {
+                MessageBox.Show("Không thể xóa tài khoản đang đăng nhập");
+            }
+        }
+
+        private void BtnTim_Click(object sender, EventArgs e)
+        {
+            var ma = string.IsNullOrWhiteSpace(txtMaTaiKhoan.Text) ? null : txtMaTaiKhoan.Text.Trim();
+            var ten = string.IsNullOrWhiteSpace(txtTenTaiKhoan.Text) ? null : txtTenTaiKhoan.Text.Trim();
+            string role = null;
+            if (!string.IsNullOrWhiteSpace(txtChucVu.Text))
+            {
+                role = txtChucVu.Text.Trim();
+                role = (Regex.IsMatch(role, "^admin$", RegexOptions.IgnoreCase)) ? "Admin" : "Nhân viên";
+            }
+            LoadAccounts(ma, ten, role);
+        }
+
+        private void BtnThem_Click(object sender, EventArgs e)
+        {
+            var ma = txtMaTaiKhoan.Text.Trim();
+            var ten = txtTenTaiKhoan.Text.Trim();
+            var mk = txtMatKhau.Text.Trim();
+            var chucvu = txtChucVu.Text.Trim();
+            int type = Regex.IsMatch(chucvu, "^admin$", RegexOptions.IgnoreCase) ? 1 : 0;
+
+            if (string.IsNullOrWhiteSpace(ma) || ma.Length != 6)
+            { MessageBox.Show("Mã tài khoản phải 6 ký tự"); return; }
+            if (string.IsNullOrWhiteSpace(ten)) { MessageBox.Show("Vui lòng nhập Tên tài khoản"); return; }
+            if (string.IsNullOrWhiteSpace(mk) || mk.Length < 6) { MessageBox.Show("Mật khẩu phải có ít nhất 6 ký tự"); return; }
+
+            using (var conn = Db.Open())
+            {
+                using (var chk = new SqlCommand("SELECT COUNT(1) FROM dbo.TaiKhoan WHERE MaTaiKhoan=@Ma OR TenTaiKhoan=@Ten", conn))
+                {
+                    chk.Parameters.AddWithValue("@Ma", ma);
+                    chk.Parameters.AddWithValue("@Ten", ten);
+                    if ((int)chk.ExecuteScalar() > 0)
+                    { MessageBox.Show("Tên tài khoản đã tồn tại"); return; }
+                }
+
+                using (var tran = conn.BeginTransaction())
+                using (var cmd = new SqlCommand(@"INSERT dbo.TaiKhoan(MaTaiKhoan, TenTaiKhoan, PassWord, [Type])
+                                                 VALUES(@Ma,@Ten,@Pass,@Type)", conn, tran))
+                {
+                    cmd.Parameters.AddWithValue("@Ma", ma);
+                    cmd.Parameters.AddWithValue("@Ten", ten);
+                    cmd.Parameters.AddWithValue("@Pass", mk);
+                    cmd.Parameters.AddWithValue("@Type", type);
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+                        tran.Commit();
+                        MessageBox.Show("Thêm tài khoản mới thành công!");
+                        // Log
+                        try { System.Diagnostics.Debug.WriteLine($"Admin {_currentUser} đã thêm tài khoản {ma}"); } catch { }
+                        ClearInputs();
+                        LoadAccounts();
+                    }
+                    catch (SqlException)
+                    {
+                        try { tran.Rollback(); } catch { }
+                        MessageBox.Show("Lỗi khi thêm tài khoản");
+                    }
+                }
+            }
+        }
+
+        private void BtnCapNhat_Click(object sender, EventArgs e)
+        {
+            var ma = txtMaTaiKhoan.Text.Trim();
+            if (string.IsNullOrWhiteSpace(ma)) { MessageBox.Show("Phải chọn tài khoản để cập nhật"); return; }
+
+            var ten = txtTenTaiKhoan.Text.Trim();
+            var mk = txtMatKhau.Text.Trim();
+            var chucvu = txtChucVu.Text.Trim();
+            int type = Regex.IsMatch(chucvu, "^admin$", RegexOptions.IgnoreCase) ? 1 : 0;
+
+            var isCurrent = string.Equals(ten, _currentUser, StringComparison.OrdinalIgnoreCase);
+            if (isCurrent && type == 0)
+            {
+                if (MessageBox.Show("Bạn đang thu hồi quyền Admin của tài khoản hiện tại", "Cảnh báo", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK)
+                    return;
+            }
+
+            if (MessageBox.Show("Bạn có chắc muốn cập nhật thông tin tài khoản này?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+                return;
+
+            using (var conn = Db.Open())
+            using (var tran = conn.BeginTransaction())
+            {
+                try
+                {
+                    // Update core fields
+                    var sql = "UPDATE dbo.TaiKhoan SET TenTaiKhoan=@Ten, [Type]=@Type";
+                    if (!string.IsNullOrWhiteSpace(mk)) sql += ", PassWord=@Pass";
+                    sql += " WHERE MaTaiKhoan=@Ma";
+                    using (var cmd = new SqlCommand(sql, conn, tran))
+                    {
+                        cmd.Parameters.AddWithValue("@Ma", ma);
+                        cmd.Parameters.AddWithValue("@Ten", ten);
+                        cmd.Parameters.AddWithValue("@Type", type);
+                        if (!string.IsNullOrWhiteSpace(mk)) cmd.Parameters.AddWithValue("@Pass", mk);
+                        if (cmd.ExecuteNonQuery() == 0)
+                        { tran.Rollback(); MessageBox.Show("Không tìm thấy tài khoản"); return; }
+                    }
+                    tran.Commit();
+                    MessageBox.Show("Cập nhật tài khoản thành công!");
+                    try { System.Diagnostics.Debug.WriteLine($"Admin {_currentUser} đã cập nhật tài khoản {ma}"); } catch { }
+                    LoadAccounts();
+                }
+                catch (Exception ex)
+                {
+                    try { tran.Rollback(); } catch { }
+                    MessageBox.Show("Lỗi khi cập nhật: " + ex.Message);
+                }
+            }
+        }
+
+        private void BtnXoa_Click(object sender, EventArgs e)
+        {
+            var ma = txtMaTaiKhoan.Text.Trim();
+            var ten = txtTenTaiKhoan.Text.Trim();
+            if (string.IsNullOrWhiteSpace(ma)) { MessageBox.Show("Phải chọn tài khoản để xóa"); return; }
+            if (string.Equals(ten, _currentUser, StringComparison.OrdinalIgnoreCase))
+            { MessageBox.Show("Không thể xóa tài khoản đang sử dụng"); return; }
+
+            using (var conn = Db.Open())
+            {
+                // Check last admin
+                bool isAdminTarget;
+                using (var c1 = new SqlCommand("SELECT [Type] FROM dbo.TaiKhoan WHERE MaTaiKhoan=@Ma", conn))
+                { c1.Parameters.AddWithValue("@Ma", ma); isAdminTarget = Convert.ToInt32(c1.ExecuteScalar()) == 1; }
+                if (isAdminTarget)
+                {
+                    using (var c2 = new SqlCommand("SELECT COUNT(*) FROM dbo.TaiKhoan WHERE [Type]=1", conn))
+                    {
+                        var countAdmin = Convert.ToInt32(c2.ExecuteScalar());
+                        if (countAdmin <= 1)
+                        { MessageBox.Show("Không thể xóa tài khoản Admin cuối cùng"); return; }
+                    }
+                }
+
+                if (MessageBox.Show($"Bạn có CHẮC CHẮN muốn xóa tài khoản '{ten}'? Hành động này KHÔNG THỂ hoàn tác!", "Cảnh báo", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                    return;
+
+                using (var tran = conn.BeginTransaction())
+                using (var cmd = new SqlCommand("DELETE dbo.TaiKhoan WHERE MaTaiKhoan=@Ma", conn, tran))
+                {
+                    cmd.Parameters.AddWithValue("@Ma", ma);
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+                        tran.Commit();
+                        MessageBox.Show("Xóa tài khoản thành công!");
+                        try { System.Diagnostics.Debug.WriteLine($"Admin {_currentUser} đã XÓA tài khoản {ma}"); } catch { }
+                        ClearInputs();
+                        LoadAccounts();
+                    }
+                    catch (Exception ex)
+                    { try { tran.Rollback(); } catch { } MessageBox.Show("Lỗi khi xóa: " + ex.Message); }
+                }
+            }
+        }
+
+        private void ResetInputs()
+        {
+            txtMaTaiKhoan.Clear();
+            txtTenTaiKhoan.Clear();
+            txtMatKhau.Clear();
+            txtChucVu.Text = "Nhân viên";
+        }
+
+        private void SetButtonsState(bool hasSelection)
+        {
+            btnThem.Enabled = true;
+            btnCapNhat.Enabled = hasSelection;
+            btnXoa.Enabled = hasSelection;
+        }
+
+        private void TxtMatKhau_TextChanged(object sender, EventArgs e)
+        {
+            // Strength check and keep masked
+            var v = txtMatKhau.Text;
+            bool ok = v.Length >= 6 && Regex.IsMatch(v, @"[A-Z]") && Regex.IsMatch(v, @"[a-z]") && Regex.IsMatch(v, @"\d") && Regex.IsMatch(v, @"[^\da-zA-Z]");
+            txtMatKhau.BackColor = ok || string.IsNullOrEmpty(v) ? System.Drawing.Color.White : System.Drawing.Color.MistyRose;
+        }
+
+        private void FrmTaiKhoan_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            try { txtMatKhau.Clear(); } catch { }
+            try { System.Diagnostics.Debug.WriteLine($"Admin {_currentUser} đã đóng form Quản lý tài khoản"); } catch { }
+        }
+
+        private void ClearInputs()
+        {
+            txtMaTaiKhoan.Clear();
+            txtTenTaiKhoan.Clear();
+            txtMatKhau.Clear();
+            txtChucVu.Clear();
+        }
+    }
+}
