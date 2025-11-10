@@ -9,7 +9,7 @@ using System.Windows.Forms;
 using WindowsFormsApp2.Infrastructure;
 using WindowsFormsApp2.Security;
 using WindowsFormsApp2.Validation;
-using WindowsFormsApp2.Models;
+using BussinessLogic.Models;
 using WindowsFormsApp2.Services;
 
 namespace WindowsFormsApp2

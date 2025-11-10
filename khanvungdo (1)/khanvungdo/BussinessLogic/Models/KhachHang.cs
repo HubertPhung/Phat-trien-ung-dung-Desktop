@@ -1,0 +1,13 @@
+namespace BussinessLogic.Models
+{
+ public class KhachHang
+ {
+ public int Id { get; set; }
+ public string TenKH { get; set; }
+ public string CMND_CCCD { get; set; }
+ public string DiaChi { get; set; }
+ public string SDT { get; set; }
+ public string LoaiKH { get; set; }
+ public string GhiChu { get; set; }
+ }
+}

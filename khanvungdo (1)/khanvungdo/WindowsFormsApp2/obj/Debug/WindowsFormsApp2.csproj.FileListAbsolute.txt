@@ -137,3 +137,9 @@ D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\Windo
 D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\WindowsFormsApp2\obj\Debug\WindowsFormsApp2.exe
 D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\WindowsFormsApp2\obj\Debug\WindowsFormsApp2.pdb
 D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\WindowsFormsApp2\obj\Debug\WindowsFormsApp2.frmChonKhachHang.resources
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\WindowsFormsApp2\bin\Debug\BussinessLogic.dll
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\WindowsFormsApp2\bin\Debug\DataAccess.dll
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\WindowsFormsApp2\bin\Debug\BussinessLogic.pdb
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\WindowsFormsApp2\bin\Debug\BussinessLogic.dll.config
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\WindowsFormsApp2\bin\Debug\DataAccess.pdb
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\WindowsFormsApp2\bin\Debug\DataAccess.dll.config

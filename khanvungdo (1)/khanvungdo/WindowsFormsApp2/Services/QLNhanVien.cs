@@ -2,7 +2,7 @@ using System;
 using System.Data;
 using System.Data.SqlClient;
 using WindowsFormsApp2.Infrastructure;
-using WindowsFormsApp2.Models;
+using BussinessLogic.Models;
 
 namespace WindowsFormsApp2.Services
 {

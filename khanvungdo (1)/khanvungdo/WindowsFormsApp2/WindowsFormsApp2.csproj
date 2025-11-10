@@ -141,8 +141,6 @@
       <DependentUpon>frmTaiKhoan.cs</DependentUpon>
     </Compile>
     <Compile Include="Infrastructure\Db.cs" />
-    <Compile Include="Models\KhachHang.cs" />
-    <Compile Include="Models\NhanVien.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Security\UserContext.cs" />
@@ -327,5 +325,15 @@
     <None Include="Resources\A-nh-chu-p-Ma-n-hi-nh-2024-11-18-lu-c-13.20.21.png" />
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\BussinessLogic\BussinessLogic.csproj">
+      <Project>{700bf17a-e037-4858-a2f9-a4d022b8eb7a}</Project>
+      <Name>BussinessLogic</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DataAccess\DataAccess.csproj">
+      <Project>{e2744561-9e96-4390-b825-e5b2c8414eb7}</Project>
+      <Name>DataAccess</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

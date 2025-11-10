@@ -10,7 +10,7 @@ using WindowsFormsApp2.Infrastructure;
 using WindowsFormsApp2.Security;
 using System.IO;
 using WindowsFormsApp2.Services;
-using WindowsFormsApp2.Models;
+using BussinessLogic.Models;
 
 namespace WindowsFormsApp2
 {

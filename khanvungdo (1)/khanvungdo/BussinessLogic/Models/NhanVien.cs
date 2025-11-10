@@ -1,0 +1,10 @@
+namespace BussinessLogic.Models
+{
+ public class NhanVien
+ {
+ public string MaTaiKhoan { get; set; }
+ public string TenTaiKhoan { get; set; }
+ public string MatKhau { get; set; }
+ public byte Loai { get; set; } //1: admin,0: staff
+ }
+}

@@ -1,0 +1,11 @@
+D:\University\Phát triển ứng dụng Desktop\ChuDe5\Lab_Advanced_Command\bin\Debug\Lab_Advanced_Command.exe.config
+D:\University\Phát triển ứng dụng Desktop\ChuDe5\Lab_Advanced_Command\bin\Debug\Lab_Advanced_Command.exe
+D:\University\Phát triển ứng dụng Desktop\ChuDe5\Lab_Advanced_Command\bin\Debug\Lab_Advanced_Command.pdb
+D:\University\Phát triển ứng dụng Desktop\ChuDe5\Lab_Advanced_Command\obj\Debug\Lab_Advanced_Command.csproj.AssemblyReference.cache
+D:\University\Phát triển ứng dụng Desktop\ChuDe5\Lab_Advanced_Command\obj\Debug\Lab_Advanced_Command.FoodForm.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe5\Lab_Advanced_Command\obj\Debug\Lab_Advanced_Command.FoodInfoForm.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe5\Lab_Advanced_Command\obj\Debug\Lab_Advanced_Command.Properties.Resources.resources
+D:\University\Phát triển ứng dụng Desktop\ChuDe5\Lab_Advanced_Command\obj\Debug\Lab_Advanced_Command.csproj.GenerateResource.cache
+D:\University\Phát triển ứng dụng Desktop\ChuDe5\Lab_Advanced_Command\obj\Debug\Lab_Advanced_Command.csproj.CoreCompileInputs.cache
+D:\University\Phát triển ứng dụng Desktop\ChuDe5\Lab_Advanced_Command\obj\Debug\Lab_Advanced_Command.exe
+D:\University\Phát triển ứng dụng Desktop\ChuDe5\Lab_Advanced_Command\obj\Debug\Lab_Advanced_Command.pdb

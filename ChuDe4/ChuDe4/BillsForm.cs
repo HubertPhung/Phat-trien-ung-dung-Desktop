@@ -46,22 +46,22 @@ namespace ChuDe4
             }
 
             string sql = @"
-SELECT 
- b.ID,
- b.TableID,
- b.CheckIn,
- b.CheckOut,
- b.DiscountPercent,
- b.IsPaid,
- b.Notes,
- ISNULL(SUM(bd.Quantity * bd.UnitPrice),0) AS SubTotal,
- CAST(ISNULL(SUM(bd.Quantity * bd.UnitPrice),0) * (b.DiscountPercent/100.0) AS INT) AS DiscountAmount,
- CAST(ISNULL(SUM(bd.Quantity * bd.UnitPrice),0) * (1 - b.DiscountPercent/100.0) AS INT) AS ActualAmount
-FROM dbo.Bills b
-LEFT JOIN dbo.BillDetails bd ON bd.BillID = b.ID
-WHERE b.CheckIn >= @FromDate AND b.CheckIn < DATEADD(day,1, @ToDate)
-GROUP BY b.ID, b.TableID, b.CheckIn, b.CheckOut, b.DiscountPercent, b.IsPaid, b.Notes
-ORDER BY b.CheckIn DESC;";
+                    SELECT 
+                     b.ID,
+                     b.TableID,
+                     b.CheckIn,
+                     b.CheckOut,
+                     b.DiscountPercent,
+                     b.IsPaid,
+                     b.Notes,
+                     ISNULL(SUM(bd.Quantity * bd.UnitPrice),0) AS SubTotal,
+                     CAST(ISNULL(SUM(bd.Quantity * bd.UnitPrice),0) * (b.DiscountPercent/100.0) AS INT) AS DiscountAmount,
+                     CAST(ISNULL(SUM(bd.Quantity * bd.UnitPrice),0) * (1 - b.DiscountPercent/100.0) AS INT) AS ActualAmount
+                    FROM dbo.Bills b
+                    LEFT JOIN dbo.BillDetails bd ON bd.BillID = b.ID
+                    WHERE b.CheckIn >= @FromDate AND b.CheckIn < DATEADD(day,1, @ToDate)
+                    GROUP BY b.ID, b.TableID, b.CheckIn, b.CheckOut, b.DiscountPercent, b.IsPaid, b.Notes
+                    ORDER BY b.CheckIn DESC;";
 
             var prms = new[]
             {

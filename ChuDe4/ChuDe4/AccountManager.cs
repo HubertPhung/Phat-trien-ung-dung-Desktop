@@ -1,5 +1,4 @@
-﻿// AccountManager.cs
-using System;
+﻿using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Windows.Forms;
@@ -14,7 +13,6 @@ namespace ChuDe4
         {
             InitializeComponent();
 
-            // Wire up events
             this.Load += AccountManager_Load;
             this.dgvAccounts.SelectionChanged += dgvAccounts_SelectionChanged;
             this.btnAdd.Click += btnAdd_Click;
@@ -32,7 +30,6 @@ namespace ChuDe4
 
         private void LoadFilterComboBoxes()
         {
-            // Load Account Groups
             cboAccountGroup.Items.Add("Tất cả");
             string query = "SELECT DISTINCT [Group] FROM Accounts WHERE [Group] IS NOT NULL";
             DataTable groupTable = db.ExecuteQuery(query);
@@ -42,13 +39,12 @@ namespace ChuDe4
             }
             cboAccountGroup.SelectedIndex = 0;
 
-            // Load Status
             cboStatus.Items.Add("Ngưng hoạt động"); // value = 0
             cboStatus.Items.Add("Hoạt động"); // value = 1
             cboStatus.Items.Add("Tất cả"); // value = 2
             cboStatus.SelectedIndex = 1;
 
-            // Tự động tải lại khi thay đổi lựa chọn
+
             cboAccountGroup.SelectedIndexChanged += (s, ev) => LoadAccounts();
             cboStatus.SelectedIndexChanged += (s, ev) => LoadAccounts();
         }
@@ -73,7 +69,6 @@ namespace ChuDe4
             dgvAccounts.DataSource = db.ExecuteQuery(query, parameters.ToArray());
             dgvAccounts.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
-            // Tránh tự động chọn dòng đầu tiên
             dgvAccounts.ClearSelection();
         }
 
@@ -81,17 +76,28 @@ namespace ChuDe4
         {
             if (dgvAccounts.SelectedRows.Count > 0)
             {
-                var row = dgvAccounts.SelectedRows[0];
-                txtUsername.Text = Convert.ToString(row.Cells["Tên đăng nhập"].Value);
-                txtFullName.Text = Convert.ToString(row.Cells["Tên hiển thị"].Value);
-                // Lấy thêm các trường khác nếu có trên form (email, tel)
-                var isActiveVal = row.Cells["Kích hoạt"].Value;
+                var drv = dgvAccounts.SelectedRows[0].DataBoundItem as DataRowView;
+                if (drv == null)
+                {
+                    ClearForm();
+                    return;
+                }
+
+                txtUsername.Text = Convert.ToString(drv.Row["Tên đăng nhập"]);
+                txtFullName.Text = Convert.ToString(drv.Row["Tên hiển thị"]);
+
+                var isActiveVal = drv.Row["Kích hoạt"];
                 bool isActive = false;
                 if (isActiveVal is bool) isActive = (bool)isActiveVal;
-                else if (isActiveVal != null) bool.TryParse(isActiveVal.ToString(), out isActive);
+                else if (isActiveVal != null)
+                {
+                    bool parsed;
+                    if (isActiveVal is int) isActive = ((int)isActiveVal) != 0;
+                    else if (bool.TryParse(isActiveVal.ToString(), out parsed)) isActive = parsed;
+                }
                 chkActive.Checked = isActive;
 
-                txtUsername.Enabled = false; // Không cho sửa tên đăng nhập (khóa chính logic)
+                txtUsername.Enabled = false;
                 btnAdd.Enabled = false;
                 btnUpdate.Enabled = true;
             }
@@ -120,14 +126,14 @@ namespace ChuDe4
                 return;
             }
 
-            string defaultPassword = "123"; // TODO: Nên mã hóa mật khẩu này
+            string defaultPassword = "123456";
 
             string query = "INSERT INTO Accounts (UserName, DisplayName, Password, [Group], IsActive) VALUES (@UserName, @DisplayName, @Password, @Group, @IsActive)";
             SqlParameter[] parameters = {
                 new SqlParameter("@UserName", txtUsername.Text),
                 new SqlParameter("@DisplayName", txtFullName.Text),
                 new SqlParameter("@Password", defaultPassword),
-                new SqlParameter("@Group", "Staff"), // Mặc định là Staff
+                new SqlParameter("@Group", "Staff"),
                 new SqlParameter("@IsActive", chkActive.Checked)
             };
 
@@ -140,7 +146,7 @@ namespace ChuDe4
                     ClearForm();
                 }
             }
-            catch (SqlException ex) when (ex.Number == 2627) 
+            catch (SqlException ex) when (ex.Number == 2627)
             {
                 MessageBox.Show("Tên đăng nhập đã tồn tại. Vui lòng chọn tên khác.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -177,7 +183,7 @@ namespace ChuDe4
             var drv = (DataRowView)dgvAccounts.SelectedRows[0].DataBoundItem;
             int accountId = Convert.ToInt32(drv.Row["ID"]);
             string username = Convert.ToString(drv.Row["Tên đăng nhập"]);
-            string defaultPassword = "123"; 
+            string defaultPassword = "123";
 
             if (MessageBox.Show($"Bạn có chắc muốn đặt lại mật khẩu cho '{username}'?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {

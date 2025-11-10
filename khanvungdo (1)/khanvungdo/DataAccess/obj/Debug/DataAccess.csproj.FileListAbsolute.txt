@@ -2,3 +2,8 @@ D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\DataA
 D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\DataAccess\obj\Debug\DataAccess.Properties.Resources.resources
 D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\DataAccess\obj\Debug\DataAccess.csproj.GenerateResource.cache
 D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\DataAccess\obj\Debug\DataAccess.csproj.CoreCompileInputs.cache
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\DataAccess\bin\Debug\DataAccess.dll.config
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\DataAccess\bin\Debug\DataAccess.dll
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\DataAccess\bin\Debug\DataAccess.pdb
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\DataAccess\obj\Debug\DataAccess.dll
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\DataAccess\obj\Debug\DataAccess.pdb

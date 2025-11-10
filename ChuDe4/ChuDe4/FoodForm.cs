@@ -54,15 +54,12 @@ namespace ChuDe4
             using (var da = new SqlDataAdapter("SELECT ID, Name, Unit, FoodCategoryID, Price, Notes FROM dbo.Food", conn))
             using (var builder = new SqlCommandBuilder(da))
             {
-                // Ensure schema (keys) so SqlCommandBuilder generates proper commands
                 da.MissingSchemaAction = MissingSchemaAction.AddWithKey;
 
                 conn.Open();
 
-                // Pull schema info into current DataTable (does not overwrite data)
                 da.FillSchema(dt, SchemaType.Source);
 
-                // Push changes back to DB
                 var affected = da.Update(dt);
                 MessageBox.Show($"Đã lưu dữ liệu món ăn. Bản ghi đã cập nhật: {affected}");
             }

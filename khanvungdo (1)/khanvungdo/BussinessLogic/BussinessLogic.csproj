@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{700BF17A-E037-4858-A2F9-A4D022B8EB7A}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>BussinessLogic</RootNamespace>
     <AssemblyName>BussinessLogic</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -32,6 +32,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -49,6 +52,8 @@
     <Compile Include="Interfaces\IInvoiceService.cs" />
     <Compile Include="Interfaces\IRoomRepository.cs" />
     <Compile Include="Interfaces\IServiceRepository.cs" />
+    <Compile Include="Models\KhachHang.cs" />
+    <Compile Include="Models\NhanVien.cs" />
     <Compile Include="Models\Room.cs" />
     <Compile Include="Models\ServiceItem.cs" />
     <Compile Include="Program.cs" />

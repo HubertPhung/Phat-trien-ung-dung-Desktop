@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Windows.Forms;
 using WindowsFormsApp2.Infrastructure;
+using BussinessLogic.Models; // future shared models if needed
 
 namespace WindowsFormsApp2
 {
