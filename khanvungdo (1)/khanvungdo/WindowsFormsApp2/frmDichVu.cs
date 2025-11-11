@@ -29,10 +29,11 @@ namespace WindowsFormsApp2
             button1.Click += BtnChonHinh_Click;
             txtMaDV.TextChanged += TxtMaDV_TextChanged;
             txtTenDV.TextChanged += TxtTenDV_TextChanged;
-            txtDonGia.TextChanged += (s,e)=> { _dirtyInputs = true; };
+            txtDonGia.TextChanged += (s, e) => { _dirtyInputs = true; };
             txtDonGia.Leave += TxtDonGia_Leave;
-            txtDVT.TextChanged += (s,e)=> { _dirtyInputs = true; };
-            txtLuuY.TextChanged += (s,e)=> { _dirtyInputs = true; };
+            txtDonGia.KeyPress += TxtDonGia_KeyPress;
+            txtDVT.TextChanged += (s, e) => { _dirtyInputs = true; };
+            txtLuuY.TextChanged += (s, e) => { _dirtyInputs = true; };
             this.FormClosing += FrmDichVu_FormClosing;
         }
 
@@ -40,7 +41,7 @@ namespace WindowsFormsApp2
         {
             // Kiểm tra quyền
             _isAdmin = WindowsFormsApp2.Security.UserContext.Type == 1;
-            SetButtonsByRole(canEdit:_isAdmin);
+            SetButtonsByRole(canEdit: _isAdmin);
 
             // Kết nối CSDL
             try
@@ -54,11 +55,30 @@ namespace WindowsFormsApp2
                 return;
             }
 
+            // cấu hình auto-complete cho ĐVT và một số ràng buộc nhập liệu
+            ConfigureDvtAutocomplete();
+            txtMaDV.MaxLength = 10;
+            txtTenDV.MaxLength = 70;
+
             LoadLoaiDichVu();
             LoadDanhSachDichVu();
             ResetInputs();
             // Định dạng list
             lvDSDV.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+        }
+
+        private void ConfigureDvtAutocomplete()
+        {
+            try
+            {
+                var units = new[] { "Lần", "Giờ", "Ngày", "Chai", "Lon", "Cái", "Kg", "Gói", "Suất", "Vé" };
+                var src = new AutoCompleteStringCollection();
+                src.AddRange(units);
+                txtDVT.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+                txtDVT.AutoCompleteSource = AutoCompleteSource.CustomSource;
+                txtDVT.AutoCompleteCustomSource = src;
+            }
+            catch { /* ignore UI config errors */ }
         }
 
         private class LoaiItem
@@ -128,7 +148,7 @@ namespace WindowsFormsApp2
         {
             btnThem.Enabled = canEdit;
             guna2Button1.Enabled = false; // chỉ bật khi chọn + có quyền
-            btnXoa.Enabled = false;       // chỉ bật khi chọn + có quyền
+            btnXoa.Enabled = false; // chỉ bật khi chọn + có quyền
         }
 
         private void SetButtonsEnabled(bool enabled)
@@ -177,7 +197,7 @@ namespace WindowsFormsApp2
             txtLuuY.Text = it.SubItems[7].Text;
 
             guna2Button1.Enabled = _isAdmin; // cập nhật
-            btnXoa.Enabled = _isAdmin;       // xóa
+            btnXoa.Enabled = _isAdmin; // xóa
             _dirtyInputs = false;
         }
 
@@ -198,10 +218,15 @@ namespace WindowsFormsApp2
         private bool ValidateInputsForAdd(out decimal donGia)
         {
             donGia = 0;
-            if (string.IsNullOrWhiteSpace(txtTenDV.Text)) { MessageBox.Show("Vui lòng nhập Tên dịch vụ"); return false; }
-            if (string.IsNullOrWhiteSpace(txtDVT.Text)) { MessageBox.Show("Vui lòng nhập Đơn vị tính"); return false; }
-            if (!decimal.TryParse(txtDonGia.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out donGia) || donGia <= 0)
-            { MessageBox.Show("Đơn giá phải là số dương"); return false; }
+            // Highlight và validate
+            txtTenDV.BackColor = System.Drawing.SystemColors.Window;
+            txtDVT.BackColor = System.Drawing.SystemColors.Window;
+            txtDonGia.BackColor = System.Drawing.SystemColors.Window;
+
+            if (string.IsNullOrWhiteSpace(txtTenDV.Text)) { txtTenDV.BackColor = System.Drawing.Color.MistyRose; MessageBox.Show("Vui lòng nhập Tên dịch vụ"); return false; }
+            if (string.IsNullOrWhiteSpace(txtDVT.Text)) { txtDVT.BackColor = System.Drawing.Color.MistyRose; MessageBox.Show("Vui lòng nhập Đơn vị tính"); return false; }
+            if (!decimal.TryParse(txtDonGia.Text.Replace(",", ""), NumberStyles.Any, CultureInfo.InvariantCulture, out donGia) || donGia <= 0)
+            { txtDonGia.BackColor = System.Drawing.Color.MistyRose; MessageBox.Show("Đơn giá phải là số dương"); return false; }
             if (comboBox1.SelectedItem == null) { MessageBox.Show("Chọn loại dịch vụ"); return false; }
             return true;
         }
@@ -272,44 +297,73 @@ namespace WindowsFormsApp2
             var dvt = txtDVT.Text.Trim();
             var luuy = string.IsNullOrWhiteSpace(txtLuuY.Text) ? (object)DBNull.Value : txtLuuY.Text.Trim();
             decimal dongia;
-            if (string.IsNullOrWhiteSpace(ten) || string.IsNullOrWhiteSpace(dvt) || !decimal.TryParse(txtDonGia.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out dongia) || dongia <= 0)
+            if (string.IsNullOrWhiteSpace(ten) || string.IsNullOrWhiteSpace(dvt) || !decimal.TryParse(txtDonGia.Text.Replace(",", ""), NumberStyles.Any, CultureInfo.InvariantCulture, out dongia) || dongia <= 0)
             {
                 MessageBox.Show("Nhập Tên, ĐVT và Đơn giá hợp lệ."); return;
             }
             if (comboBox1.SelectedItem == null) { MessageBox.Show("Chọn loại dịch vụ"); return; }
             var loaiId = (comboBox1.SelectedItem as LoaiItem).Id;
 
+            // Kiểm tra thay đổi dữ liệu so với dòng đang chọn
+            if (lvDSDV.SelectedItems.Count > 0)
+            {
+                var it = lvDSDV.SelectedItems[0];
+                var oldTen = it.SubItems[3].Text;
+                var oldLoai = it.SubItems[4].Text;
+                var oldGia = it.SubItems[5].Text.Replace(",", "");
+                var oldDvt = it.SubItems[6].Text;
+                var oldLoaiId = (comboBox1.Items.Cast<object>().FirstOrDefault(x => (x as LoaiItem)?.Name == oldLoai) as LoaiItem)?.Id;
+                if (oldTen == ten && oldDvt == dvt && oldGia == Convert.ToString(dongia, CultureInfo.InvariantCulture) && oldLoaiId == loaiId)
+                {
+                    MessageBox.Show("Không có thay đổi để cập nhật.");
+                    return;
+                }
+            }
+
             if (MessageBox.Show("Bạn có chắc muốn cập nhật thông tin dịch vụ này?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
                 return;
 
             using (var conn = Db.Open())
-            using (var cmd = new SqlCommand(@"UPDATE dbo.DSDichVu
-                                            SET TenDV=@Ten, idLoaiDichVu=@Loai, DonGia=@Gia, DVT=@DVT, LuuY=@LuuY
-                                            WHERE id=@Id", conn))
             {
-                cmd.Parameters.AddWithValue("@Id", id);
-                cmd.Parameters.AddWithValue("@Ten", ten);
-                cmd.Parameters.AddWithValue("@Loai", loaiId);
-                cmd.Parameters.AddWithValue("@Gia", dongia);
-                cmd.Parameters.AddWithValue("@DVT", dvt);
-                cmd.Parameters.AddWithValue("@LuuY", luuy);
-                try
+                // cảnh báo nếu dịch vụ đang được sử dụng - chỉ cần kiểm tra tồn tại một dòng
+                using (var warn = new SqlCommand("SELECT TOP11 FROM dbo.ChiTietHD WHERE MaDV=@Id", conn))
                 {
-                    var rows = cmd.ExecuteNonQuery();
-                    if (rows == 0) { MessageBox.Show("Không tìm thấy DV để cập nhật."); return; }
-                    MessageBox.Show("Cập nhật dịch vụ thành công!");
-                    LoadDanhSachDichVu();
-                    foreach (ListViewItem it in lvDSDV.Items)
+                    warn.Parameters.AddWithValue("@Id", id);
+                    var used = warn.ExecuteScalar() != null;
+                    if (used)
                     {
-                        if (it.SubItems[2].Text == id.ToString())
-                        {
-                            it.Selected = true; it.Focused = true; it.EnsureVisible(); break;
-                        }
+                        MessageBox.Show("Dịch vụ đang được sử dụng. Việc thay đổi có thể ảnh hưởng đến hóa đơn hiện tại.");
                     }
                 }
-                catch (SqlException ex)
+
+                using (var cmd = new SqlCommand(@"UPDATE dbo.DSDichVu
+                                            SET TenDV=@Ten, idLoaiDichVu=@Loai, DonGia=@Gia, DVT=@DVT, LuuY=@LuuY
+                                            WHERE id=@Id", conn))
                 {
-                    MessageBox.Show("Lỗi khi cập nhật: " + ex.Message);
+                    cmd.Parameters.AddWithValue("@Id", id);
+                    cmd.Parameters.AddWithValue("@Ten", ten);
+                    cmd.Parameters.AddWithValue("@Loai", loaiId);
+                    cmd.Parameters.AddWithValue("@Gia", dongia);
+                    cmd.Parameters.AddWithValue("@DVT", dvt);
+                    cmd.Parameters.AddWithValue("@LuuY", luuy);
+                    try
+                    {
+                        var rows = cmd.ExecuteNonQuery();
+                        if (rows ==0) { MessageBox.Show("Không tìm thấy DV để cập nhật."); return; }
+                        MessageBox.Show("Cập nhật dịch vụ thành công!");
+                        LoadDanhSachDichVu();
+                        foreach (ListViewItem it in lvDSDV.Items)
+                        {
+                            if (it.SubItems[2].Text == id.ToString())
+                            {
+                                it.Selected = true; it.Focused = true; it.EnsureVisible(); break;
+                            }
+                        }
+                    }
+                    catch (SqlException ex)
+                    {
+                        MessageBox.Show("Lỗi khi cập nhật: " + ex.Message);
+                    }
                 }
             }
         }
@@ -408,8 +462,15 @@ namespace WindowsFormsApp2
         {
             if (txtMaDV.Focused)
             {
-                txtMaDV.Text = txtMaDV.Text.ToUpperInvariant();
-                txtMaDV.SelectionStart = txtMaDV.Text.Length;
+                // Chuyển hoa + giới hạn độ dài10
+                var caret = txtMaDV.SelectionStart;
+                var t = txtMaDV.Text.ToUpperInvariant();
+                if (t.Length > 10) t = t.Substring(0, 10);
+                if (t != txtMaDV.Text)
+                {
+                    txtMaDV.Text = t;
+                    txtMaDV.SelectionStart = Math.Min(caret, txtMaDV.Text.Length);
+                }
             }
         }
 
@@ -419,19 +480,30 @@ namespace WindowsFormsApp2
             if (!txtTenDV.Focused) return;
             var caret = txtTenDV.SelectionStart;
             var text = Regex.Replace(txtTenDV.Text, @"\b\p{Ll}", m => m.Value.ToUpper());
+            if (text.Length > 70) text = text.Substring(0, 70);
             if (text != txtTenDV.Text)
             {
                 txtTenDV.Text = text;
-                txtTenDV.SelectionStart = caret;
+                txtTenDV.SelectionStart = caret <= txtTenDV.Text.Length ? caret : txtTenDV.Text.Length;
+            }
+        }
+
+        private void TxtDonGia_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Chỉ cho số, phím điều khiển và dấu phân cách , .
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && e.KeyChar != ',' && e.KeyChar != '.')
+            {
+                e.Handled = true;
             }
         }
 
         private void TxtDonGia_Leave(object sender, EventArgs e)
         {
             decimal v;
-            if (decimal.TryParse(txtDonGia.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out v))
+            var raw = txtDonGia.Text.Replace(",", "").Replace(".", "");
+            if (decimal.TryParse(raw, NumberStyles.Any, CultureInfo.InvariantCulture, out v))
             {
-                txtDonGia.Text = string.Format(CultureInfo.InvariantCulture, "{0}", v);
+                txtDonGia.Text = string.Format(CultureInfo.GetCultureInfo("vi-VN"), "{0:N0}", v);
             }
         }
 

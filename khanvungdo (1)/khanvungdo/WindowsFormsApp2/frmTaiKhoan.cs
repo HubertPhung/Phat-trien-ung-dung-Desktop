@@ -179,13 +179,15 @@ namespace WindowsFormsApp2
                     { MessageBox.Show("Tên hoặc mã tài khoản đã tồn tại"); return; }
                 }
 
+                var hashed = PasswordHasher.Hash(mk);
+
                 using (var tran = conn.BeginTransaction())
                 using (var cmd = new SqlCommand(@"INSERT dbo.TaiKhoan(MaTaiKhoan, TenTaiKhoan, PassWord, [Type])
                                                  VALUES(@Ma,@Ten,@Pass,@Type)", conn, tran))
                 {
                     cmd.Parameters.AddWithValue("@Ma", ma);
                     cmd.Parameters.AddWithValue("@Ten", ten);
-                    cmd.Parameters.AddWithValue("@Pass", mk);
+                    cmd.Parameters.AddWithValue("@Pass", hashed);
                     cmd.Parameters.AddWithValue("@Type", type);
                     try
                     {
@@ -240,7 +242,7 @@ namespace WindowsFormsApp2
                         cmd.Parameters.AddWithValue("@Ma", ma);
                         cmd.Parameters.AddWithValue("@Ten", ten);
                         cmd.Parameters.AddWithValue("@Type", type);
-                        if (!string.IsNullOrWhiteSpace(mk)) cmd.Parameters.AddWithValue("@Pass", mk);
+                        if (!string.IsNullOrWhiteSpace(mk)) cmd.Parameters.AddWithValue("@Pass", PasswordHasher.Hash(mk));
                         if (cmd.ExecuteNonQuery() == 0)
                         { tran.Rollback(); MessageBox.Show("Không tìm thấy tài khoản"); return; }
                     }

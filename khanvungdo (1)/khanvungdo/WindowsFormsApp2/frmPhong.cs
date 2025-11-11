@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Drawing;
 using System.Windows.Forms;
 using System.Data.SqlClient;
 using WindowsFormsApp2.Infrastructure;
@@ -8,10 +9,14 @@ namespace WindowsFormsApp2
 {
     public partial class frmPhong : Form
     {
+        private bool _dirty = false; // có thay đổi chưa lưu
+        private bool _loading = false; // tránh gắn dirty khi đang load
+
         public frmPhong()
         {
             InitializeComponent();
             Load += FrmPhong_Load;
+            FormClosing += FrmPhong_FormClosing;
 
             // Wire events
             lvDSPhong.SelectedIndexChanged += LvDSPhong_SelectedIndexChanged;
@@ -20,6 +25,17 @@ namespace WindowsFormsApp2
             btnCapNhat.Click += BtnCapNhat_Click;
             btnXoa.Click += BtnXoa_Click;
             btnTim.Click += BtnTim_Click;
+
+            // Theo dõi thay đổi
+            cbSoPhong.TextChanged += AnyInputChanged;
+            txtSoNguoi.TextChanged += AnyInputChanged;
+            txtTenKhachChu.TextChanged += AnyInputChanged;
+        }
+
+        private void AnyInputChanged(object sender, EventArgs e)
+        {
+            if (_loading) return;
+            _dirty = true;
         }
 
         private void FrmPhong_Load(object sender, EventArgs e)
@@ -35,9 +51,24 @@ namespace WindowsFormsApp2
                 return;
             }
 
+            _loading = true;
             LoadPhong();
             ResetFormInputs();
             SetButtonsState(onRowSelected: false);
+            _loading = false;
+        }
+
+        private void FrmPhong_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (_dirty && MessageBox.Show("Bạn có thay đổi chưa lưu, lưu trước khi thoát?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                // Thử lưu nhanh nếu có phòng chọn (cập nhật), nếu không thì bỏ qua
+                if (btnCapNhat.Enabled)
+                {
+                    BtnCapNhat_Click(btnCapNhat, EventArgs.Empty);
+                    // Nếu có lỗi sẽ vẫn đóng vì MessageBox đã báo trước; có thể mở rộng logic tại đây
+                }
+            }
         }
 
         private void ToggleAll(bool enabled)
@@ -51,6 +82,15 @@ namespace WindowsFormsApp2
             cbSoPhong.Text = string.Empty;
             txtSoNguoi.Text = string.Empty;
             txtTenKhachChu.Text = string.Empty;
+            ClearErrorStyles();
+            _dirty = false;
+        }
+
+        private void ClearErrorStyles()
+        {
+            cbSoPhong.BackColor = SystemColors.Window;
+            txtSoNguoi.BackColor = SystemColors.Window;
+            txtTenKhachChu.BackColor = SystemColors.Window;
         }
 
         private void SetButtonsState(bool onRowSelected)
@@ -58,6 +98,16 @@ namespace WindowsFormsApp2
             btnThem.Enabled = true;
             btnCapNhat.Enabled = onRowSelected;
             btnXoa.Enabled = onRowSelected;
+        }
+
+        private bool ColumnExists(SqlConnection conn, string table, string column)
+        {
+            using (var cmd = new SqlCommand(@"SELECT COUNT(1) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME=@t AND COLUMN_NAME=@c", conn))
+            {
+                cmd.Parameters.AddWithValue("@t", table);
+                cmd.Parameters.AddWithValue("@c", column);
+                return (int)cmd.ExecuteScalar() >0;
+            }
         }
 
         private void LoadPhong(string soPhongFilter = null, string tenKhachFilter = null)
@@ -123,6 +173,7 @@ ORDER BY p.id;", conn))
             txtSoNguoi.Text = it.SubItems[1].Text;
             txtTenKhachChu.Text = it.SubItems[2].Text;
             SetButtonsState(true);
+            _dirty = false; // hiển thị dữ liệu hiện tại
         }
 
         private void LvDSPhong_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -155,51 +206,85 @@ ORDER BY p.id;", conn))
             }
         }
 
-        private void BtnThem_Click(object sender, EventArgs e)
+        private bool ValidateInputsForAddOrUpdate(bool isAdd, out int soNguoi, out string soPhong, out string tenKhach)
         {
-            // Validation
-            var soPhong = cbSoPhong.Text?.Trim();
-            if (string.IsNullOrWhiteSpace(soPhong)) { MessageBox.Show("Vui lòng nhập Số Phòng."); return; }
+            ClearErrorStyles();
+            soPhong = cbSoPhong.Text?.Trim();
+            tenKhach = txtTenKhachChu.Text.Trim();
+            soNguoi =0;
+            bool ok = true;
 
-            int soNguoi;
-            if (!int.TryParse(txtSoNguoi.Text.Trim(), out soNguoi) || soNguoi <= 0)
+            if (string.IsNullOrWhiteSpace(soPhong))
             {
-                MessageBox.Show("Số Người phải là số > 0.");
-                return;
+                cbSoPhong.BackColor = Color.MistyRose;
+                MessageBox.Show("Vui lòng nhập Số Phòng.");
+                ok = false;
             }
 
-            var tenKhach = txtTenKhachChu.Text.Trim();
-
-            using (var conn = Db.Open())
+            if (!int.TryParse(txtSoNguoi.Text.Trim(), out soNguoi) || soNguoi <=0)
             {
-                // Duplicate check
+                txtSoNguoi.BackColor = Color.MistyRose;
+                MessageBox.Show("Số Người phải là số >0.");
+                ok = false;
+            }
+
+            if (!ok) return false;
+
+            if (isAdd)
+            {
+                // Kiểm tra trùng số phòng
+                using (var conn = Db.Open())
                 using (var check = new SqlCommand("SELECT COUNT(1) FROM dbo.Phong WHERE TenPhong=@ten", conn))
                 {
                     check.Parameters.AddWithValue("@ten", soPhong);
-                    if ((int)check.ExecuteScalar() > 0)
+                    if ((int)check.ExecuteScalar() >0)
                     {
+                        cbSoPhong.BackColor = Color.MistyRose;
                         MessageBox.Show("Số phòng đã tồn tại.");
-                        return;
+                        return false;
                     }
                 }
+            }
+            return true;
+        }
 
-                int? maKh = null;
-                if (!string.IsNullOrWhiteSpace(tenKhach))
+        private void BtnThem_Click(object sender, EventArgs e)
+        {
+            if (!ValidateInputsForAddOrUpdate(true, out var soNguoi, out var soPhong, out var tenKhach)) return;
+
+            try
+            {
+                using (var conn = Db.Open())
                 {
-                    using (var findKh = new SqlCommand("SELECT TOP 1 id FROM dbo.KhachHang WHERE TenKH=@n", conn))
+                    int? maKh = null;
+                    if (!string.IsNullOrWhiteSpace(tenKhach))
                     {
-                        findKh.Parameters.AddWithValue("@n", tenKhach);
-                        var obj = findKh.ExecuteScalar();
-                        if (obj != null) maKh = Convert.ToInt32(obj);
+                        using (var findKh = new SqlCommand("SELECT TOP 1 id FROM dbo.KhachHang WHERE TenKH=@n", conn))
+                        {
+                            findKh.Parameters.AddWithValue("@n", tenKhach);
+                            var obj = findKh.ExecuteScalar();
+                            if (obj != null) maKh = Convert.ToInt32(obj);
+                        }
+                    }
+
+                    bool hasSoNguoiCol = ColumnExists(conn, "Phong", "SoNguoi");
+                    string sql = hasSoNguoiCol
+                        ? "INSERT INTO dbo.Phong(TenPhong, MaKH, SoNguoi, GhiChu, status) VALUES(@Ten, @MaKH, @SoNguoi, NULL, N'Trống')"
+                        : "INSERT INTO dbo.Phong(TenPhong, MaKH, GhiChu, status) VALUES(@Ten, @MaKH, NULL, N'Trống')";
+
+                    using (var cmd = new SqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@Ten", soPhong);
+                        cmd.Parameters.AddWithValue("@MaKH", (object)maKh ?? DBNull.Value);
+                        if (hasSoNguoiCol) cmd.Parameters.AddWithValue("@SoNguoi", soNguoi);
+                        cmd.ExecuteNonQuery();
                     }
                 }
-
-                using (var cmd = new SqlCommand("INSERT INTO dbo.Phong(TenPhong, MaKH, GhiChu, status) VALUES(@Ten, @MaKH, NULL, N'Trống')", conn))
-                {
-                    cmd.Parameters.AddWithValue("@Ten", soPhong);
-                    cmd.Parameters.AddWithValue("@MaKH", (object)maKh ?? DBNull.Value);
-                    cmd.ExecuteNonQuery();
-                }
+            }
+            catch (Exception ex)
+            {
+                ShowDbError(ex, "Thêm phòng");
+                return;
             }
 
             LoadPhong();
@@ -215,40 +300,44 @@ ORDER BY p.id;", conn))
                 return;
             }
 
-            var soPhong = cbSoPhong.Text?.Trim();
-            if (string.IsNullOrWhiteSpace(soPhong)) { MessageBox.Show("Vui lòng nhập Số Phòng."); return; }
-
-            int soNguoi;
-            if (!int.TryParse(txtSoNguoi.Text.Trim(), out soNguoi) || soNguoi <= 0)
-            {
-                MessageBox.Show("Số Người phải là số > 0.");
-                return;
-            }
-
-            var tenKhach = txtTenKhachChu.Text.Trim();
+            if (!ValidateInputsForAddOrUpdate(false, out var soNguoi, out var soPhong, out var tenKhach)) return;
 
             if (MessageBox.Show("Bạn có chắc muốn cập nhật thông tin phòng này?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
                 return;
 
-            using (var conn = Db.Open())
+            try
             {
-                int? maKh = null;
-                if (!string.IsNullOrWhiteSpace(tenKhach))
+                using (var conn = Db.Open())
                 {
-                    using (var findKh = new SqlCommand("SELECT TOP 1 id FROM dbo.KhachHang WHERE TenKH=@n", conn))
+                    int? maKh = null;
+                    if (!string.IsNullOrWhiteSpace(tenKhach))
                     {
-                        findKh.Parameters.AddWithValue("@n", tenKhach);
-                        var obj = findKh.ExecuteScalar();
-                        if (obj != null) maKh = Convert.ToInt32(obj);
+                        using (var findKh = new SqlCommand("SELECT TOP 1 id FROM dbo.KhachHang WHERE TenKH=@n", conn))
+                        {
+                            findKh.Parameters.AddWithValue("@n", tenKhach);
+                            var obj = findKh.ExecuteScalar();
+                            if (obj != null) maKh = Convert.ToInt32(obj);
+                        }
+                    }
+
+                    bool hasSoNguoiCol = ColumnExists(conn, "Phong", "SoNguoi");
+                    string sql = hasSoNguoiCol
+                        ? "UPDATE dbo.Phong SET MaKH=@MaKH, SoNguoi=@SoNguoi WHERE TenPhong=@Ten"
+                        : "UPDATE dbo.Phong SET MaKH=@MaKH WHERE TenPhong=@Ten";
+
+                    using (var cmd = new SqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@Ten", soPhong);
+                        cmd.Parameters.AddWithValue("@MaKH", (object)maKh ?? DBNull.Value);
+                        if (hasSoNguoiCol) cmd.Parameters.AddWithValue("@SoNguoi", soNguoi);
+                        cmd.ExecuteNonQuery();
                     }
                 }
-
-                using (var cmd = new SqlCommand("UPDATE dbo.Phong SET MaKH=@MaKH WHERE TenPhong=@Ten", conn))
-                {
-                    cmd.Parameters.AddWithValue("@Ten", soPhong);
-                    cmd.Parameters.AddWithValue("@MaKH", (object)maKh ?? DBNull.Value);
-                    cmd.ExecuteNonQuery();
-                }
+            }
+            catch (Exception ex)
+            {
+                ShowDbError(ex, "Cập nhật phòng");
+                return;
             }
 
             LoadPhong();
@@ -284,27 +373,35 @@ ORDER BY p.id;", conn))
             if (MessageBox.Show("Bạn có chắc muốn xóa phòng này? Dữ liệu không thể khôi phục!", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
                 return;
 
-            using (var conn = Db.Open())
+            try
             {
-                // Ensure no open bill exists
-                using (var chk = new SqlCommand(@"SELECT COUNT(1)
+                using (var conn = Db.Open())
+                {
+                    using (var chk = new SqlCommand(@"SELECT COUNT(1)
 FROM dbo.HoaDon hd
 JOIN dbo.Phong p ON p.id = hd.MaPhong
 WHERE p.TenPhong=@Ten AND hd.status=0", conn))
-                {
-                    chk.Parameters.AddWithValue("@Ten", soPhong);
-                    if ((int)chk.ExecuteScalar() > 0)
                     {
-                        MessageBox.Show("Không thể xóa phòng đang có hóa đơn mở!");
-                        return;
+                        chk.Parameters.AddWithValue("@Ten", soPhong);
+                        if ((int)chk.ExecuteScalar() > 0)
+                        {
+                            MessageBox.Show("Không thể xóa phòng đang có hóa đơn mở!");
+                            return;
+                        }
+                    }
+
+                    // Xóa dịch vụ liên quan (hóa đơn đã đóng) nếu nghiệp vụ yêu cầu - thận trọng: ở đây chỉ xóa phòng
+                    using (var del = new SqlCommand("DELETE p FROM dbo.Phong p WHERE p.TenPhong=@Ten", conn))
+                    {
+                        del.Parameters.AddWithValue("@Ten", soPhong);
+                        del.ExecuteNonQuery();
                     }
                 }
-
-                using (var del = new SqlCommand("DELETE p FROM dbo.Phong p WHERE p.TenPhong=@Ten", conn))
-                {
-                    del.Parameters.AddWithValue("@Ten", soPhong);
-                    del.ExecuteNonQuery();
-                }
+            }
+            catch (Exception ex)
+            {
+                ShowDbError(ex, "Xóa phòng");
+                return;
             }
 
             LoadPhong();
@@ -318,6 +415,12 @@ WHERE p.TenPhong=@Ten AND hd.status=0", conn))
             var soPhongFilter = cbSoPhong.Text?.Trim();
             var tenKhFilter = txtTenKhachChu.Text?.Trim();
             LoadPhong(soPhongFilter, tenKhFilter);
+        }
+
+        private void ShowDbError(Exception ex, string action)
+        {
+            // Có thể ghi log, tạm thời hiển thị chung
+            MessageBox.Show($"{action} thất bại. Vui lòng thử lại.\nChi tiết: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

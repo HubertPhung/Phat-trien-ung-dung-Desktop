@@ -2,8 +2,10 @@
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using WindowsFormsApp2.Infrastructure;
+using System.Reflection;
 
 namespace WindowsFormsApp2
 {
@@ -13,19 +15,54 @@ namespace WindowsFormsApp2
         private int _currentBillId = 0;
         private int? _currentCustomerId = null;
         private int _editingOldQty = 0;
+        private string _currentRoomStatus = ""; // Trống / Đang sử dụng
 
         public frmHome()
         {
             InitializeComponent();
             this.Load += FrmHome_Load;
             WireEvents();
+            EnsureDynamicColumns();
             ConfigureChiTietGridEditing();
+            ConfigureGridsUi();
 
             // Trạng thái UI ban đầu theo yêu cầu
             ResetDichVuList();
             ResetThongTinPhongVaKhach();
             ResetChiTietGrid();
             ToggleActions(false);
+        }
+
+        // Cho phép form khác chọn trước phòng
+        public void SetRoom(int roomId)
+        {
+            if (roomId <= 0) return;
+            // nếu đã load danh sách phòng thì chọn ngay; nếu chưa sẽ chọn sau khi load
+            SelectRoomInList(roomId);
+        }
+
+        private void EnsureDynamicColumns()
+        {
+            // Thêm cột IdDVẩn cho dgvDSDV nếu chưa có để lưu mã dịch vụ
+            if (dgvDSDV.Columns["IdDV"] == null)
+            {
+                var col = new DataGridViewTextBoxColumn
+                {
+                    Name = "IdDV",
+                    HeaderText = "IdDV",
+                    Visible = false
+                };
+                dgvDSDV.Columns.Add(col);
+            }
+        }
+
+        private void ConfigureChiTietGridEditing()
+        {
+            // Cho phép chỉnh sửa SL trên lưới chi tiết hóa đơn
+            dgvChiTiet.ReadOnly = false;
+            foreach (DataGridViewColumn c in dgvChiTiet.Columns) c.ReadOnly = true;
+            if (dgvChiTiet.Columns.Contains("Column6")) // SL
+                dgvChiTiet.Columns["Column6"].ReadOnly = false;
         }
 
         private void FrmHome_Load(object sender, EventArgs e)
@@ -52,7 +89,7 @@ namespace WindowsFormsApp2
                 MessageBox.Show("Không thể tải danh sách phòng: " + ex.Message);
             }
 
-            // 3) Hiển thị danh sách loại dịch vụ (text radio giữ nguyên, không chọn mặc định)
+            // 3) Bỏ chọn loại dịch vụ mặc định
             try
             {
                 rdAnUong.Checked = false;
@@ -66,39 +103,60 @@ namespace WindowsFormsApp2
 
         private void WireEvents()
         {
-            rdAnUong.CheckedChanged += (s,e) => { if (rdAnUong.Checked) { _currentLoaiId = 1; LoadDichVuTheoLoai(_currentLoaiId); } };
-            rdDiLai.CheckedChanged += (s,e) => { if (rdDiLai.Checked) { _currentLoaiId = 2; LoadDichVuTheoLoai(_currentLoaiId); } };
-            rdGiatLa.CheckedChanged += (s,e) => { if (rdGiatLa.Checked) { _currentLoaiId = 3; LoadDichVuTheoLoai(_currentLoaiId); } };
-            rdSpa.CheckedChanged += (s,e) => { if (rdSpa.Checked) { _currentLoaiId = 4; LoadDichVuTheoLoai(_currentLoaiId); } };
-            rdGiaiTri.CheckedChanged += (s,e) => { if (rdGiaiTri.Checked) { _currentLoaiId = 5; LoadDichVuTheoLoai(_currentLoaiId); } };
+            rdAnUong.CheckedChanged += (s, e) => { if (rdAnUong.Checked) { _currentLoaiId = 1; LoadDichVuTheoLoai(_currentLoaiId); } };
+            rdDiLai.CheckedChanged += (s, e) => { if (rdDiLai.Checked) { _currentLoaiId = 2; LoadDichVuTheoLoai(_currentLoaiId); } };
+            rdGiatLa.CheckedChanged += (s, e) => { if (rdGiatLa.Checked) { _currentLoaiId = 3; LoadDichVuTheoLoai(_currentLoaiId); } };
+            rdSpa.CheckedChanged += (s, e) => { if (rdSpa.Checked) { _currentLoaiId = 4; LoadDichVuTheoLoai(_currentLoaiId); } };
+            rdGiaiTri.CheckedChanged += (s, e) => { if (rdGiaiTri.Checked) { _currentLoaiId = 5; LoadDichVuTheoLoai(_currentLoaiId); } };
 
             btnThemDV.Click += BtnThemDV_Click;
             btnThanhToan.Click += BtnThanhToan_Click;
             btnHuyDon.Click += BtnHuyDon_Click;
             btnLuu.Click += BtnLuu_Click;
-            btnThoat.Click += (s,e)=> this.Close();
-            nudGiamGia.ValueChanged += (s,e)=> RecalcThanhTienLocal();
+            btnThoat.Click += (s, e) => this.Close();
+            nudGiamGia.ValueChanged += (s, e) => RecalcThanhTienLocal();
 
             dgvChiTiet.CellBeginEdit += DgvChiTiet_CellBeginEdit;
             dgvChiTiet.CellEndEdit += DgvChiTiet_CellEndEdit;
             dgvChiTiet.KeyDown += DgvChiTiet_KeyDown;
+            dgvChiTiet.CellDoubleClick += DgvChiTiet_CellDoubleClick; // mở chi tiết dịch vụ từ dòng hóa đơn
 
             lvPhong.ItemSelectionChanged += LvPhong_ItemSelectionChanged;
             dgvDSDV.CellDoubleClick += DgvDSDV_CellDoubleClick;
         }
 
-        private void ConfigureChiTietGridEditing()
+        private void ConfigureGridsUi()
         {
-            // Cho phép chỉnh sửa cột SL, các cột khác readonly
-            foreach (DataGridViewColumn c in dgvChiTiet.Columns)
-                c.ReadOnly = true;
-            if (dgvChiTiet.Columns.Contains("Column6")) // SL
-                dgvChiTiet.Columns["Column6"].ReadOnly = false;
+            // bật double buffering để mượt hơn
+            TryEnableDoubleBuffering(lvPhong);
+            TryEnableDoubleBuffering(dgvDSDV);
+            TryEnableDoubleBuffering(dgvChiTiet);
+
+            // cấu hình chọn dòng
+            dgvDSDV.ReadOnly = true;
+            dgvDSDV.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvDSDV.MultiSelect = false;
+
+            dgvChiTiet.SelectionMode = DataGridViewSelectionMode.CellSelect;
+            dgvChiTiet.MultiSelect = false;
+
+            // autosize cột cơ bản
+            foreach (DataGridViewColumn c in dgvDSDV.Columns) c.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            foreach (DataGridViewColumn c in dgvChiTiet.Columns) c.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+        }
+
+        private void TryEnableDoubleBuffering(object control)
+        {
+            try
+            {
+                var pi = control.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
+                pi?.SetValue(control, true, null);
+            }
+            catch { }
         }
 
         private void ResetDichVuList()
         {
-            // Xóa dữ liệu dịch vụ, giữ tiêu đề cột
             dgvDSDV.Rows.Clear();
         }
 
@@ -115,6 +173,7 @@ namespace WindowsFormsApp2
             txtThanhTien.Clear();
             _currentBillId = 0;
             _currentCustomerId = null;
+            _currentRoomStatus = string.Empty;
         }
 
         private void ResetChiTietGrid()
@@ -152,6 +211,7 @@ namespace WindowsFormsApp2
                         var id = Convert.ToInt32(rd["id"]);
                         var ten = rd["TenPhong"].ToString();
                         var status = rd["status"].ToString();
+                        if (string.IsNullOrWhiteSpace(status)) status = "Trống"; // mặc định Trống
                         int imageIndex = string.Equals(status, "Trống", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
                         var item = new ListViewItem(ten, imageIndex)
                         {
@@ -160,6 +220,26 @@ namespace WindowsFormsApp2
                         lvPhong.Items.Add(item);
                     }
                 }
+            }
+        }
+
+        private void SelectRoomInList(int roomId)
+        {
+            foreach (ListViewItem it in lvPhong.Items)
+            {
+                var tag = it.Tag;
+                if (tag == null) continue;
+                try
+                {
+                    var t = tag.GetType();
+                    int id = (int)t.GetProperty("Id").GetValue(tag, null);
+                    if (id == roomId)
+                    {
+                        it.Selected = true; it.Focused = true; it.EnsureVisible();
+                        break;
+                    }
+                }
+                catch { }
             }
         }
 
@@ -175,6 +255,7 @@ namespace WindowsFormsApp2
                 tenPhong = (string)t.GetProperty("Ten").GetValue(tag, null);
                 status = (string)t.GetProperty("Status").GetValue(tag, null);
             }
+            _currentRoomStatus = status;
 
             txtSoPhong.Text = roomId.ToString();
             if (string.Equals(status, "Trống", StringComparison.OrdinalIgnoreCase))
@@ -202,9 +283,9 @@ namespace WindowsFormsApp2
         private void LoadKhachHangTheoPhong(int roomId)
         {
             using (var conn = Db.Open())
-            using (var cmd = new SqlCommand(@"SELECT TOP 1 kh.id, kh.TenKH, kh.CMND_CCCD, kh.SDT
-                                              FROM dbo.Phong p LEFT JOIN dbo.KhachHang kh ON kh.id = p.MaKH
-                                              WHERE p.id=@p", conn))
+            using (var cmd = new SqlCommand(@"SELECT TOP(1) kh.id, kh.TenKH, kh.CMND_CCCD, kh.SDT
+                                            FROM dbo.Phong p LEFT JOIN dbo.KhachHang kh ON kh.id = p.MaKH
+                                            WHERE p.id=@p", conn))
             {
                 cmd.Parameters.AddWithValue("@p", roomId);
                 using (var rd = cmd.ExecuteReader())
@@ -252,7 +333,6 @@ namespace WindowsFormsApp2
                 return;
             }
 
-            // Có hóa đơn mở -> tải chi tiết
             RefreshBillUI();
             ToggleActions(true);
         }
@@ -271,8 +351,13 @@ namespace WindowsFormsApp2
                 {
                     while (rd.Read())
                     {
-                        // Hinh, Ten, DVT, Gia
-                        dgvDSDV.Rows.Add(null, rd["TenDV"], rd["DVT"], rd["DonGia"]);
+                        int idDV = 0;
+                        try { idDV = Convert.ToInt32(rd["id"]); } catch { /* nếu SP không trả id */ }
+                        var ten = rd["TenDV"].ToString();
+                        var dvt = rd["DVT"].ToString();
+                        var gia = rd["DonGia"]; // giữ object
+                        // Thứ tự cột hiện tại: Hinh, Ten, DVT, Gia, IdDV (ấn)
+                        dgvDSDV.Rows.Add(null, ten, dvt, gia, idDV);
                         count++;
                     }
                 }
@@ -287,19 +372,60 @@ namespace WindowsFormsApp2
             nudSoLuong.Value = 0;
         }
 
+        private string GetLoaiTenById(int id)
+        {
+            switch (id)
+            {
+                case 1: return "Ăn uống";
+                case 2: return "Đi lại";
+                case 3: return "Giặt là";
+                case 4: return "Spa";
+                case 5: return "Giải trí";
+                default: return string.Empty;
+            }
+        }
+
         private void DgvDSDV_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
+
+            // Kiểm tra điều kiện trước khi mở chi tiết
+            int roomId;
+            if (!int.TryParse(txtSoPhong.Text, out roomId))
+            {
+                MessageBox.Show("Vui lòng chọn phòng trước.");
+                return;
+            }
+            if (string.Equals(_currentRoomStatus, "Trống", StringComparison.OrdinalIgnoreCase))
+            {
+                // Cố gắng mở hóa đơn sẽ tự set trạng thái phòng
+                if (!EnsureBill())
+                {
+                    MessageBox.Show("Phòng đang trống, không thể thêm dịch vụ.");
+                    return;
+                }
+            }
+            if (_currentBillId == 0 && !EnsureBill())
+            {
+                MessageBox.Show("Phòng chưa có hóa đơn mở.");
+                return;
+            }
+
             var row = dgvDSDV.Rows[e.RowIndex];
             var ten = Convert.ToString(row.Cells["Ten"].Value);
             var dvt = Convert.ToString(row.Cells["DVT"].Value);
-            var giaObj = row.Cells["Gia"].Value;
-            decimal gia = 0; decimal.TryParse(Convert.ToString(giaObj), out gia);
+            decimal gia; decimal.TryParse(Convert.ToString(row.Cells["Gia"].Value), out gia);
+            int serviceId = 0;
+            if (row.Cells["IdDV"] != null)
+                int.TryParse(Convert.ToString(row.Cells["IdDV"].Value), out serviceId);
+            if (serviceId == 0)
+                serviceId = GetServiceIdByUnique(ten, dvt, gia, _currentLoaiId == 0 ? 1 : _currentLoaiId);
 
-            using (var f = new frmChiTietDV())
+            // Lấy tên loại chính xác cho dịch vụ (nếu có thể)
+            var loaiTen = GetLoaiTenByServiceId(serviceId) ?? GetLoaiTenById(_currentLoaiId);
+
+            using (var f = new frmChiTietDV(serviceId, ten, loaiTen, gia, dvt, null, roomId, _currentBillId, null, () => RefreshBillUI()))
             {
-                // Nếu form chi tiết đã có UI, có thể set thuộc tính/label tại đây.
-                f.Text = $"Chi tiết dịch vụ - {ten}";
                 f.ShowDialog(this);
             }
         }
@@ -344,6 +470,14 @@ namespace WindowsFormsApp2
                 {
                     _currentBillId = Convert.ToInt32(dt.Rows[0]["id"]);
                     txtNgayLap.Text = Convert.ToDateTime(dt.Rows[0]["NgayLapHD"]).ToString("dd/MM/yyyy HH:mm");
+
+                    // Đánh dấu phòng đang sử dụng
+                    using (var up = new SqlCommand("UPDATE dbo.Phong SET status=N'Đang sử dụng' WHERE id=@p", conn))
+                    {
+                        up.Parameters.AddWithValue("@p", roomId);
+                        up.ExecuteNonQuery();
+                    }
+                    _currentRoomStatus = "Đang sử dụng";
                     RefreshBillUI();
                     ToggleActions(true);
                     return true;
@@ -356,11 +490,11 @@ namespace WindowsFormsApp2
         {
             if (_currentBillId <= 0) return;
 
-            // Load chi tiết
             dgvChiTiet.Rows.Clear();
-            decimal tongDV = 0;
+            int totalQty = 0;
+            decimal totalMoney = 0;
             using (var conn = Db.Open())
-            using (var cmd = new SqlCommand("USP_XuatDS_IDHoaDon", conn))
+            using (var cmd = new SqlCommand("USP_XuatChiTietHD_HoaDon", conn))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@billID", _currentBillId);
@@ -374,24 +508,23 @@ namespace WindowsFormsApp2
                         int sl = Convert.ToInt32(rd["SoLuong"]);
                         decimal dongia = Convert.ToDecimal(rd["DonGia"]);
                         decimal thanhtien = rd["ThanhTien"] == DBNull.Value ? (sl * dongia) : Convert.ToDecimal(rd["ThanhTien"]);
-                        tongDV += thanhtien;
-                        // STT, Mã DV, Tên DV, Ngày SD, Đơn giá, SL, Thành tiền, Ghi chú
-                        dgvChiTiet.Rows.Add(stt++, null, ten, DateTime.Now.ToString("dd/MM/yyyy"), dongia, sl, thanhtien, "");
-                        // Lấy id DV để dùng khi sửa/xóa
-                        dgvChiTiet.Rows[dgvChiTiet.Rows.Count - 1].Cells["Column2"].Value = GetServiceIdByUnique(ten, dvt, dongia, _currentLoaiId == 0 ? 1 : _currentLoaiId);
+                        totalQty += sl;
+                        totalMoney += thanhtien;
+                        int idService = Convert.ToInt32(rd["MaDV"]);
+                        string ghiChu = rd["GhiChu"] == DBNull.Value ? string.Empty : rd["GhiChu"].ToString();
+                        dgvChiTiet.Rows.Add(stt++, idService, ten, DateTime.Now.ToString("dd/MM/yyyy"), dongia, sl, thanhtien, ghiChu);
                     }
                 }
             }
-
-            txtTongDV.Text = string.Format("{0:N0}", tongDV);
-            txtTongTien.Text = txtTongDV.Text; // không có tiền phòng => tổng tiền = tổng dịch vụ
+            txtTongDV.Text = totalQty.ToString(); // tổng số dịch vụ (SL cộng dồn)
+            txtTongTien.Text = string.Format("{0:N0}", totalMoney);
             RecalcThanhTienLocal();
         }
 
         private int GetServiceIdByUnique(string ten, string dvt, decimal gia, int loai)
         {
             using (var conn = Db.Open())
-            using (var cmd = new SqlCommand("SELECT TOP 1 id FROM DSDichVu WHERE TenDV=@Ten AND DVT=@DVT AND DonGia=@Gia AND idLoaiDichVu=@Loai", conn))
+            using (var cmd = new SqlCommand("SELECT TOP(1) id FROM DSDichVu WHERE TenDV=@Ten AND DVT=@DVT AND DonGia=@Gia AND idLoaiDichVu=@Loai", conn))
             {
                 cmd.Parameters.AddWithValue("@Ten", ten);
                 cmd.Parameters.AddWithValue("@DVT", dvt);
@@ -402,11 +535,28 @@ namespace WindowsFormsApp2
             }
         }
 
+        private string GetLoaiTenByServiceId(int serviceId)
+        {
+            if (serviceId <= 0) return null;
+            using (var conn = Db.Open())
+            using (var cmd = new SqlCommand(@"SELECT TOP(1) l.name
+                                             FROM DSDichVu dv
+                                             JOIN LoaiDichVu l ON l.id = dv.idLoaiDichVu
+                                             WHERE dv.id = @id", conn))
+            {
+                cmd.Parameters.AddWithValue("@id", serviceId);
+                var obj = cmd.ExecuteScalar();
+                return obj == null ? null : Convert.ToString(obj);
+            }
+        }
+
         private void RecalcThanhTienLocal()
         {
             decimal tong = 0;
-            decimal.TryParse(txtTongTien.Text.Replace(",",""), out tong);
-            var giam = (decimal)nudGiamGia.Value;
+            // loại bỏ mọi ký tự không phải số
+            var raw = Regex.Replace(txtTongTien.Text ?? string.Empty, @"[^0-9]", "");
+            if (!string.IsNullOrEmpty(raw)) decimal.TryParse(raw, out tong);
+            var giam = (decimal)nudGiamGia.Value; // % giảm
             var thanh = Math.Max(0, tong * (1 - (giam / 100m)));
             txtThanhTien.Text = string.Format("{0:N0}", thanh);
         }
@@ -426,7 +576,7 @@ namespace WindowsFormsApp2
 
             var row = dgvChiTiet.Rows[e.RowIndex];
             int newQty;
-            if (!int.TryParse(Convert.ToString(row.Cells["Column6"].Value), out newQty))
+            if (!int.TryParse(Convert.ToString(row.Cells["Column6"].Value), out newQty) || newQty <= 0)
             {
                 MessageBox.Show("Số lượng không hợp lệ.");
                 row.Cells["Column6"].Value = _editingOldQty;
@@ -485,6 +635,25 @@ namespace WindowsFormsApp2
             RefreshBillUI();
         }
 
+        private void DgvChiTiet_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            if (_currentBillId == 0) return;
+
+            var row = dgvChiTiet.Rows[e.RowIndex];
+            int serviceId; if (!int.TryParse(Convert.ToString(row.Cells["Column2"].Value), out serviceId)) return;
+            var ten = Convert.ToString(row.Cells["Column3"].Value);
+            decimal donGia = 0; decimal.TryParse(Convert.ToString(row.Cells["Column5"].Value), out donGia);
+            var dvt = ""; // không có cột DVT trong lưới -> lấy từ DB nếu cần
+            var loai = GetLoaiTenByServiceId(serviceId) ?? GetLoaiTenById(_currentLoaiId);
+
+            int roomId; int.TryParse(txtSoPhong.Text, out roomId);
+            using (var f = new frmChiTietDV(serviceId, ten, loai, donGia, dvt, null, roomId, _currentBillId, null, () => RefreshBillUI()))
+            {
+                f.ShowDialog(this);
+            }
+        }
+
         private void BtnThemDV_Click(object sender, EventArgs e)
         {
             // Kiểm tra điều kiện
@@ -493,6 +662,14 @@ namespace WindowsFormsApp2
             {
                 MessageBox.Show("Vui lòng chọn phòng.");
                 return;
+            }
+            if (string.Equals(_currentRoomStatus, "Trống", StringComparison.OrdinalIgnoreCase))
+            {
+                if (!EnsureBill())
+                {
+                    MessageBox.Show("Phòng đang trống, không thể thêm dịch vụ.");
+                    return;
+                }
             }
 
             if (_currentBillId == 0 && !EnsureBill())
@@ -525,7 +702,11 @@ namespace WindowsFormsApp2
             }
 
             var ghiChu = string.IsNullOrWhiteSpace(txtGhiChu.Text) ? (object)DBNull.Value : txtGhiChu.Text.Trim();
-            int dvId = GetServiceIdByUnique(ten, dvt, gia, _currentLoaiId == 0 ? 1 : _currentLoaiId);
+            int dvId = 0;
+            if (row.Cells["IdDV"] != null)
+                int.TryParse(Convert.ToString(row.Cells["IdDV"].Value), out dvId);
+            if (dvId == 0)
+                dvId = GetServiceIdByUnique(ten, dvt, gia, _currentLoaiId == 0 ? 1 : _currentLoaiId);
             if (dvId == 0)
             {
                 MessageBox.Show("Không tìm thấy dịch vụ.");
@@ -553,8 +734,6 @@ namespace WindowsFormsApp2
                 MessageBox.Show("Chưa có hóa đơn.");
                 return;
             }
-
-            // Không có chi tiết
             if (dgvChiTiet.Rows.Count == 0)
             {
                 MessageBox.Show("Chưa có dịch vụ để thanh toán.");
@@ -562,6 +741,7 @@ namespace WindowsFormsApp2
             }
 
             var giam = (decimal)nudGiamGia.Value;
+            int roomId; int.TryParse(txtSoPhong.Text, out roomId);
             using (var conn = Db.Open())
             using (var cmd = new SqlCommand("USP_DienHoaDon", conn))
             {
@@ -570,6 +750,18 @@ namespace WindowsFormsApp2
                 cmd.Parameters.AddWithValue("@giamgia", giam);
                 cmd.ExecuteNonQuery();
             }
+
+            // đặt phòng trống lại
+            if (roomId > 0)
+            {
+                using (var conn = Db.Open())
+                using (var up = new SqlCommand("UPDATE dbo.Phong SET status=N'Trống' WHERE id=@p", conn))
+                {
+                    up.Parameters.AddWithValue("@p", roomId);
+                    up.ExecuteNonQuery();
+                }
+            }
+
             MessageBox.Show("Thanh toán thành công. Hóa đơn đã được lưu.");
 
             // Reset sau thanh toán
@@ -588,8 +780,7 @@ namespace WindowsFormsApp2
             }
             if (MessageBox.Show("Hủy hóa đơn hiện tại?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
 
-            int roomId;
-            int.TryParse(txtSoPhong.Text, out roomId);
+            int roomId; int.TryParse(txtSoPhong.Text, out roomId);
 
             using (var conn = Db.Open())
             using (var tran = conn.BeginTransaction())
@@ -601,6 +792,7 @@ namespace WindowsFormsApp2
                         cmd.Parameters.AddWithValue("@id", _currentBillId);
                         cmd.ExecuteNonQuery();
                     }
+                    // Thay vì xóa, có thể cập nhật status =2 (Đã hủy) nếu nghiệp vụ yêu cầu.
                     using (var cmd = new SqlCommand("DELETE dbo.HoaDon WHERE id=@id AND status=0", conn, tran))
                     {
                         cmd.Parameters.AddWithValue("@id", _currentBillId);
@@ -633,27 +825,23 @@ namespace WindowsFormsApp2
 
         private void BtnLuu_Click(object sender, EventArgs e)
         {
-            // Kiểm tra phòng
             int roomId;
             if (!int.TryParse(txtSoPhong.Text, out roomId))
             {
                 MessageBox.Show("Phòng chưa được chọn, không thể lưu.");
                 return;
             }
-
             if (_currentCustomerId == null)
             {
                 MessageBox.Show("Thông tin khách hàng chưa đầy đủ, vui lòng kiểm tra lại.");
                 return;
             }
-
-            // Đảm bảo có hóa đơn mở
             if (_currentBillId == 0 && !EnsureBill())
             {
                 MessageBox.Show("Không thể tạo/lấy hóa đơn.");
                 return;
             }
-
+            //Ở đây có thể bổ sung cập nhật ghi chú, giảm giá tạm, ...
             MessageBox.Show("Dữ liệu đã được lưu thành công.");
         }
     }
