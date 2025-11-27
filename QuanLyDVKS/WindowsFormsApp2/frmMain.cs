@@ -1,0 +1,235 @@
+﻿using Guna.UI2.WinForms;
+using System;
+using System.Linq;
+using System.Windows.Forms;
+using WindowsFormsApp2.Infrastructure;
+using WindowsFormsApp2.Security;
+
+namespace WindowsFormsApp2
+{
+    public partial class frmMain : Form
+    {
+        private Label _lblUserInfo;
+
+        public frmMain()
+        {
+            InitializeComponent();
+            Load += FrmMain_Load;
+            FormClosing += FrmMain_FormClosing;
+            btnDangXuat.Click += BtnDangXuat_Click;
+        }
+
+        private void FrmMain_Load(object sender, EventArgs e)
+        {
+            // Hiển thị thông tin người dùng và phân quyền
+            bool isAdmin = UserContext.Type == 1;
+            try
+            {
+                // Hiển thị tên + vai trò góc trên phải
+                if (_lblUserInfo == null)
+                {
+                    _lblUserInfo = new Label
+                    {
+                        AutoSize = true,
+                        Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                        BackColor = System.Drawing.Color.Transparent,
+                        ForeColor = System.Drawing.Color.DimGray
+                    };
+                    guna2Panel1.Controls.Add(_lblUserInfo);
+                }
+                var role = isAdmin ? "Admin" : "Nhân viên";
+                _lblUserInfo.Text = $"{UserContext.TenTaiKhoan ?? "User"} ({role})";
+                // đặt vị trí bên phải
+                _lblUserInfo.Left = guna2Panel1.Width - _lblUserInfo.Width - 160; // chừa vùng control box
+                _lblUserInfo.Top = 7;
+                guna2Panel1.Resize += (s, ev) =>
+                {
+                    _lblUserInfo.Left = guna2Panel1.Width - _lblUserInfo.Width - 160;
+                };
+
+                // Phân quyền menu: luôn hiển thị, chỉ bật cho Admin
+                btnTaiKhoan.Visible = true;
+                btnDoanhThu.Visible = true;
+                btnTaiKhoan.Enabled = isAdmin;
+                btnDoanhThu.Enabled = isAdmin;
+            }
+            catch { }
+
+            // Thiết lập trạng thái ban đầu: chọn Home và load
+            try
+            {
+                btnHome.Checked = true;
+                container(new frmHome());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Không thể tải trang Home: " + ex.Message);
+            }
+
+            // Kiểm tra kết nối CSDL nhanh
+            try
+            {
+                using (var conn = Db.Open()) { /* ok */ }
+            }
+            catch
+            {
+                MessageBox.Show("Mất kết nối database. Vui lòng kiểm tra kết nối.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void SetActive(Guna2Button active)
+        {
+            // Bỏ chọn tất cả, chọn một
+            foreach (var b in new[] { btnHome, btnPhong, btnDichVu, btnDoanhThu, btnKhachHang, btnHoaDon, btnTaiKhoan })
+            {
+                if (b == null) continue;
+                b.Checked = (b == active);
+            }
+        }
+
+        private void CloseAllChildForms()
+        {
+            // Đóng và giải phóng các form con trong panel
+            foreach (Control c in pnHienThi.Controls.OfType<Form>().ToList())
+            {
+                try { ((Form)c).Close(); } catch { }
+                try { c.Dispose(); } catch { }
+            }
+            pnHienThi.Controls.Clear();
+        }
+
+        private void container(object _form)
+        {
+            if (pnHienThi.Controls.Count > 0) CloseAllChildForms();
+
+            Form fm = _form as Form;
+            fm.TopLevel = false;
+            fm.FormBorderStyle = FormBorderStyle.None;
+            fm.Dock = DockStyle.Fill;
+            pnHienThi.Controls.Add(fm);
+            pnHienThi.Tag = fm;
+            fm.Show();
+        }
+
+        private void btnHome_Click(object sender, EventArgs e)
+        {
+            SetActive(btnHome);
+            CloseAllChildForms();
+            container(new frmHome());
+        }
+
+        private void btnPhong_Click(object sender, EventArgs e)
+        {
+            SetActive(btnPhong);
+            CloseAllChildForms();
+            container(new frmPhong());
+        }
+
+        private void btnDichVu_Click(object sender, EventArgs e)
+        {
+            SetActive(btnDichVu);
+            CloseAllChildForms();
+            container(new frmDichVu());
+        }
+
+        private void btnDoanhThu_Click(object sender, EventArgs e)
+        {
+            // Chỉ Admin
+            if (UserContext.Type != 1)
+            {
+                MessageBox.Show("Chỉ Admin được truy cập báo cáo doanh thu.", "Truy cập bị từ chối", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            SetActive(btnDoanhThu);
+            CloseAllChildForms();
+            container(new frmDoanhThu());
+        }
+
+        private void btnKhachHang_Click(object sender, EventArgs e)
+        {
+            SetActive(btnKhachHang);
+            CloseAllChildForms();
+            container(new frmKhachHang());
+        }
+
+        private void btnHoaDon_Click(object sender, EventArgs e)
+        {
+            SetActive(btnHoaDon);
+            CloseAllChildForms();
+            container(new frmHoaDon());
+        }
+
+        private void btnTaiKhoan_Click(object sender, EventArgs e)
+        {
+            // Chỉ Admin
+            if (UserContext.Type != 1)
+            {
+                MessageBox.Show("Chỉ Admin được truy cập quản lý tài khoản.", "Truy cập bị từ chối", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            SetActive(btnTaiKhoan);
+            CloseAllChildForms();
+            container(new frmTaiKhoan());
+        }
+
+        private void BtnDangXuat_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Bạn có chắc muốn đăng xuất?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+                return;
+
+            try
+            {
+                // Clear session/token
+                UserContext.MaTaiKhoan = null;
+                UserContext.TenTaiKhoan = null;
+                UserContext.Type = 0;
+
+                // Dọn dẹp form con
+                CloseAllChildForms();
+
+                // Mở form đăng nhập và đóng form hiện tại
+                using (var f = new frmDangNhap())
+                {
+                    this.Hide();
+                    f.ShowDialog();
+                }
+            }
+            finally
+            {
+                // Sau khi form đăng nhập đóng: nếu vẫn chưa đăng nhập lại thì thoát
+                if (string.IsNullOrWhiteSpace(UserContext.MaTaiKhoan))
+                {
+                    try { this.Close(); } catch { }
+                }
+                else
+                {
+                    // Đăng nhập lại thành công -> hiện lại và reload UI
+                    this.Show();
+                    FrmMain_Load(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // Xác nhận thoát
+            var ask = MessageBox.Show("Bạn có chắc muốn thoát ứng dụng?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (ask != DialogResult.Yes)
+            {
+                e.Cancel = true;
+                return;
+            }
+
+            try
+            {
+                // Dọn dẹp tài nguyên
+                CloseAllChildForms();
+            }
+            catch { }
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+        }
+    }
+}

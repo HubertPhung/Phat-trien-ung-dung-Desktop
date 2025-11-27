@@ -1,0 +1,18 @@
+C:\Users\TruongDan\Documents\Works\Desktop\2312590_NNTDan_Lab06\DataAccess\obj\Debug\DataAccess.csproj.AssemblyReference.cache
+C:\Users\TruongDan\Documents\Works\Desktop\2312590_NNTDan_Lab06\DataAccess\obj\Debug\DataAccess.csproj.CoreCompileInputs.cache
+C:\Users\TruongDan\Documents\Works\Desktop\2312590_NNTDan_Lab06\DataAccess\bin\Debug\DataAccess.dll
+C:\Users\TruongDan\Documents\Works\Desktop\2312590_NNTDan_Lab06\DataAccess\bin\Debug\DataAccess.pdb
+C:\Users\TruongDan\Documents\Works\Desktop\2312590_NNTDan_Lab06\DataAccess\obj\Debug\DataAccess.dll
+C:\Users\TruongDan\Documents\Works\Desktop\2312590_NNTDan_Lab06\DataAccess\obj\Debug\DataAccess.pdb
+C:\Users\TruongDan\Documents\Desktop\DataAccess\bin\Debug\DataAccess.dll
+C:\Users\TruongDan\Documents\Desktop\DataAccess\bin\Debug\DataAccess.pdb
+C:\Users\TruongDan\Documents\Desktop\DataAccess\obj\Debug\DataAccess.csproj.AssemblyReference.cache
+C:\Users\TruongDan\Documents\Desktop\DataAccess\obj\Debug\DataAccess.csproj.CoreCompileInputs.cache
+C:\Users\TruongDan\Documents\Desktop\DataAccess\obj\Debug\DataAccess.dll
+C:\Users\TruongDan\Documents\Desktop\DataAccess\obj\Debug\DataAccess.pdb
+D:\University\Phát triển ứng dụng Desktop\ChuDe6\DataAccess\bin\Debug\DataAccess.dll
+D:\University\Phát triển ứng dụng Desktop\ChuDe6\DataAccess\bin\Debug\DataAccess.pdb
+D:\University\Phát triển ứng dụng Desktop\ChuDe6\DataAccess\obj\Debug\DataAccess.csproj.AssemblyReference.cache
+D:\University\Phát triển ứng dụng Desktop\ChuDe6\DataAccess\obj\Debug\DataAccess.csproj.CoreCompileInputs.cache
+D:\University\Phát triển ứng dụng Desktop\ChuDe6\DataAccess\obj\Debug\DataAccess.dll
+D:\University\Phát triển ứng dụng Desktop\ChuDe6\DataAccess\obj\Debug\DataAccess.pdb

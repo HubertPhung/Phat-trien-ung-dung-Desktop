@@ -1,0 +1,35 @@
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\obj\Debug\BussinessLogic.csproj.AssemblyReference.cache
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\obj\Debug\BussinessLogic.Properties.Resources.resources
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\obj\Debug\BussinessLogic.csproj.GenerateResource.cache
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\obj\Debug\BussinessLogic.csproj.CoreCompileInputs.cache
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\bin\Debug\BussinessLogic.pdb
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\obj\Debug\BussinessLogic.pdb
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\bin\Debug\BussinessLogic.dll.config
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\bin\Debug\BussinessLogic.dll
+D:\University\Phát triển ứng dụng Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\obj\Debug\BussinessLogic.dll
+D:\Vương\Nam 3 Ki 1\Phát triển ứng dụng desktop\BTNhom\Phat-trien-ung-dung-Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\bin\Debug\BussinessLogic.dll.config
+D:\Vương\Nam 3 Ki 1\Phát triển ứng dụng desktop\BTNhom\Phat-trien-ung-dung-Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\bin\Debug\BussinessLogic.dll
+D:\Vương\Nam 3 Ki 1\Phát triển ứng dụng desktop\BTNhom\Phat-trien-ung-dung-Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\bin\Debug\BussinessLogic.pdb
+D:\Vương\Nam 3 Ki 1\Phát triển ứng dụng desktop\BTNhom\Phat-trien-ung-dung-Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\obj\Debug\BussinessLogic.csproj.AssemblyReference.cache
+D:\Vương\Nam 3 Ki 1\Phát triển ứng dụng desktop\BTNhom\Phat-trien-ung-dung-Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\obj\Debug\BussinessLogic.Properties.Resources.resources
+D:\Vương\Nam 3 Ki 1\Phát triển ứng dụng desktop\BTNhom\Phat-trien-ung-dung-Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\obj\Debug\BussinessLogic.csproj.GenerateResource.cache
+D:\Vương\Nam 3 Ki 1\Phát triển ứng dụng desktop\BTNhom\Phat-trien-ung-dung-Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\obj\Debug\BussinessLogic.csproj.CoreCompileInputs.cache
+D:\Vương\Nam 3 Ki 1\Phát triển ứng dụng desktop\BTNhom\Phat-trien-ung-dung-Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\obj\Debug\BussinessLogic.dll
+D:\Vương\Nam 3 Ki 1\Phát triển ứng dụng desktop\BTNhom\Phat-trien-ung-dung-Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\obj\Debug\BussinessLogic.pdb
+D:\Vương\Nam 3 Ki 1\Phát triển ứng dụng desktop\BTNhom\Phat-trien-ung-dung-Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\bin\Debug\DataAccess.dll
+D:\Vương\Nam 3 Ki 1\Phát triển ứng dụng desktop\BTNhom\Phat-trien-ung-dung-Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\bin\Debug\DataAccess.pdb
+D:\Vương\Nam 3 Ki 1\Phát triển ứng dụng desktop\BTNhom\Phat-trien-ung-dung-Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\bin\Debug\DataAccess.dll.config
+D:\Vương\Nam 3 Ki 1\Phát triển ứng dụng desktop\BTNhom\Phat-trien-ung-dung-Desktop\khanvungdo (1)\khanvungdo\BussinessLogic\obj\Debug\Bussines.273F0448.Up2Date
+D:\QuanLyDVKS\BussinessLogic\bin\Debug\BussinessLogic.dll.config
+D:\QuanLyDVKS\BussinessLogic\bin\Debug\BussinessLogic.dll
+D:\QuanLyDVKS\BussinessLogic\bin\Debug\BussinessLogic.pdb
+D:\QuanLyDVKS\BussinessLogic\bin\Debug\DataAccess.dll
+D:\QuanLyDVKS\BussinessLogic\bin\Debug\DataAccess.pdb
+D:\QuanLyDVKS\BussinessLogic\bin\Debug\DataAccess.dll.config
+D:\QuanLyDVKS\BussinessLogic\obj\Debug\BussinessLogic.csproj.AssemblyReference.cache
+D:\QuanLyDVKS\BussinessLogic\obj\Debug\BussinessLogic.Properties.Resources.resources
+D:\QuanLyDVKS\BussinessLogic\obj\Debug\BussinessLogic.csproj.GenerateResource.cache
+D:\QuanLyDVKS\BussinessLogic\obj\Debug\BussinessLogic.csproj.CoreCompileInputs.cache
+D:\QuanLyDVKS\BussinessLogic\obj\Debug\Bussines.273F0448.Up2Date
+D:\QuanLyDVKS\BussinessLogic\obj\Debug\BussinessLogic.dll
+D:\QuanLyDVKS\BussinessLogic\obj\Debug\BussinessLogic.pdb

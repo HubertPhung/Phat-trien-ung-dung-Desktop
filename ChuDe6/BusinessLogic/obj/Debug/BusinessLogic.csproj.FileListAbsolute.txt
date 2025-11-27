@@ -1,0 +1,27 @@
+C:\Users\TruongDan\Documents\Works\Desktop\2312590_NNTDan_Lab06\BusinessLogic\obj\Debug\BusinessLogic.csproj.AssemblyReference.cache
+C:\Users\TruongDan\Documents\Works\Desktop\2312590_NNTDan_Lab06\BusinessLogic\obj\Debug\BusinessLogic.csproj.CoreCompileInputs.cache
+C:\Users\TruongDan\Documents\Works\Desktop\2312590_NNTDan_Lab06\BusinessLogic\bin\Debug\BusinessLogic.dll
+C:\Users\TruongDan\Documents\Works\Desktop\2312590_NNTDan_Lab06\BusinessLogic\bin\Debug\BusinessLogic.pdb
+C:\Users\TruongDan\Documents\Works\Desktop\2312590_NNTDan_Lab06\BusinessLogic\bin\Debug\DataAccess.dll
+C:\Users\TruongDan\Documents\Works\Desktop\2312590_NNTDan_Lab06\BusinessLogic\bin\Debug\DataAccess.pdb
+C:\Users\TruongDan\Documents\Works\Desktop\2312590_NNTDan_Lab06\BusinessLogic\obj\Debug\Business.CF5D6E35.Up2Date
+C:\Users\TruongDan\Documents\Works\Desktop\2312590_NNTDan_Lab06\BusinessLogic\obj\Debug\BusinessLogic.dll
+C:\Users\TruongDan\Documents\Works\Desktop\2312590_NNTDan_Lab06\BusinessLogic\obj\Debug\BusinessLogic.pdb
+C:\Users\TruongDan\Documents\Desktop\BusinessLogic\bin\Debug\BusinessLogic.dll
+C:\Users\TruongDan\Documents\Desktop\BusinessLogic\bin\Debug\BusinessLogic.pdb
+C:\Users\TruongDan\Documents\Desktop\BusinessLogic\bin\Debug\DataAccess.dll
+C:\Users\TruongDan\Documents\Desktop\BusinessLogic\bin\Debug\DataAccess.pdb
+C:\Users\TruongDan\Documents\Desktop\BusinessLogic\obj\Debug\BusinessLogic.csproj.AssemblyReference.cache
+C:\Users\TruongDan\Documents\Desktop\BusinessLogic\obj\Debug\BusinessLogic.csproj.CoreCompileInputs.cache
+C:\Users\TruongDan\Documents\Desktop\BusinessLogic\obj\Debug\Business.CF5D6E35.Up2Date
+C:\Users\TruongDan\Documents\Desktop\BusinessLogic\obj\Debug\BusinessLogic.dll
+C:\Users\TruongDan\Documents\Desktop\BusinessLogic\obj\Debug\BusinessLogic.pdb
+D:\University\Phát triển ứng dụng Desktop\ChuDe6\BusinessLogic\bin\Debug\BusinessLogic.dll
+D:\University\Phát triển ứng dụng Desktop\ChuDe6\BusinessLogic\bin\Debug\BusinessLogic.pdb
+D:\University\Phát triển ứng dụng Desktop\ChuDe6\BusinessLogic\bin\Debug\DataAccess.dll
+D:\University\Phát triển ứng dụng Desktop\ChuDe6\BusinessLogic\bin\Debug\DataAccess.pdb
+D:\University\Phát triển ứng dụng Desktop\ChuDe6\BusinessLogic\obj\Debug\BusinessLogic.csproj.AssemblyReference.cache
+D:\University\Phát triển ứng dụng Desktop\ChuDe6\BusinessLogic\obj\Debug\BusinessLogic.csproj.CoreCompileInputs.cache
+D:\University\Phát triển ứng dụng Desktop\ChuDe6\BusinessLogic\obj\Debug\Business.CF5D6E35.Up2Date
+D:\University\Phát triển ứng dụng Desktop\ChuDe6\BusinessLogic\obj\Debug\BusinessLogic.dll
+D:\University\Phát triển ứng dụng Desktop\ChuDe6\BusinessLogic\obj\Debug\BusinessLogic.pdb
